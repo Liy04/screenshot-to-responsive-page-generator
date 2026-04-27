@@ -1,0 +1,20 @@
+# Dependencies
+frontend/node_modules/
+
+# Build outputs
+frontend/dist/
+backend/target/
+
+# Local logs
+*.log
+
+# Python local environments and caches
+worker/.venv/
+worker/__pycache__/
+*.py[cod]
+
+# IDE and OS local files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
