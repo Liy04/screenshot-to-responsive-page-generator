@@ -7,6 +7,7 @@
 当前阶段范围以以下文档为准：
 
 - Week 01 初始化阶段：以 `docs/week/01-plan.md` 和 `docs/week/01-status.md` 为准。
+- 当前阶段轻量上下文：以 `docs/context/current-phase.md` 为准。
 - 当前 MVP 第一版：以 `docs/mvp-scope.md` 为准。
 
 当前 MVP 第一版只做：
@@ -26,7 +27,7 @@
 - 不引入 Redis / RabbitMQ 作为运行前置依赖。
 - 未确认数据库任务前，不设计数据库表、不创建数据库访问层。
 
-本文档中涉及 Figma、真实 AI、页面代码生成、在线编辑、导出 ZIP、Redis、RabbitMQ、数据库表结构等内容，均表示后续产品方向或草案，不能直接下沉为当前 Week 01 / MVP 第一版开发任务。
+本文档中涉及 Figma、真实 AI、页面代码生成、在线编辑、导出 ZIP、Redis、RabbitMQ、数据库表结构等内容，均表示后续产品方向或草案，不能直接下沉为当前 Week 02 / MVP 第一版开发任务。
 
 ## 1. 产品一句话说明
 
@@ -655,8 +656,8 @@ README 中需要说明：
 |---|---|---|
 | 首页 / 工作台 | `/dashboard` | 展示任务列表和入口 |
 | 创建任务页 | `/generation/create` | 上传截图或输入 Figma 链接 |
-| 任务详情页 | `/generation/:id` | 查看生成状态 |
-| 生成结果页 | `/generation/:id/result` | 预览、编辑、导出 |
+| 任务详情页 | `/generation/:jobId` | 查看生成状态 |
+| 生成结果页 | `/generation/:jobId/result` | 预览、编辑、导出 |
 | 历史记录页 | `/history` | 查看历史生成任务 |
 | 设置页 | `/settings` | 配置模型 Key、Figma Token 等，可后续做 |
 
@@ -734,9 +735,9 @@ AI 根据要求修改
 
 ## 11. 数据库设计草案
 
-本节仅为后续数据库任务的草案，不代表 Week 01 或当前 MVP 第一版需要创建数据库表。
+本节仅为后续数据库任务的草案，不代表当前 Week 02 或 MVP 第一版需要创建数据库表。
 
-当前 Week 01 不设计数据库表；当前 MVP 第一版在用户确认数据库任务前，不新增 Mapper、实体表映射、数据库配置或数据库访问层。
+当前 Week 02 / MVP 第一版不设计数据库表；在用户确认数据库任务前，不新增 Mapper、实体表映射、数据库配置或数据库访问层。
 
 ### 11.1 project 项目表
 

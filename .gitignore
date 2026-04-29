@@ -5,6 +5,9 @@ frontend/node_modules/
 frontend/dist/
 backend/target/
 
+# Local uploaded files
+backend/uploads/
+
 # Local logs
 *.log
 

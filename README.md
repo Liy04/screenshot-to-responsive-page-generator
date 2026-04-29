@@ -8,8 +8,11 @@
 
 1. `README.md`
 2. `AGENTS.md`
-3. `docs/week/01-plan.md`
-4. `docs/week/01-status.md`
+3. `docs/context/current-phase.md`
+4. 当前任务对应的 `docs/tasks/*.md`
+5. 当前任务相关模块代码
+
+`docs/week/02-plan.md`、`docs/week/02-status.md`、`docs/mvp-scope.md` 等文档作为按需参考，不再作为每日开发任务的默认上下文。
 
 ## 项目一句话说明
 
@@ -17,27 +20,27 @@
 
 ## 当前阶段
 
-当前处于 **Week 01 初始化阶段**。
+当前处于 **Week 02 MVP 最小闭环已完成，下一阶段准备中**。
 
-这一周不追求页面生成效果，而追求三件事：
+Week 01 初始化阶段已完成。Week 02 已跑通 mock 最小闭环：
 
-- 把项目边界写清楚
-- 把工程骨架搭起来
-- 把 Codex 的协作规则固化下来
+```text
+上传截图 -> 创建任务 -> 查看任务状态 -> 查看 mock 生成结果
+```
 
-## 当前阶段目标
+## 当前阶段结果
 
-本周目标如下：
+Week 02 已完成：
 
-- 明确 MVP 范围
-- 建立 `frontend / backend / worker` 三层目录骨架
-- 补齐基础文档
-- 形成最小 smoke 测试路径
-- 为第二周进入“任务闭环开发”做准备
+- 实现截图上传接口和本地文件保存。
+- 实现生成任务创建、状态查询和 mock 结果查询接口。
+- 实现前端工作台、创建任务页和任务详情页。
+- 跑通前后端最小闭环。
+- 更新 smoke 文档和 Week 02 状态看板。
 
 ## 本周不做什么
 
-以下内容不是第一周目标：
+以下内容不是第二周目标：
 
 - 不接入真实模型 API
 - 不接入 Figma API / MCP
@@ -45,17 +48,18 @@
 - 不做真实代码生成
 - 不做拖拽编辑器
 - 不做导出 zip
+- 不接 MySQL 实际落库
 - 不做 Redis / RabbitMQ 的运行时接入
 - 不做复杂自动化回归体系
 
 ## 技术选型
 
-| 层级 | 选型 | 第一周说明 |
+| 层级 | 选型 | 当前阶段说明 |
 |---|---|---|
 | 前端 | Vue3 + Vite + JavaScript | 优先快速起步，先不强制 TypeScript |
 | 后端 | Java 17 + Spring Boot + Maven | 提供基础服务与任务骨架 |
-| 数据层 | MyBatis-Plus + MySQL | 第一周只保留方向，不要求完成数据库接入 |
-| Worker | Python 3.11 | 后续承接生成任务；本周最小脚本允许使用 Python 3.10+ 本地验证 |
+| 数据层 | MyBatis-Plus + MySQL | 长期方向；Week 02 不实际落库、不创建 Mapper / Entity |
+| Worker | Python 3.11 | 后续承接生成任务；当前 smoke 脚本允许使用 Python 3.10+ 本地验证 |
 | 测试 | smoke test | 先验证“能启动、能访问、能输出” |
 
 ## 为什么这样选
@@ -72,14 +76,26 @@ project-root/
   AGENTS.md
   README.md
   docs/
+    context/
+      current-phase.md
+    tasks/
+      week02-day1-upload-api.md
+      week02-day2-generation-api.md
+      week02-day3-frontend-create-page.md
+      week02-day4-generation-detail-page.md
+      week02-day5-smoke-and-docs.md
     week/
       01-plan.md
       01-status.md
+      02-plan.md
+      02-status.md
     mvp-scope.md
     prd.md
     architecture.md
     coding-rules.md
     testing.md
+    api-contracts.md
+    frontend-pages.md
     prompt-templates.md
     skills/
       frontend-task-skill.md
@@ -96,7 +112,7 @@ project-root/
 
 ## 本地启动示例
 
-以下命令是三端工程初始化完成后的第一周推荐最小启动方式。
+以下命令是三端工程初始化完成后的推荐最小启动方式。
 
 当前如果对应目录内还只有 `.gitkeep` 等占位文件，说明该端工程尚未初始化，需先完成 Day 2 / Day 3 的工程骨架任务，再执行下面命令。
 
@@ -115,14 +131,13 @@ project-root/
 
 4. 预期结果
    - 本地出现开发地址
-   - 页面能打开
-   - 页面至少展示项目标题和“Week 01 初始化中”的占位信息
+   - 页面能打开，并展示当前阶段相关入口或占位信息
 
 ### 后端
 
 进入 `backend/` 目录后执行：
 
-说明：当前 Windows 中文路径下，`mvn spring-boot:run` 存在已知启动失败风险。Week 01 Day 3 smoke 推荐使用先打包、再运行 jar 的稳定路径。
+说明：当前 Windows 中文路径下，`mvn spring-boot:run` 存在已知启动失败风险。smoke 推荐使用先打包、再运行 jar 的稳定路径。
 
 1. 运行测试
    `mvn test`
@@ -140,11 +155,21 @@ project-root/
 
 风险记录：`mvn spring-boot:run` 暂作为后续待排查项，不作为当前 Windows 中文路径下的主验收命令。
 
+### Week 02 最小闭环验证
+
+Week 02 端到端 smoke 以 `tests/smoke/README.md` 为准，覆盖：
+
+```text
+上传截图 -> 创建任务 -> 查看任务状态 -> 查看 mock 生成结果
+```
+
+验证时后端使用 jar 启动，前端使用 Vite dev server；如果 `5173` 被占用，可以改用 `5174` 或 `5175`。
+
 ### Worker
 
 进入 `worker/` 目录后执行：
 
-说明：项目推荐目标版本为 Python 3.11。Week 01 的 worker smoke 脚本只使用标准库，允许使用 Python 3.10+ 完成本地验证。
+说明：项目推荐目标版本为 Python 3.11。当前 worker smoke 脚本只使用标准库，允许使用 Python 3.10+ 完成本地验证。
 
 1. 创建虚拟环境（可选）
    `python -m venv .venv`
@@ -158,54 +183,59 @@ project-root/
 
 ## 与 Codex 的协作方式
 
-第一周默认协作流程：
+从 Week 02 开始，推荐使用轻量上下文协作方式：
 
 1. 先让 Codex 阅读 `AGENTS.md`
-2. 再让 Codex 阅读 `README.md`、`docs/week/01-plan.md` 与 `docs/week/01-status.md`
-3. 对复杂任务，要求 Codex 先输出计划
-4. 计划确认后再允许 Codex 改代码
-5. 改动完成后，要求 Codex 提供验证方式与结果
-6. 如果目录、命令、约束变了，要同步更新文档
+2. 再让 Codex 阅读 `docs/context/current-phase.md`
+3. 然后读取当前任务对应的 `docs/tasks/*.md`
+4. 最后读取当前任务相关模块代码
+5. 对开发任务，要求 Codex 先输出计划，确认后再编码
+6. 改动完成后，要求 Codex 执行最小验证并汇报结果
+7. 如果目录、命令、接口约定、测试方式或阶段口径变了，要同步更新文档
+
+完整 PRD、完整周计划、历史状态和全部 skills 只在任务卡明确要求，或任务确实必须参考时读取。
 
 ## 文档索引
 
 | 文档 | 作用 |
 |---|---|
 | `AGENTS.md` | 仓库长期规则，主要给 Codex 看 |
+| `docs/context/current-phase.md` | 当前阶段目标、禁止项和推荐实现方式 |
+| `docs/tasks/*.md` | 单任务卡，日常开发优先读取 |
 | `docs/week/01-plan.md` | 第一周任务说明与每日拆解 |
 | `docs/week/01-status.md` | 第一周实际进展、验收结果、风险和下一步 |
+| `docs/week/02-plan.md` | 第二周周执行安排 |
+| `docs/week/02-status.md` | 第二周实际进展、验收结果、风险和下一步 |
 | `docs/mvp-scope.md` | MVP 第一版范围 |
 | `docs/prd.md` | 长期产品愿景和后续演进方向 |
 | `docs/architecture.md` | 系统架构与模块关系 |
+| `docs/api-contracts.md` | Week 02 接口契约 |
+| `docs/frontend-pages.md` | Week 02 前端页面、路由和交互说明 |
 | `docs/coding-rules.md` | 前端、后端、Worker 编码规范 |
 | `docs/testing.md` | 测试方式与验证策略 |
 | `docs/prompt-templates.md` | 常用提示词模板 |
 | `docs/skills/frontend-task-skill.md` | 前端任务技能草案 |
 | `docs/skills/backend-api-skill.md` | 后端接口任务工作流 |
 | `docs/skills/bugfix-skill.md` | Bug 修复任务工作流 |
-| `tests/smoke/README.md` | 第一周最小 smoke 测试步骤 |
+| `tests/smoke/README.md` | Week 01 / Week 02 最小 smoke 测试步骤 |
 
-## 本周交付物
+## Week 02 交付物
 
-第一周结束时，仓库应至少包括：
+第二周结束时，仓库应至少包括：
 
-- `AGENTS.md`
-- `README.md`
-- `docs/week/01-plan.md`
-- `docs/week/01-status.md`
-- `docs/mvp-scope.md`
-- `docs/prd.md`
-- `docs/architecture.md`
-- `docs/coding-rules.md`
-- `docs/testing.md`
-- `docs/prompt-templates.md`
-- `docs/skills/frontend-task-skill.md`
-- `docs/skills/backend-api-skill.md`
-- `docs/skills/bugfix-skill.md`
-- `tests/smoke/README.md`
-- `frontend/` 初始工程
-- `backend/` 初始工程
-- `worker/` 初始脚本
+- `docs/week/02-plan.md`
+- `docs/week/02-status.md`
+- `docs/context/current-phase.md`
+- `docs/tasks/week02-day1-upload-api.md`
+- `docs/tasks/week02-day2-generation-api.md`
+- `docs/tasks/week02-day3-frontend-create-page.md`
+- `docs/tasks/week02-day4-generation-detail-page.md`
+- `docs/tasks/week02-day5-smoke-and-docs.md`
+- `docs/api-contracts.md`
+- `docs/frontend-pages.md`
+- 更新后的 `tests/smoke/README.md`
+- 后端上传接口、任务接口和 mock 结果接口
+- 前端工作台、创建任务页和任务详情页
 
 ## 关键字段说明
 
@@ -223,22 +253,27 @@ project-root/
 
 你可以对 Codex 发送类似提示：
 
-请先阅读 `AGENTS.md`、`README.md`、`docs/week/01-plan.md`、`docs/week/01-status.md`。
+请先阅读：
+
+1. `AGENTS.md`
+2. `docs/context/current-phase.md`
+3. `docs/tasks/week02-day1-upload-api.md`
+4. 后端上传接口相关代码
 
 当前任务：
-初始化 `frontend/` 工程并提供首页占位页面。
+执行 Week 02 Day 1：后端上传接口。
 
 要求：
 1. 先输出计划
-2. 只改前端相关文件
-3. 不做组件库引入
-4. 完成后给出启动命令和验证结果
+2. 只改后端上传接口相关文件
+3. 不接 MySQL、Redis、RabbitMQ、真实模型 API、Figma API
+4. 完成后给出验证步骤和验证结果
 
 ## 验收标准
 
 本文件满足以下条件时，视为可用：
 
 - 新成员打开仓库，能在 5 分钟内知道项目在做什么
-- 新成员知道第一周只做初始化，不会误以为已经进入生成能力开发
+- 新成员知道 Week 02 只做 MVP mock 最小闭环，不会误以为已经进入真实生成能力开发
 - 新成员能按本文件找到关键文档与建议目录
 - Codex 能根据本文件快速总结仓库入口信息

@@ -14,7 +14,7 @@ API 是 Application Programming Interface（应用程序接口），本项目后
 
 ## 执行步骤
 
-1. 阅读 `AGENTS.md`、`README.md`、`docs/week/01-plan.md`、`docs/week/01-status.md`、`docs/mvp-scope.md` 和相关架构文档。
+1. 阅读 `AGENTS.md`、`docs/context/current-phase.md`、当前任务卡、必要专项文档和相关后端代码。
 2. 明确接口资源、路径、请求方法、请求参数和返回结构。
 3. 检查是否需要数据库字段或表结构支持。
 4. 输出计划，说明准备修改的 Controller、Service、Mapper、实体或 DTO。
@@ -25,7 +25,7 @@ API 是 Application Programming Interface（应用程序接口），本项目后
 ## 任务边界
 
 - 后端接口任务优先只修改 `backend/`。
-- Week 01 优先保证服务可启动、`/api/health` 可访问。
+- 当前阶段以任务卡为准；Week 02 优先完成上传接口、任务接口和 mock 结果接口。
 - MVP mock 阶段可以返回固定模拟数据或内存数据，但必须明确说明这是 mock，不代表真实生成结果。
 - 不在未确认的情况下设计数据库表。
 - 不在未确认的情况下接入 MySQL，或把 MySQL 作为启动前置依赖。
@@ -58,7 +58,7 @@ mvn test
 mvn package -DskipTests
 ```
 
-Week 01 当前 Windows 中文路径下，优先使用以下方式验证启动：
+当前 Windows 中文路径下，优先使用以下方式验证启动：
 
 ```bash
 java -jar target/backend-0.0.1-SNAPSHOT.jar

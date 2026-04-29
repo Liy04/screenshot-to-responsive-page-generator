@@ -2,11 +2,11 @@
 
 ## 文件目的
 
-本目录用于放置 Python worker 代码。Week 01 只提供最小 smoke 入口，验证 worker 可以独立运行。
+本目录用于放置 Python worker 代码。当前阶段只提供最小 smoke 入口，验证 worker 可以独立运行。
 
 ## 运行方式
 
-项目推荐目标版本为 Python 3.11。Week 01 smoke 脚本只使用 Python 标准库，允许使用 Python 3.10+ 本地验证。
+项目推荐目标版本为 Python 3.11。当前 smoke 脚本只使用 Python 标准库，允许使用 Python 3.10+ 本地验证。
 
 在本目录执行：
 
