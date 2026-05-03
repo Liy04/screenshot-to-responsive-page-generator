@@ -51,8 +51,8 @@
 - 不接 RabbitMQ。
 - 不接 MySQL 实际落库。
 - 不创建数据库表。
-- 不创建 Mapper。
-- 不创建 Entity 或数据库表映射。
+- 不新增 Mapper。
+- 不新增 Entity 或数据库表映射。
 - 不做真实截图解析。
 - 不做真实页面代码生成。
 - 不做导出 zip。
@@ -80,7 +80,7 @@
 
 ### 4.2 后端存储
 
-本周不引入 MySQL，不设计数据库表，不创建 Mapper。
+本周不引入 MySQL，不设计数据库表，不新增 Mapper。
 
 本周采用：
 
@@ -94,7 +94,7 @@ mock 结果：后端固定返回模拟代码和模拟 layoutJson
 
 - 内存 Map 数据在后端服务重启后会丢失。
 - 第二周这是可接受限制，因为本周目标是验证最小闭环，不验证持久化。
-- 本周可使用 DTO / VO，但不创建 Entity / Mapper / 数据库配置。
+- 本周可使用 DTO / VO，但不新增 Entity / Mapper / 数据库配置。
 
 ### 4.3 后端静态资源
 
@@ -245,7 +245,7 @@ Week 02 通过需要满足：
 | 风险 | 表现 | 控制方式 |
 |---|---|---|
 | 范围膨胀 | 想顺手接 MySQL / AI / Figma | 每个任务先读 `docs/context/current-phase.md` 和当前任务卡中的禁止事项 |
-| 后端过度设计 | DTO、VO、Entity、Mapper 全套上来 | 本周可用 DTO / VO，但不创建 Entity / Mapper / 数据库配置 |
+| 后端过度设计 | DTO、VO、Entity、Mapper 全套上来 | 本周可用 DTO / VO，但不新增 Entity / Mapper / 数据库配置 |
 | 前端做太漂亮 | 花大量时间调 UI | 先完成流程，再做基础美化 |
 | Worker 抢主线 | 想让 Python 真的处理图片 | 本周 Worker 只保留 smoke |
 | 联调卡住 | 前后端接口字段不一致 | 以 `docs/api-contracts.md` 为接口契约 |

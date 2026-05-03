@@ -1,0 +1,196 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Landing Page",
+    "type": "marketing",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {
+    "colors": {
+      "background": "#ffffff",
+      "textPrimary": "#111827",
+      "accent": "#2563eb"
+    },
+    "typography": {
+      "headingLg": "heading-lg",
+      "bodyMd": "body-md"
+    },
+    "spacing": {
+      "lg": 32,
+      "xl": 48
+    },
+    "radius": {
+      "md": 12
+    }
+  },
+  "layout": {
+    "id": "landing-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {
+      "background": "background"
+    },
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "hug"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "landing-hero",
+        "type": "section",
+        "role": "hero",
+        "bounds": {
+          "x": 80,
+          "y": 72,
+          "width": 1280,
+          "height": 420
+        },
+        "style": {
+          "spacing": "xl"
+        },
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "landing-hero-content",
+            "type": "container",
+            "role": "contentGroup",
+            "bounds": {
+              "x": 120,
+              "y": 120,
+              "width": 560,
+              "height": 260
+            },
+            "style": {
+              "spacing": "lg"
+            },
+            "constraints": {
+              "horizontal": "hug",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "landing-hero-title",
+                "type": "text",
+                "role": "heading",
+                "content": "Generate responsive pages from clear layout structure",
+                "bounds": {
+                  "x": 120,
+                  "y": 120,
+                  "width": 520,
+                  "height": 96
+                },
+                "style": {
+                  "typography": "headingLg",
+                  "color": "textPrimary"
+                },
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              },
+              {
+                "id": "landing-hero-cta",
+                "type": "button",
+                "role": "primaryAction",
+                "content": "Start with layout JSON",
+                "bounds": {
+                  "x": 120,
+                  "y": 248,
+                  "width": 220,
+                  "height": 48
+                },
+                "style": {
+                  "color": "accent",
+                  "radius": "md"
+                },
+                "constraints": {
+                  "horizontal": "hug",
+                  "vertical": "fixed"
+                },
+                "interactions": [],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "landing-hero-image",
+            "type": "image",
+            "role": "heroVisual",
+            "src": null,
+            "assetId": "landing-visual",
+            "bounds": {
+              "x": 760,
+              "y": 112,
+              "width": 480,
+              "height": 300
+            },
+            "style": {
+              "radius": "md"
+            },
+            "constraints": {
+              "horizontal": "fixed",
+              "vertical": "fixed"
+            },
+            "interactions": [],
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "landing-visual",
+      "type": "image",
+      "status": "placeholder"
+    }
+  ],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "landing-hero",
+        "mode": "stackOnMobile"
+      }
+    ]
+  },
+  "assumptions": [
+    {
+      "target": "landing-hero-cta",
+      "message": "Button action is unknown and treated as primary navigation."
+    }
+  ],
+  "warnings": [
+    {
+      "target": "landing-hero-image",
+      "message": "Hero image is represented by a placeholder asset."
+    }
+  ]
+}

@@ -255,7 +255,8 @@ h2 {
 }
 
 .detail-card,
-.code-block {
+.code-block,
+.json-panel {
   padding: 24px;
   border: 1px solid #d8dee8;
   border-radius: 8px;
@@ -393,6 +394,88 @@ h2 {
   white-space: pre;
 }
 
+.layout-viewer-page {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+}
+
+.layout-viewer-page .top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.layout-query-card {
+  display: grid;
+  gap: 10px;
+  padding: 24px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.layout-query-card label {
+  color: #374151;
+  font-weight: 700;
+}
+
+.layout-query-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.layout-query-row input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #111827;
+}
+
+.layout-query-row input:disabled {
+  background: #f3f4f6;
+}
+
+.layout-artifact-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.empty-state p {
+  margin: 10px 0 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.json-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.json-panel pre {
+  max-height: 620px;
+  margin: 0;
+  overflow: auto;
+  border-radius: 6px;
+  background: #111827;
+  color: #f9fafb;
+}
+
+.json-panel code {
+  display: block;
+  min-width: max-content;
+  padding: 16px;
+  font-family:
+    "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
 @media (max-width: 760px) {
   .page-shell {
     padding: 28px 16px;
@@ -425,6 +508,10 @@ h2 {
   }
 
   .task-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .layout-query-row {
     grid-template-columns: 1fr;
   }
 

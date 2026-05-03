@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://screenshot-to-responsive-page-generator.local/schema/layout.schema.json",
+  "title": "Layout JSON v0.1",
+  "description": "Basic structure schema for Layout JSON v0.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "page",
+    "source",
+    "tokens",
+    "layout",
+    "assets",
+    "responsive",
+    "assumptions",
+    "warnings"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "name",
+        "type",
+        "viewport"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "width",
+            "height"
+          ],
+          "properties": {
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "screenshot",
+            "figma"
+          ]
+        },
+        "fileUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "figmaFileKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "figmaNodeId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "tokens": {
+      "type": "object"
+    },
+    "layout": {
+      "$ref": "#/$defs/layoutNode"
+    },
+    "assets": {
+      "type": "array"
+    },
+    "responsive": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "breakpoints",
+        "rules"
+      ],
+      "properties": {
+        "breakpoints": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "mobile",
+            "tablet",
+            "desktop"
+          ],
+          "properties": {
+            "mobile": {
+              "type": "number"
+            },
+            "tablet": {
+              "type": "number"
+            },
+            "desktop": {
+              "type": "number"
+            }
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array"
+    },
+    "warnings": {
+      "type": "array"
+    }
+  },
+  "$defs": {
+    "layoutNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "role",
+        "bounds",
+        "style",
+        "constraints",
+        "interactions",
+        "children"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "page",
+            "section",
+            "container",
+            "text",
+            "button",
+            "image",
+            "card",
+            "list",
+            "listItem",
+            "form",
+            "input"
+          ]
+        },
+        "role": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "src": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "assetId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bounds": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "x",
+            "y",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          }
+        },
+        "style": {
+          "type": "object"
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "horizontal",
+            "vertical"
+          ],
+          "properties": {
+            "horizontal": {
+              "type": "string",
+              "enum": [
+                "fixed",
+                "fill",
+                "hug",
+                "center",
+                "stretch"
+              ]
+            },
+            "vertical": {
+              "type": "string",
+              "enum": [
+                "fixed",
+                "fill",
+                "hug",
+                "center",
+                "stretch"
+              ]
+            }
+          }
+        },
+        "interactions": {
+          "type": "array"
+        },
+        "dataBinding": {
+          "type": "object"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/layoutNode"
+          }
+        }
+      }
+    }
+  }
+}

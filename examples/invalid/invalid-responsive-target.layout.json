@@ -1,0 +1,115 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Invalid Responsive Target",
+    "type": "business-negative",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {},
+  "layout": {
+    "id": "responsive-target-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {},
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "responsive-target-section",
+        "type": "section",
+        "role": "content",
+        "bounds": {
+          "x": 80,
+          "y": 80,
+          "width": 720,
+          "height": 320
+        },
+        "style": {},
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "responsive-target-card",
+            "type": "card",
+            "role": "summaryCard",
+            "bounds": {
+              "x": 120,
+              "y": 120,
+              "width": 360,
+              "height": 160
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "fixed",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "responsive-target-title",
+                "type": "text",
+                "role": "heading",
+                "content": "Responsive target check",
+                "bounds": {
+                  "x": 144,
+                  "y": 144,
+                  "width": 280,
+                  "height": 32
+                },
+                "style": {},
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "responsive-target-missing-node",
+        "mode": "stackOnMobile"
+      }
+    ]
+  },
+  "assumptions": [],
+  "warnings": [
+    {
+      "target": "responsive-target-missing-node",
+      "message": "Responsive target is intentionally missing for business validation."
+    }
+  ]
+}

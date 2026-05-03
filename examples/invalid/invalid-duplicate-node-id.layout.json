@@ -1,0 +1,115 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Invalid Duplicate Node ID",
+    "type": "business-negative",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {},
+  "layout": {
+    "id": "duplicate-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {},
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "duplicate-section",
+        "type": "section",
+        "role": "content",
+        "bounds": {
+          "x": 80,
+          "y": 80,
+          "width": 640,
+          "height": 300
+        },
+        "style": {},
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "duplicate-shared-text",
+            "type": "text",
+            "role": "heading",
+            "content": "First node using duplicate id",
+            "bounds": {
+              "x": 120,
+              "y": 120,
+              "width": 360,
+              "height": 40
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": []
+          },
+          {
+            "id": "duplicate-shared-text",
+            "type": "button",
+            "role": "primaryAction",
+            "content": "Second node using duplicate id",
+            "bounds": {
+              "x": 120,
+              "y": 188,
+              "width": 240,
+              "height": 48
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "hug",
+              "vertical": "fixed"
+            },
+            "interactions": [],
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "duplicate-section",
+        "mode": "stackOnMobile"
+      }
+    ]
+  },
+  "assumptions": [
+    {
+      "target": "duplicate-shared-text",
+      "message": "Duplicate node id is intentional for business validation."
+    }
+  ],
+  "warnings": []
+}

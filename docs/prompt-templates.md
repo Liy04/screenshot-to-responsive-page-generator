@@ -82,6 +82,7 @@
 3. 标明每个线程的输入、输出、验收标准和风险。
 4. 不直接扩大到当前阶段之外的功能。
 5. 如状态变化，更新对应 `docs/week/*-status.md`。
+6. 如果任务涉及多个线程，必须拆成多条单线程任务，并明确执行顺序；不要合并成一份大提示词。
 
 完成条件：
 1. 给出清晰任务拆分。
@@ -375,8 +376,8 @@ Bug 修复线程。
 - 不接 RabbitMQ
 - 不接 MySQL 实际落库
 - 不创建数据库表
-- 不创建 Mapper
-- 可使用 DTO / VO，但不创建 Entity / Mapper / 数据库配置
+- 不新增 Mapper
+- 可使用 DTO / VO，但不新增 Entity / Mapper / 数据库配置
 - 不做真实截图解析
 - 不做真实页面代码生成
 - 不做导出 zip
@@ -420,8 +421,8 @@ Bug 修复线程。
 严格不做：
 - 不接 MySQL
 - 不建表
-- 不创建 Mapper
-- 不创建 Entity
+- 不新增 Mapper
+- 不新增 Entity
 - 不接 Redis
 - 不接 RabbitMQ
 - 不接真实模型 API
@@ -458,8 +459,8 @@ Bug 修复线程。
 严格不做：
 - 不接 MySQL
 - 不创建数据库表
-- 不创建 Mapper
-- 不创建 Entity
+- 不新增 Mapper
+- 不新增 Entity
 - 不接 Redis
 - 不接 RabbitMQ
 - 不调用 Python Worker
@@ -578,4 +579,204 @@ Bug 修复线程。
 - 是否误提交构建产物
 
 请先输出验收计划，然后执行验证。
+```
+
+## 模板十五：Week 03 Day 1 Layout JSON 设计文档
+
+```text
+你现在执行 Week 03 Day 1：Layout JSON 设计文档。
+
+请只阅读：
+1. AGENTS.md
+2. docs/context/current-phase.md
+3. docs/tasks/week03-day1-layout-design.md
+4. docs/layout-schema-design.md（如已存在）
+
+本任务只做：
+- docs/layout-schema-design.md
+
+严格不做：
+- 不写 Schema
+- 不写 examples
+- 不改 worker / backend / frontend 业务代码
+- 不接真实 AI / 模型 API / Figma / Redis / RabbitMQ / MySQL
+- 不新增 Entity / Mapper
+- 不做 Vue 页面代码生成
+
+请先输出文档修改计划，等待确认。
+```
+
+## 模板十六：Week 03 Day 2 Schema
+
+```text
+你现在执行 Week 03 Day 2：JSON Schema。
+
+请只阅读：
+1. AGENTS.md
+2. docs/context/current-phase.md
+3. docs/tasks/week03-day2-schema.md
+4. docs/layout-schema-design.md
+5. schema/layout.schema.json（如已存在）
+
+本任务只做：
+- schema/layout.schema.json
+
+严格不做：
+- 不写 examples
+- 不写 worker 校验器
+- 不改 backend / frontend 业务代码
+- 不接真实 AI / 模型 API / Figma / Redis / RabbitMQ / MySQL
+- 不新增 Entity / Mapper
+- 不做 Vue 页面代码生成
+
+请先输出 Schema 修改计划，等待确认。
+```
+
+## 模板十七：Week 03 Day 3 示例
+
+```text
+你现在执行 Week 03 Day 3：Layout JSON 示例。
+
+请只阅读：
+1. AGENTS.md
+2. docs/context/current-phase.md
+3. docs/tasks/week03-day3-examples.md
+4. docs/layout-schema-design.md
+5. schema/layout.schema.json
+6. examples/ 目录下已有示例（如存在）
+
+本任务只做：
+- examples/valid 下 5 个合法示例
+- examples/invalid 下 3 个非法示例
+
+严格不做：
+- 不写 worker 校验器
+- 不改 backend / frontend 业务代码
+- 不接真实 AI / 模型 API / Figma / Redis / RabbitMQ / MySQL
+- 不新增 Entity / Mapper
+- 不做 Vue 页面代码生成
+
+请先输出示例编写计划，等待确认。
+```
+
+## 模板十八：Week 03 Day 4 Worker 校验器
+
+```text
+你现在执行 Week 03 Day 4：Worker Layout JSON 校验器。
+
+请只阅读：
+1. AGENTS.md
+2. docs/context/current-phase.md
+3. docs/tasks/week03-day4-validator.md
+4. docs/layout-schema-design.md
+5. schema/layout.schema.json
+6. examples/valid 和 examples/invalid
+7. worker/README.md
+8. 当前任务相关 worker 代码
+
+本任务只做：
+- worker/layout_validator.py
+- worker/test_layout_validator.py
+
+严格不做：
+- 不改 backend / frontend 业务代码
+- 不接真实 AI / 模型 API / Figma / Redis / RabbitMQ / MySQL
+- 不新增 Entity / Mapper
+- 不做真实截图解析
+- 不做 Vue 页面代码生成
+- 不安装依赖，除非计划中说明原因并等待确认
+
+请先输出实现计划，等待确认。
+```
+
+## 模板十九：Week 03 Day 5 校验器 Smoke 和修复
+
+```text
+你现在执行 Week 03 Day 5：校验器 smoke 和修复。
+
+请只阅读：
+1. AGENTS.md
+2. docs/context/current-phase.md
+3. docs/tasks/week03-day5-validator-fix-and-smoke.md
+4. docs/layout-schema-design.md
+5. schema/layout.schema.json
+6. examples/valid 和 examples/invalid
+7. worker/layout_validator.py
+8. worker/test_layout_validator.py
+
+本任务只做：
+- 校验器测试
+- 校验器最小修复
+- smoke 记录
+
+严格不做：
+- 不做 P1 mock 保存
+- 不做前端查看页
+- 不接真实 AI / 模型 API / Figma / Redis / RabbitMQ / MySQL
+- 不新增 Entity / Mapper
+- 不做 Vue 页面代码生成
+
+请先输出 smoke 与修复计划，等待确认。
+```
+
+## 模板二十：Week 03 Day 6 可选 Mock 保存 / 前端查看
+
+```text
+你现在执行 Week 03 Day 6：P1 可选 mock 保存 / 前端基础查看。
+
+请只阅读：
+1. AGENTS.md
+2. docs/context/current-phase.md
+3. docs/tasks/week03-day6-optional-mock-viewer.md
+4. docs/layout-api-contracts.md
+5. 当前任务相关前端或后端代码
+
+前提：
+- 必须先确认 Week 03 P0 已完成。
+
+本任务只做 P1：
+- 本地文件 mock 保存 Layout JSON
+- 本地文件 mock 查询 Layout JSON
+- 前端基础 Layout JSON 查看页
+
+严格不做：
+- 不连接 MySQL
+- 不新增 Entity / Mapper
+- 不写 MyBatis-Plus 持久层代码
+- 不接 Redis / RabbitMQ
+- 不接真实 AI / 模型 API / Figma
+- 不做 Vue 页面代码生成
+- 不做 JSON 在线编辑器、拖拽编辑器或导出 ZIP
+
+请先输出实现计划，等待确认。
+```
+
+## 模板二十一：Week 03 Day 7 验收收口
+
+```text
+你现在执行 Week 03 Day 7：验收、文档收口和总结。
+
+请只阅读：
+1. AGENTS.md
+2. docs/context/current-phase.md
+3. docs/tasks/week03-day7-smoke-and-summary.md
+4. docs/week/03-plan.md
+5. docs/week/03-status.md
+6. docs/week/03-summary.md
+7. tests/smoke/README.md
+
+本任务只做：
+- Week 03 验收
+- docs/week/03-status.md 更新
+- docs/week/03-summary.md 填写
+- 必要时更新 tests/smoke/README.md
+
+严格不做：
+- 不新增功能
+- 不直接修复业务代码
+- 不接真实 AI / 模型 API / Figma / Redis / RabbitMQ / MySQL
+- 不新增 Entity / Mapper
+- 不做 Vue 页面代码生成、拖拽编辑器、在线编辑器或导出 ZIP
+
+请先输出验收计划，等待确认。
 ```

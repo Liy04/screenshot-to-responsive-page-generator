@@ -17,7 +17,7 @@
 | `/api/generations/{jobId}` | GET | 查询任务状态 | mock 状态 |
 | `/api/generations/{jobId}/result` | GET | 获取生成结果 | 返回 mock 代码 |
 
-本周不创建数据库表、不创建 Mapper、不创建 Entity、不引入 MySQL 实际落库。
+本周不创建数据库表、不新增 Mapper、不新增 Entity、不引入 MySQL 实际落库。
 
 本周可以使用 DTO / VO，让接口入参和返回结构更清晰。
 

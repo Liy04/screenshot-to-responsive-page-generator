@@ -12,7 +12,7 @@
 4. 当前任务对应的 `docs/tasks/*.md`
 5. 当前任务相关模块代码
 
-`docs/week/02-plan.md`、`docs/week/02-status.md`、`docs/mvp-scope.md` 等文档作为按需参考，不再作为每日开发任务的默认上下文。
+`docs/week/02-plan.md`、`docs/week/03-plan.md`、`docs/week/03-status.md`、`docs/mvp-scope.md` 等文档作为按需参考，不再作为每日开发任务的默认上下文。
 
 ## 项目一句话说明
 
@@ -20,12 +20,18 @@
 
 ## 当前阶段
 
-当前处于 **Week 02 MVP 最小闭环已完成，下一阶段准备中**。
+当前处于 **Week 03 Layout JSON v0.1 收口阶段**。
 
 Week 01 初始化阶段已完成。Week 02 已跑通 mock 最小闭环：
 
 ```text
 上传截图 -> 创建任务 -> 查看任务状态 -> 查看 mock 生成结果
+```
+
+Week 03 聚焦 Layout JSON v0.1 稳定落地：
+
+```text
+手写 Layout JSON -> Schema 校验 -> 业务规则校验 -> 示例验证
 ```
 
 ## 当前阶段结果
@@ -38,9 +44,16 @@ Week 02 已完成：
 - 跑通前后端最小闭环。
 - 更新 smoke 文档和 Week 02 状态看板。
 
+Week 03 当前收口结果：
+
+- P0 已完成 Layout JSON 设计文档、JSON Schema、合法 / 非法示例、Python 校验器和校验器测试。
+- P1 后端 mock 保存 / 查询接口已完成基础 smoke。
+- P1 前端 Layout JSON 查看页仍需结合 Day 6B / Day 7A 输出做最终确认。
+- 当前仍不代表已经接入真实 AI、Figma、数据库落库或 Vue 页面生成。
+
 ## 本周不做什么
 
-以下内容不是第二周目标：
+以下内容不是当前阶段目标：
 
 - 不接入真实模型 API
 - 不接入 Figma API / MCP
@@ -58,7 +71,7 @@ Week 02 已完成：
 |---|---|---|
 | 前端 | Vue3 + Vite + JavaScript | 优先快速起步，先不强制 TypeScript |
 | 后端 | Java 17 + Spring Boot + Maven | 提供基础服务与任务骨架 |
-| 数据层 | MyBatis-Plus + MySQL | 长期方向；Week 02 不实际落库、不创建 Mapper / Entity |
+| 数据层 | MyBatis-Plus + MySQL | 长期方向；当前阶段不实际落库、不新增 Mapper / Entity |
 | Worker | Python 3.11 | 后续承接生成任务；当前 smoke 脚本允许使用 Python 3.10+ 本地验证 |
 | 测试 | smoke test | 先验证“能启动、能访问、能输出” |
 
@@ -89,6 +102,9 @@ project-root/
       01-status.md
       02-plan.md
       02-status.md
+      03-plan.md
+      03-status.md
+      03-summary.md
     mvp-scope.md
     prd.md
     architecture.md
@@ -96,6 +112,9 @@ project-root/
     testing.md
     api-contracts.md
     frontend-pages.md
+    layout-schema-design.md
+    layout-api-contracts.md
+    database-artifact-draft.md
     prompt-templates.md
     skills/
       frontend-task-skill.md
@@ -165,6 +184,16 @@ Week 02 端到端 smoke 以 `tests/smoke/README.md` 为准，覆盖：
 
 验证时后端使用 jar 启动，前端使用 Vite dev server；如果 `5173` 被占用，可以改用 `5174` 或 `5175`。
 
+### Week 03 Layout JSON 验证
+
+Week 03 smoke 以 `tests/smoke/README.md` 为准，覆盖：
+
+```text
+Layout JSON 示例 -> Schema 校验 -> 业务规则校验 -> 后端 mock 保存 / 查询
+```
+
+前端 Layout JSON 查看页属于 Week 03 P1，需要结合 Day 6B / Day 7A 输出单独确认；当前阶段不接数据库、不接真实 AI、不做 Vue 页面代码生成。
+
 ### Worker
 
 进入 `worker/` 目录后执行：
@@ -206,18 +235,24 @@ Week 02 端到端 smoke 以 `tests/smoke/README.md` 为准，覆盖：
 | `docs/week/01-status.md` | 第一周实际进展、验收结果、风险和下一步 |
 | `docs/week/02-plan.md` | 第二周周执行安排 |
 | `docs/week/02-status.md` | 第二周实际进展、验收结果、风险和下一步 |
+| `docs/week/03-plan.md` | 第三周 Layout JSON v0.1 周计划 |
+| `docs/week/03-status.md` | 第三周实际进展、验收结果、风险和下一步 |
+| `docs/week/03-summary.md` | 第三周收口总结和 Week 04 输入 |
 | `docs/mvp-scope.md` | MVP 第一版范围 |
 | `docs/prd.md` | 长期产品愿景和后续演进方向 |
 | `docs/architecture.md` | 系统架构与模块关系 |
 | `docs/api-contracts.md` | Week 02 接口契约 |
 | `docs/frontend-pages.md` | Week 02 前端页面、路由和交互说明 |
+| `docs/layout-schema-design.md` | Week 03 Layout JSON v0.1 设计依据 |
+| `docs/layout-api-contracts.md` | Week 03 Layout JSON P1 mock 接口契约 |
+| `docs/database-artifact-draft.md` | 后续数据库 artifact 设计草案，Week 03 不执行 |
 | `docs/coding-rules.md` | 前端、后端、Worker 编码规范 |
 | `docs/testing.md` | 测试方式与验证策略 |
 | `docs/prompt-templates.md` | 常用提示词模板 |
 | `docs/skills/frontend-task-skill.md` | 前端任务技能草案 |
 | `docs/skills/backend-api-skill.md` | 后端接口任务工作流 |
 | `docs/skills/bugfix-skill.md` | Bug 修复任务工作流 |
-| `tests/smoke/README.md` | Week 01 / Week 02 最小 smoke 测试步骤 |
+| `tests/smoke/README.md` | Week 01 / Week 02 / Week 03 最小 smoke 测试步骤 |
 
 ## Week 02 交付物
 
@@ -236,6 +271,23 @@ Week 02 端到端 smoke 以 `tests/smoke/README.md` 为准，覆盖：
 - 更新后的 `tests/smoke/README.md`
 - 后端上传接口、任务接口和 mock 结果接口
 - 前端工作台、创建任务页和任务详情页
+
+## Week 03 交付物
+
+第三周收口时，仓库应至少包括：
+
+- `docs/week/03-plan.md`
+- `docs/week/03-status.md`
+- `docs/week/03-summary.md`
+- `docs/layout-schema-design.md`
+- `docs/layout-api-contracts.md`
+- `docs/database-artifact-draft.md`
+- `schema/layout.schema.json`
+- `examples/valid/*.layout.json`
+- `examples/invalid/*.layout.json`
+- `worker/layout_validator.py`
+- `worker/test_layout_validator.py`
+- 更新后的 `tests/smoke/README.md`
 
 ## 关键字段说明
 
@@ -274,6 +326,6 @@ Week 02 端到端 smoke 以 `tests/smoke/README.md` 为准，覆盖：
 本文件满足以下条件时，视为可用：
 
 - 新成员打开仓库，能在 5 分钟内知道项目在做什么
-- 新成员知道 Week 02 只做 MVP mock 最小闭环，不会误以为已经进入真实生成能力开发
+- 新成员知道当前阶段只做 Layout JSON v0.1 稳定落地，不会误以为已经进入真实生成能力开发
 - 新成员能按本文件找到关键文档与建议目录
 - Codex 能根据本文件快速总结仓库入口信息

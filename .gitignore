@@ -19,5 +19,6 @@ worker/__pycache__/
 # IDE and OS local files
 .idea/
 .vscode/
+.claude/
 .DS_Store
 Thumbs.db

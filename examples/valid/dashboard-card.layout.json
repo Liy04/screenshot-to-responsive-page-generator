@@ -1,0 +1,226 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Dashboard Card",
+    "type": "dashboard",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {
+    "colors": {
+      "background": "#f9fafb",
+      "surface": "#ffffff",
+      "textMuted": "#64748b"
+    },
+    "typography": {
+      "headingMd": "heading-md",
+      "bodySm": "body-sm"
+    },
+    "spacing": {
+      "sm": 12,
+      "md": 20
+    },
+    "radius": {
+      "lg": 16
+    }
+  },
+  "layout": {
+    "id": "dashboard-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {
+      "background": "background"
+    },
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "dashboard-main",
+        "type": "section",
+        "role": "mainContent",
+        "bounds": {
+          "x": 80,
+          "y": 80,
+          "width": 960,
+          "height": 520
+        },
+        "style": {
+          "spacing": "md"
+        },
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "dashboard-summary-card",
+            "type": "card",
+            "role": "summaryCard",
+            "bounds": {
+              "x": 80,
+              "y": 80,
+              "width": 360,
+              "height": 220
+            },
+            "style": {
+              "background": "surface",
+              "radius": "lg"
+            },
+            "constraints": {
+              "horizontal": "fixed",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "dashboard-summary-title",
+                "type": "text",
+                "role": "heading",
+                "content": "Generated pages",
+                "bounds": {
+                  "x": 112,
+                  "y": 112,
+                  "width": 240,
+                  "height": 32
+                },
+                "style": {
+                  "typography": "bodySm",
+                  "color": "textMuted"
+                },
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              },
+              {
+                "id": "dashboard-summary-value",
+                "type": "text",
+                "role": "metric",
+                "content": "24",
+                "bounds": {
+                  "x": 112,
+                  "y": 156,
+                  "width": 120,
+                  "height": 56
+                },
+                "style": {
+                  "typography": "headingMd"
+                },
+                "constraints": {
+                  "horizontal": "hug",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "dashboard-activity-list",
+            "type": "list",
+            "role": "activityList",
+            "bounds": {
+              "x": 480,
+              "y": 80,
+              "width": 520,
+              "height": 260
+            },
+            "style": {
+              "spacing": "sm"
+            },
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "dashboard-activity-item-1",
+                "type": "listItem",
+                "role": "activityItem",
+                "bounds": {
+                  "x": 500,
+                  "y": 104,
+                  "width": 480,
+                  "height": 56
+                },
+                "style": {
+                  "spacing": "sm"
+                },
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": [
+                  {
+                    "id": "dashboard-activity-item-1-text",
+                    "type": "text",
+                    "role": "label",
+                    "content": "Landing page mock created",
+                    "bounds": {
+                      "x": 520,
+                      "y": 118,
+                      "width": 300,
+                      "height": 24
+                    },
+                    "style": {
+                      "typography": "bodySm"
+                    },
+                    "constraints": {
+                      "horizontal": "fill",
+                      "vertical": "hug"
+                    },
+                    "interactions": [],
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "dashboard-main",
+        "mode": "singleColumnOnTablet"
+      }
+    ]
+  },
+  "assumptions": [
+    {
+      "target": "dashboard-summary-value",
+      "message": "Metric value is mock content."
+    }
+  ],
+  "warnings": []
+}

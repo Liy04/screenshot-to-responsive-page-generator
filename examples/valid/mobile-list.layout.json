@@ -1,0 +1,205 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Mobile List",
+    "type": "mobile-list",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {
+    "colors": {
+      "background": "#ffffff",
+      "surface": "#f8fafc",
+      "textPrimary": "#111827"
+    },
+    "typography": {
+      "headingSm": "heading-sm",
+      "bodyMd": "body-md"
+    },
+    "spacing": {
+      "sm": 12,
+      "md": 16
+    },
+    "radius": {
+      "sm": 8
+    }
+  },
+  "layout": {
+    "id": "mobile-list-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844
+    },
+    "style": {
+      "background": "background"
+    },
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "mobile-list-header",
+        "type": "section",
+        "role": "header",
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 96
+        },
+        "style": {
+          "spacing": "md"
+        },
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "fixed"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "mobile-list-header-title",
+            "type": "text",
+            "role": "heading",
+            "content": "Recent layouts",
+            "bounds": {
+              "x": 20,
+              "y": 44,
+              "width": 220,
+              "height": 32
+            },
+            "style": {
+              "typography": "headingSm",
+              "color": "textPrimary"
+            },
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "mobile-list-content",
+        "type": "section",
+        "role": "content",
+        "bounds": {
+          "x": 0,
+          "y": 96,
+          "width": 390,
+          "height": 600
+        },
+        "style": {
+          "spacing": "sm"
+        },
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "mobile-list-items",
+            "type": "list",
+            "role": "layoutList",
+            "bounds": {
+              "x": 16,
+              "y": 112,
+              "width": 358,
+              "height": 300
+            },
+            "style": {
+              "spacing": "sm"
+            },
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "mobile-list-item-1",
+                "type": "listItem",
+                "role": "layoutListItem",
+                "bounds": {
+                  "x": 16,
+                  "y": 112,
+                  "width": 358,
+                  "height": 72
+                },
+                "style": {
+                  "background": "surface",
+                  "radius": "sm"
+                },
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": [
+                  {
+                    "id": "mobile-list-item-1-title",
+                    "type": "text",
+                    "role": "title",
+                    "content": "Profile page structure",
+                    "bounds": {
+                      "x": 32,
+                      "y": 128,
+                      "width": 240,
+                      "height": 24
+                    },
+                    "style": {
+                      "typography": "bodyMd"
+                    },
+                    "constraints": {
+                      "horizontal": "fill",
+                      "vertical": "hug"
+                    },
+                    "interactions": [],
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "mobile-list-items",
+        "mode": "alreadyMobile"
+      }
+    ]
+  },
+  "assumptions": [],
+  "warnings": [
+    {
+      "target": "mobile-list-item-1",
+      "message": "Only one list item is modeled for the v0.1 example."
+    }
+  ]
+}

@@ -8,15 +8,17 @@
 
 ## 当前阶段
 
-Week 02 MVP 最小闭环已完成，下一阶段准备中。
+Week 03 Layout JSON v0.1 稳定落地。
 
 ## 当前目标
 
-Week 02 已跑通最小业务闭环：
+当前目标是跑通 Layout JSON v0.1 的 P0 验证链路：
 
 ```text
-上传截图 -> 创建任务 -> 查看任务状态 -> 查看 mock 生成结果
+手写 Layout JSON -> Schema 校验 -> 业务规则校验 -> 示例验证
 ```
+
+Week 02 已完成上传截图、创建任务、查询状态、查看 mock 结果。Worker 仅 smoke，不参与真实生成。
 
 ## 当前禁止
 
@@ -28,23 +30,24 @@ Week 02 已跑通最小业务闭环：
 - 不接 RabbitMQ。
 - 不接 MySQL 实际落库。
 - 不创建数据库表。
-- 不创建 Mapper。
-- 不创建 Entity 或实体表映射。
+- 不新增 Entity / Mapper。
+- 不新增数据库配置。
 - 不做真实截图解析。
-- 不做真实页面代码生成。
+- 不做 Vue 页面代码生成。
 - 不做导出 ZIP。
+- 不做拖拽编辑器。
 - 不做在线编辑器。
 - 不做登录注册。
 - 不做历史记录持久化。
 - 不做复杂权限系统。
 
-## 当前实现结果
+## 当前推荐实现
 
-- 截图文件保存到 `backend/uploads/`。
-- 任务数据暂存在后端内存 Map。
-- mock 结果由后端固定返回。
-- Worker 只保留 smoke，不参与真实生成。
-- 前端已完成工作台、创建任务页和任务详情页的最小闭环。
+- Layout JSON 使用手写示例。
+- Schema 放在 `schema/layout.schema.json`。
+- 示例放在 `examples/valid` 和 `examples/invalid`。
+- Worker 只做本地 Layout JSON 校验器。
+- 后端 / 前端 mock 保存与查看仅作为 P1。
 
 ## 当前执行方式
 

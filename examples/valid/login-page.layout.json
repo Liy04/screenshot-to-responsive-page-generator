@@ -1,0 +1,225 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Login Page",
+    "type": "auth",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {
+    "colors": {
+      "background": "#f8fafc",
+      "surface": "#ffffff",
+      "textPrimary": "#0f172a"
+    },
+    "typography": {
+      "headingMd": "heading-md",
+      "bodyMd": "body-md"
+    },
+    "spacing": {
+      "md": 24,
+      "lg": 32
+    },
+    "radius": {
+      "md": 10
+    }
+  },
+  "layout": {
+    "id": "login-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {
+      "background": "background"
+    },
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "login-auth-section",
+        "type": "section",
+        "role": "authArea",
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "style": {
+          "alignment": "center"
+        },
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "fill"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "login-card",
+            "type": "card",
+            "role": "loginCard",
+            "bounds": {
+              "x": 520,
+              "y": 190,
+              "width": 400,
+              "height": 440
+            },
+            "style": {
+              "background": "surface",
+              "radius": "md",
+              "spacing": "lg"
+            },
+            "constraints": {
+              "horizontal": "fixed",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "login-form-title",
+                "type": "text",
+                "role": "heading",
+                "content": "Sign in",
+                "bounds": {
+                  "x": 560,
+                  "y": 230,
+                  "width": 320,
+                  "height": 40
+                },
+                "style": {
+                  "typography": "headingMd",
+                  "color": "textPrimary"
+                },
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              },
+              {
+                "id": "login-form",
+                "type": "form",
+                "role": "loginForm",
+                "bounds": {
+                  "x": 560,
+                  "y": 300,
+                  "width": 320,
+                  "height": 240
+                },
+                "style": {
+                  "spacing": "md"
+                },
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": [
+                  {
+                    "id": "login-form-email",
+                    "type": "input",
+                    "role": "emailInput",
+                    "bounds": {
+                      "x": 560,
+                      "y": 300,
+                      "width": 320,
+                      "height": 44
+                    },
+                    "style": {
+                      "variant": "outlined"
+                    },
+                    "constraints": {
+                      "horizontal": "fill",
+                      "vertical": "fixed"
+                    },
+                    "interactions": [],
+                    "children": []
+                  },
+                  {
+                    "id": "login-form-password",
+                    "type": "input",
+                    "role": "passwordInput",
+                    "bounds": {
+                      "x": 560,
+                      "y": 360,
+                      "width": 320,
+                      "height": 44
+                    },
+                    "style": {
+                      "variant": "outlined"
+                    },
+                    "constraints": {
+                      "horizontal": "fill",
+                      "vertical": "fixed"
+                    },
+                    "interactions": [],
+                    "children": []
+                  },
+                  {
+                    "id": "login-form-submit",
+                    "type": "button",
+                    "role": "submit",
+                    "content": "Log in",
+                    "bounds": {
+                      "x": 560,
+                      "y": 428,
+                      "width": 320,
+                      "height": 48
+                    },
+                    "style": {
+                      "variant": "primary"
+                    },
+                    "constraints": {
+                      "horizontal": "fill",
+                      "vertical": "fixed"
+                    },
+                    "interactions": [],
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "login-card",
+        "mode": "fullWidthOnMobile"
+      }
+    ]
+  },
+  "assumptions": [
+    {
+      "target": "login-form-submit",
+      "message": "Form submit endpoint is unknown."
+    }
+  ],
+  "warnings": []
+}

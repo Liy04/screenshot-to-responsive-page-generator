@@ -1,0 +1,192 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Profile Page",
+    "type": "profile",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {
+    "colors": {
+      "background": "#f8fafc",
+      "surface": "#ffffff",
+      "textPrimary": "#111827"
+    },
+    "typography": {
+      "headingMd": "heading-md",
+      "bodyMd": "body-md"
+    },
+    "spacing": {
+      "md": 24,
+      "lg": 32
+    },
+    "radius": {
+      "full": 999,
+      "lg": 16
+    }
+  },
+  "layout": {
+    "id": "profile-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {
+      "background": "background"
+    },
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "profile-main",
+        "type": "section",
+        "role": "profileMain",
+        "bounds": {
+          "x": 240,
+          "y": 96,
+          "width": 960,
+          "height": 560
+        },
+        "style": {
+          "spacing": "lg"
+        },
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "profile-card",
+            "type": "card",
+            "role": "profileCard",
+            "bounds": {
+              "x": 300,
+              "y": 128,
+              "width": 840,
+              "height": 320
+            },
+            "style": {
+              "background": "surface",
+              "radius": "lg"
+            },
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "profile-avatar",
+                "type": "image",
+                "role": "avatar",
+                "src": null,
+                "assetId": "profile-avatar-asset",
+                "bounds": {
+                  "x": 340,
+                  "y": 168,
+                  "width": 96,
+                  "height": 96
+                },
+                "style": {
+                  "radius": "full"
+                },
+                "constraints": {
+                  "horizontal": "fixed",
+                  "vertical": "fixed"
+                },
+                "interactions": [],
+                "children": []
+              },
+              {
+                "id": "profile-name",
+                "type": "text",
+                "role": "heading",
+                "content": "Alex Chen",
+                "bounds": {
+                  "x": 468,
+                  "y": 172,
+                  "width": 260,
+                  "height": 40
+                },
+                "style": {
+                  "typography": "headingMd",
+                  "color": "textPrimary"
+                },
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              },
+              {
+                "id": "profile-edit-button",
+                "type": "button",
+                "role": "secondaryAction",
+                "content": "Edit profile",
+                "bounds": {
+                  "x": 468,
+                  "y": 232,
+                  "width": 136,
+                  "height": 44
+                },
+                "style": {
+                  "variant": "secondary"
+                },
+                "constraints": {
+                  "horizontal": "hug",
+                  "vertical": "fixed"
+                },
+                "interactions": [],
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "profile-avatar-asset",
+      "type": "image",
+      "status": "placeholder"
+    }
+  ],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "profile-card",
+        "mode": "stackProfileContentOnMobile"
+      }
+    ]
+  },
+  "assumptions": [
+    {
+      "target": "profile-avatar",
+      "message": "Avatar uses a placeholder asset."
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,90 @@
+{
+  "page": {
+    "name": "Invalid Missing Version",
+    "type": "schema-negative",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "manual",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {},
+  "layout": {
+    "id": "invalid-missing-version-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {},
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "invalid-missing-version-section",
+        "type": "section",
+        "role": "content",
+        "bounds": {
+          "x": 80,
+          "y": 80,
+          "width": 600,
+          "height": 240
+        },
+        "style": {},
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "invalid-missing-version-title",
+            "type": "text",
+            "role": "heading",
+            "content": "Missing version",
+            "bounds": {
+              "x": 100,
+              "y": 100,
+              "width": 320,
+              "height": 40
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": []
+  },
+  "assumptions": [],
+  "warnings": [
+    {
+      "target": "invalid-missing-version-root",
+      "message": "This file intentionally omits version."
+    }
+  ]
+}

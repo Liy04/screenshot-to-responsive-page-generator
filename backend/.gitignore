@@ -1,6 +1,7 @@
 target/
 .m2/
 uploads/
+mock-data/
 
 .idea/
 *.iml

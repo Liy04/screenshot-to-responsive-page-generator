@@ -18,8 +18,8 @@
 
 - 不接 MySQL。
 - 不创建数据库表。
-- 不创建 Mapper。
-- 不创建 Entity 或实体表映射。
+- 不新增 Mapper。
+- 不新增 Entity 或实体表映射。
 - 不新增数据库配置。
 - 不接 Redis / RabbitMQ。
 - 不调用 Python Worker 执行真实任务。

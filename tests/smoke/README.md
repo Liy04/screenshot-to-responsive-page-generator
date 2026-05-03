@@ -2,11 +2,11 @@
 
 ## 文件目的
 
-本文件用于定义 Week 01 / Week 02 最小 smoke 测试步骤，验证项目已经具备继续开发和最小闭环联调的基础条件。
+本文件用于定义 Week 01 / Week 02 / Week 03 最小 smoke 测试步骤，验证项目已经具备继续开发、最小闭环联调和 Layout JSON v0.1 校验的基础条件。
 
 ## 适用阶段
 
-本文档保留 Week 01 基础 smoke 步骤；当前主要用于 Week 02 MVP 最小闭环开发阶段的基础验证。
+本文档保留 Week 01 基础 smoke 步骤，覆盖 Week 02 MVP 最小闭环验证，并补充 Week 03 Layout JSON v0.1 smoke 验收说明。
 
 ## 使用方式
 
@@ -23,13 +23,16 @@
 - Maven 3.9+
 - Python 3.10+（项目推荐目标版本为 Python 3.11）
 
-Week 01 / Week 02 默认不要求：
+Week 01 / Week 02 / Week 03 默认不要求：
 
 - MySQL 必须启动
 - Redis 必须启动
 - RabbitMQ 必须启动
 - 真实模型 API 必须可用
 - Figma API / Figma MCP 必须可用
+- MySQL 实际落库
+- Entity / Mapper 必须已创建
+- Vue 页面代码生成能力必须已实现
 
 如果 `frontend/`、`backend/` 或 `worker/` 目录内还只有 `.gitkeep` 等占位文件，说明对应工程尚未初始化；请先完成 Day 2 / Day 3 的工程骨架任务，再执行对应 smoke 步骤。
 
@@ -135,6 +138,82 @@ Week 01 / Week 02 默认不要求：
 - 进程正常结束
 - 退出码为 0
 
+## Smoke 3.0：Week 03 Layout JSON 校验器
+
+### 步骤
+1. 确认已位于项目根目录
+2. 校验 5 个合法示例：
+   `python worker/layout_validator.py examples/valid/landing-page.layout.json`
+   `python worker/layout_validator.py examples/valid/login-page.layout.json`
+   `python worker/layout_validator.py examples/valid/dashboard-card.layout.json`
+   `python worker/layout_validator.py examples/valid/mobile-list.layout.json`
+   `python worker/layout_validator.py examples/valid/profile-page.layout.json`
+3. 校验 3 个非法示例：
+   `python worker/layout_validator.py examples/invalid/invalid-missing-version.layout.json`
+   `python worker/layout_validator.py examples/invalid/invalid-duplicate-node-id.layout.json`
+   `python worker/layout_validator.py examples/invalid/invalid-responsive-target.layout.json`
+4. 执行单元测试：
+   `python -m unittest worker.test_layout_validator`
+
+### 预期结果
+- 5 个合法示例输出 `校验通过`
+- 缺少 `version` 的非法示例输出 `SCHEMA_VALIDATION_ERROR`
+- 重复节点 id 的非法示例输出 `DUPLICATE_NODE_ID`
+- 响应式目标不存在的非法示例输出 `RESPONSIVE_TARGET_NOT_FOUND`
+- `python -m unittest worker.test_layout_validator` 执行通过
+- 不接真实 AI / Figma，不生成 Vue 页面代码
+
+## Smoke 3.1：Week 03 Layout JSON mock 保存 / 查询
+
+说明：本项属于 Week 03 P1 后端 mock 验证，不连接 MySQL，不创建 Entity / Mapper，不接 Redis / RabbitMQ。
+
+### 步骤
+1. 进入 `backend/`
+2. 执行 `mvn package -DskipTests`
+3. 执行 `java -jar target/backend-0.0.1-SNAPSHOT.jar`
+4. 使用 `examples/valid/landing-page.layout.json` 作为 `layoutJson` 组装请求体
+5. 保存 Layout JSON：
+   `curl -X PUT http://127.0.0.1:8080/api/dev/generation-jobs/job_001/artifacts/layout-json -H "Content-Type: application/json" --data-binary @请求体路径.json`
+6. 查询同一个 `jobId`：
+   `curl http://127.0.0.1:8080/api/dev/generation-jobs/job_001/artifacts/layout-json`
+7. 查询不存在的 `jobId`：
+   `curl http://127.0.0.1:8080/api/dev/generation-jobs/job_not_exists/artifacts/layout-json`
+8. 保存空 `layoutJson`：
+   `curl -X PUT http://127.0.0.1:8080/api/dev/generation-jobs/job_empty/artifacts/layout-json -H "Content-Type: application/json" --data-binary @空请求体路径.json`
+
+### 预期结果
+- 保存接口返回 200，包含 `jobId`、`artifactType`、`mockPath`、`status`
+- 查询接口返回 200，包含 `layoutJson`、`status`、`errorMessage`
+- 不存在的 `jobId` 返回 404
+- 空 `layoutJson` 返回 400
+- 生成的 `mock-data/` 本地副产物不提交
+- 验证完成后停止后端服务，不留下 8080 后台进程
+
+## Smoke 3.2：Week 03 前端 Layout JSON 查看页
+
+说明：本项属于 Week 03 P1 前端查看验证。若 Day 6B 前端实现或 Day 7A 测试输出尚未提供，则本项保持待确认，不影响 Week 03 P0 收口。
+
+### 步骤
+1. 启动后端：
+   `java -jar target/backend-0.0.1-SNAPSHOT.jar`
+2. 按 `Smoke 3.1` 保存一个 Layout JSON mock 数据
+3. 进入 `frontend/`
+4. 执行 `npm run build`
+5. 启动前端：
+   `npm run dev -- --host 127.0.0.1 --port 5173`
+6. 如果 5173 被占用，可改用 5174 或 5175
+7. 打开 Day 6B 前端实现说明中记录的 Layout JSON 查看页入口
+8. 使用已保存的 `jobId` 查询 Layout JSON
+9. 使用不存在的 `jobId` 查询 Layout JSON
+
+### 预期结果
+- 页面可以打开
+- 已存在的 `jobId` 能展示格式化后的 Layout JSON
+- 页面能展示 `status` 和 `errorMessage`
+- 不存在的 `jobId` 有明确错误提示
+- 页面不提供拖拽编辑器、在线编辑器、导出 ZIP 或 Vue 页面生成能力
+- 验证完成后停止前端 dev server 和后端服务
+
 ## Smoke 4：文档协作验证
 
 ### 步骤
@@ -166,7 +245,9 @@ Week 01 / Week 02 默认不要求：
 - worker 可运行
 - 文档可指导 Codex 正确理解当前阶段
 
-Week 02 进入功能验收后，还需要补充验证上传接口和完整最小闭环流程。
+Week 02 进入功能验收后，需要验证上传接口和完整最小闭环流程。
+
+Week 03 进入收口验收后，需要验证 Layout JSON 校验器、后端 mock 保存 / 查询；前端 Layout JSON 查看页属于 P1，按任务完成情况单独确认。
 
 ## Smoke 5：Week 02 前端端到端验收
 
@@ -202,3 +283,13 @@ Week 02 进入功能验收后，还需要补充验证上传接口和完整最小
 - 任务数据暂存在内存 Map，后端重启后已创建的 `assetId` / `jobId` 会失效。
 - 上传文件保存在 `backend/uploads/`，该目录为本地验证副产物，不应提交。
 - 当前结果为 mock 数据，不代表真实截图解析或真实页面代码生成。
+
+## Week 03 当前边界
+
+- 不接数据库 / MySQL 实际落库
+- 不新增 Entity / Mapper
+- 不接 AI / Figma
+- 不接 Redis / RabbitMQ
+- 不做 Vue 页面代码生成
+- 不做拖拽编辑器、在线编辑器或导出 ZIP
+- Layout JSON 示例、schema、校验器和 mock 接口均服务于本地验证，不代表真实生成能力已经接入
