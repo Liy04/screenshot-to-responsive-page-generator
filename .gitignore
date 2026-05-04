@@ -19,6 +19,12 @@ worker/__pycache__/
 # IDE and OS local files
 .idea/
 .vscode/
-.claude/
 .DS_Store
 Thumbs.db
+
+# Claude Code local sensitive settings
+.claude/settings.local.json
+.claude/*.local.json
+
+# Generated context packs
+.context/
