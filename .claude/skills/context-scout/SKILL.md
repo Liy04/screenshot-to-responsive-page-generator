@@ -62,6 +62,25 @@ allowed-tools: Read, Grep, Glob
 7. 用户明确要求先做上下文侦察；
 8. Codex 对修改范围不确定。
 
+### 超大任务处理方式
+
+如果任务范围过大，不应强行用一个 context-pack 覆盖所有内容。
+
+以下情况应建议拆分为多个 context-pack：
+
+1. 同时检查目录结构、路径引用、prompts、ADR、任务卡和测试文档；
+2. 同时跨前端、后端、Worker、测试和文档；
+3. 同时读取大量历史归档文档；
+4. 一次任务无法在 150 行内可靠总结。
+
+推荐拆分：
+
+- 结构验收：目录、`docs/INDEX.md`、`README.md`、`AGENTS.md`、`docs/context/current-phase.md`。
+- 路径引用验收：旧路径、新路径、活跃文档和归档文档引用。
+- prompts / ADR 验收：`docs/prompts/`、`docs/archive/prompts/`、`docs/decisions/`。
+
+如果无法可靠覆盖全部范围，必须在 `Uncertainties` 中说明，并建议拆分，不要把猜测写成事实。
+
 ---
 
 ## 必须读取的阶段约束文件
@@ -257,4 +276,5 @@ context-pack 只是临时侦察材料，不能覆盖正式项目规则。
 - 不要把猜测写成事实。
 - 如果没有证据，写“不确定”。
 - 输出内容控制在 150 行以内。
+- 如果任务过大，建议拆分为多个 context-pack，不要强行覆盖全部内容。
 - 如果任务很小，只涉及 1～2 个明确小文件，应建议 Codex 直接读取，不必使用 context-scout。

@@ -218,7 +218,7 @@ Week 01 / Week 02 / Week 03 默认不要求：
 
 ### 步骤
 1. 新开一个 Codex 任务
-2. 发送：请先阅读 `AGENTS.md`、`docs/context/current-phase.md`、`docs/tasks/week02-day1-upload-api.md`
+2. 发送：请先阅读 `AGENTS.md`、`docs/context/current-phase.md`、`docs/tasks/done/week02-day1-upload-api.md`
 3. 让 Codex 总结当前阶段目标与非目标
 
 ### 预期结果

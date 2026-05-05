@@ -2,7 +2,7 @@
 
 ## 文件目的
 
-本文档记录当前阶段的轻量上下文。Codex 执行日常任务时，默认读取 `AGENTS.md`、本文档、当前任务卡和相关代码即可。
+本文档记录当前阶段的轻量上下文。Codex 执行日常任务时，默认读取 `AGENTS.md`、本文档、`docs/tasks/active/` 下的当前任务卡和相关代码即可。
 
 完整 PRD、完整周计划、历史状态和全部 skills 只在任务卡明确要求，或任务确实必须参考时读取。
 
@@ -60,7 +60,7 @@ Layout JSON v0.1
 
 ## 当前执行方式
 
-日常开发任务以 `docs/tasks/` 下的单任务卡为准。
+日常开发任务以 `docs/tasks/active/` 下的单任务卡为准。
 
 任务卡会说明：
 
@@ -73,3 +73,16 @@ Layout JSON v0.1
 - Codex 执行要求。
 
 除非任务卡明确要求，不要默认读取完整 PRD、完整周计划、全部历史状态和全部 skills。
+
+## 当前活跃文档入口
+
+- 文档总索引：`docs/INDEX.md`
+- 当前周计划：`docs/plans/week-04.md`
+- 当前任务卡：`docs/tasks/active/week04-*.md`
+- generated-page artifact 契约：`docs/specs/generated-page-artifact-v0.1.md`
+- Layout JSON 到 HTML / CSS 映射：`docs/specs/layout-to-html-v0.1.md`
+- Layout JSON v0.1 设计：`docs/specs/layout-json-v0.1.md`
+- Layout API 契约：`docs/specs/layout-api-contracts.md`
+- context-scout 流程：`docs/playbooks/context-scout.md`
+- 当前提示词模板：`docs/prompts/current.md`
+- 架构决策记录：`docs/decisions/ADR-*.md`

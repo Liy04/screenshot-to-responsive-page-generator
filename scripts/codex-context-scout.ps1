@@ -1,9 +1,17 @@
 param(
     [string]$Task = "请为 Codex 生成当前任务的最小上下文包",
-    [string]$OutputPath = ".context/codex-context-pack.md"
+    [string]$OutputPath = ".context/codex-context-pack.md",
+    [int]$MaxTurns = 8
 )
 
 $ErrorActionPreference = "Stop"
+
+$MinTurns = 3
+$MaxAllowedTurns = 16
+if ($MaxTurns -lt $MinTurns -or $MaxTurns -gt $MaxAllowedTurns) {
+    Write-Error "MaxTurns 必须在 $MinTurns 到 $MaxAllowedTurns 之间。超大任务应优先拆成多个 context-pack，而不是无限提高 turns。"
+    exit 1
+}
 
 $ClaudeCommand = Get-Command claude -ErrorAction SilentlyContinue
 if (-not $ClaudeCommand) {
@@ -52,6 +60,8 @@ $Task
 12. 控制在 150 行以内。
 13. 不要把猜测写成事实。
 14. 没有证据就写“不确定”。
+15. 输出必须直接从 "# Codex Context Pack" 开始，不要输出任何前言、解释、寒暄或后记。
+16. 如果当前任务范围过大，无法在 150 行内可靠覆盖，请在 Uncertainties 中建议拆成多个 context-pack；不要强行覆盖全部内容。
 
 必须优先读取当前阶段约束文件：
 - docs/context/current-phase.md
@@ -138,11 +148,16 @@ context-pack 使用和流转规则：
 
 $ContextPackPath = $OutputFullPath
 
-claude -p $Prompt --output-format text --max-turns 8 | Out-File -FilePath $ContextPackPath -Encoding utf8
+claude -p $Prompt --output-format text --max-turns $MaxTurns | Out-File -FilePath $ContextPackPath -Encoding utf8
 
 $ContextPack = Get-Content -Raw -Encoding utf8 $ContextPackPath
-if (($ContextPack -notlike "*# Codex Context Pack*") -or ($ContextPack -like "*Error: Reached max turns*")) {
-    Write-Error "context-pack 生成失败：输出缺少标题或 Claude Code 达到 max turns。"
+if ([string]::IsNullOrWhiteSpace($ContextPack)) {
+    Write-Error "context-pack 生成失败：输出为空。"
+    exit 1
+}
+
+if ((-not $ContextPack.StartsWith("# Codex Context Pack")) -or ($ContextPack -like "*Error: Reached max turns*")) {
+    Write-Error "context-pack 生成失败：输出必须以标题开头，或 Claude Code 达到 max turns。"
     exit 1
 }
 

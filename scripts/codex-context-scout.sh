@@ -7,6 +7,7 @@ if ! command -v claude >/dev/null 2>&1; then
 fi
 
 OUTPUT_PATH=".context/codex-context-pack.md"
+MAX_TURNS=8
 TASK_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -19,12 +20,25 @@ while [[ $# -gt 0 ]]; do
       fi
       OUTPUT_PATH="$1"
       ;;
+    --max-turns)
+      shift
+      if [[ $# -eq 0 ]]; then
+        echo "缺少 --max-turns 参数值。" >&2
+        exit 1
+      fi
+      MAX_TURNS="$1"
+      ;;
     *)
       TASK_ARGS+=("$1")
       ;;
   esac
   shift
 done
+
+if ! [[ "$MAX_TURNS" =~ ^[0-9]+$ ]] || [[ "$MAX_TURNS" -lt 3 || "$MAX_TURNS" -gt 16 ]]; then
+  echo "MaxTurns 必须在 3 到 16 之间。超大任务应优先拆成多个 context-pack，而不是无限提高 turns。" >&2
+  exit 1
+fi
 
 case "$OUTPUT_PATH" in
   .context/*)
@@ -71,6 +85,8 @@ ${TASK}
 12. 控制在 150 行以内。
 13. 不要把猜测写成事实。
 14. 没有证据就写“不确定”。
+15. 输出必须直接从 \"# Codex Context Pack\" 开始，不要输出任何前言、解释、寒暄或后记。
+16. 如果当前任务范围过大，无法在 150 行内可靠覆盖，请在 Uncertainties 中建议拆成多个 context-pack；不要强行覆盖全部内容。
 
 必须优先读取当前阶段约束文件：
 - docs/context/current-phase.md
@@ -155,11 +171,16 @@ context-pack 使用和流转规则：
 ## 9. Uncertainties
 " \
   --output-format text \
-  --max-turns 8 \
+  --max-turns "$MAX_TURNS" \
   > "$OUTPUT_PATH"
 
-if ! grep -q "# Codex Context Pack" "$OUTPUT_PATH" || grep -q "Error: Reached max turns" "$OUTPUT_PATH"; then
-  echo "context-pack 生成失败：输出缺少标题或 Claude Code 达到 max turns。" >&2
+if [[ ! -s "$OUTPUT_PATH" ]]; then
+  echo "context-pack 生成失败：输出为空。" >&2
+  exit 1
+fi
+
+if ! head -n 1 "$OUTPUT_PATH" | grep -qx "# Codex Context Pack" || grep -q "Error: Reached max turns" "$OUTPUT_PATH"; then
+  echo "context-pack 生成失败：输出必须以标题开头，或 Claude Code 达到 max turns。" >&2
   exit 1
 fi
 
