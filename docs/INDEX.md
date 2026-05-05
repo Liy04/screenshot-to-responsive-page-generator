@@ -2,79 +2,60 @@
 
 ## 文件目的
 
-本文档是项目文档入口。Docs Refactor 第二阶段后，当前上下文优先使用 `docs/context/`、`docs/plans/`、`docs/tasks/active/`、`docs/specs/`、`docs/prompts/` 和 `docs/decisions/`。
+本文档是 Lite 文档结构入口，用于说明当前默认上下文和历史归档位置。
 
-历史内容已按类型归档，保留原文用于追溯。
+当前活跃文档压缩为：
 
-## 推荐阅读顺序
+```text
+docs/
+  current.md
+  plan.md
+  task.md
+  spec.md
+  INDEX.md
+  playbooks/
+    context-scout.md
+  archive/
+```
+
+## 默认阅读顺序
 
 1. `AGENTS.md`
-2. `README.md`
-3. `docs/context/current-phase.md`
-4. 当前任务卡：`docs/tasks/active/*.md`
-5. 当前任务相关专项文档或代码
+2. `docs/current.md`
+3. `docs/task.md`
+4. 当前任务相关代码
+5. 必要时读取 `docs/spec.md`
 
 ## 活跃文档
 
 | 类型 | 路径 | 说明 |
 |---|---|---|
-| 当前阶段上下文 | `docs/context/current-phase.md` | 当前目标、禁止项、推荐实现 |
-| 当前周计划 | `docs/plans/week-04.md` | Week 04 总纲 |
-| 当前任务卡 | `docs/tasks/active/week04-*.md` | Week 04 单线程任务卡 |
-| generated-page artifact 契约 | `docs/specs/generated-page-artifact-v0.1.md` | Week 04 产物契约 |
-| Layout JSON 到 HTML/CSS 映射 | `docs/specs/layout-to-html-v0.1.md` | Week 04 编译映射规则 |
-| Layout JSON v0.1 设计 | `docs/specs/layout-json-v0.1.md` | Layout JSON v0.1 设计依据 |
-| Layout API 契约 | `docs/specs/layout-api-contracts.md` | Layout JSON mock API 契约 |
+| 当前阶段事实源 | `docs/current.md` | 当前阶段、目标、允许项、禁止项、推荐实现 |
+| 当前计划摘要 | `docs/plan.md` | Week 04 计划摘要和任务推进顺序 |
+| 当前唯一任务卡 | `docs/task.md` | 当前执行任务，默认是 Week 04 Day 2 Worker 静态编译器 |
+| 当前核心规格 | `docs/spec.md` | Week 04 执行所需核心契约 |
 | context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
-| 当前提示词模板 | `docs/prompts/current.md` | 轻量上下文提示词 |
-| 通用任务模板 | `docs/prompts/task-template.md` | 多线程任务下发模板 |
-| 验收和修复模板 | `docs/prompts/review-template.md` | 测试、Bug 修复和总结模板 |
-| 架构决策记录 | `docs/decisions/ADR-*.md` | 核心工程决策 |
+| 历史归档 | `docs/archive/` | 历史计划、任务卡、规格、提示词和参考文档 |
 
-## 新目录职责
+## 归档说明
 
-- `docs/specs/`：长期或阶段性规格文档。
-- `docs/playbooks/`：协作流程、操作流程和可复用工作法。
-- `docs/plans/`：当前和后续周计划总纲。
-- `docs/tasks/active/`：当前活跃任务卡。
-- `docs/tasks/done/`：已完成任务卡归档。
-- `docs/prompts/`：当前提示词模板。
-- `docs/decisions/`：ADR 架构决策记录。
-- `docs/archive/`：历史周文档、历史 prompts、历史状态等归档材料。
+`docs/archive/` 只用于历史追溯，不参与默认上下文。
 
-## 归档入口
+本次 Lite Refactor 后，旧的团队级目录结构已归档到：
 
-| 类型 | 路径 |
-|---|---|
-| Week 01 / Week 02 / Week 03 历史周文档 | `docs/archive/week/` |
-| Week 04 旧周计划副本 | `docs/archive/week/04-plan.md` |
-| Week 02 / Week 03 已完成任务卡 | `docs/tasks/done/` |
-| Week 04 旧任务卡副本 | `docs/archive/tasks/week04/` |
-| 历史规格和旧根目录专项文档 | `docs/archive/specs/` |
-| Week 02 / Week 03 历史长提示词 | `docs/archive/prompts/week02-week03-prompts.md` |
-| 历史状态归档入口 | `docs/archive/status/README.md` |
+- `docs/archive/lite-refactor/`
+- `docs/archive/reference/`
 
-## 迁移说明
-
-- 当前规格文档优先使用 `docs/specs/`。
-- 当前周计划优先使用 `docs/plans/`。
-- 当前任务卡优先使用 `docs/tasks/active/`。
-- 已完成任务卡归档到 `docs/tasks/done/`。
-- 历史周文档归档到 `docs/archive/week/`。
-- 历史规格和被新版本覆盖的旧根目录专项文档归档到 `docs/archive/specs/`。
-- 历史提示词归档到 `docs/archive/prompts/`。
-- Context Scout 完整流程已提取到 `docs/playbooks/context-scout.md`。
+早期周文档、旧任务卡、旧规格副本和旧提示词仍保留在已有归档目录中。
 
 ## 路径优先级
 
-新任务优先引用新路径：
+新任务优先引用：
 
-1. `docs/context/current-phase.md`
-2. `docs/plans/week-04.md`
-3. `docs/tasks/active/week04-*.md`
-4. `docs/specs/*.md`
-5. `docs/prompts/*.md`
-6. `docs/decisions/*.md`
-7. `docs/playbooks/*.md`
+1. `docs/current.md`
+2. `docs/plan.md`
+3. `docs/task.md`
+4. `docs/spec.md`
+5. `docs/playbooks/context-scout.md`
 
-归档文档中的旧路径允许保留，用于历史追溯。
+历史归档中的旧路径允许保留，用于追溯当时上下文。
