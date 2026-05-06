@@ -72,6 +72,27 @@ Layout JSON v0.1
 
 当前唯一任务卡见 `docs/task.md`。
 
+## Week 04 完成情况
+
+| 项目 | 结果 |
+|---|---|
+| Day 2 Worker 静态编译器 | 已完成 |
+| Day 3 Worker 测试 | 已完成 |
+| Day 4 后端 generated-page artifact mock 接口 | 已完成 |
+| Day 5 前端 generated-page 展示与 iframe sandbox 预览 | 已完成 |
+| Day 6 集成 smoke | 通过 |
+| Week 04 建议判断 | 通过 |
+
+## Day 6 smoke 记录
+
+- Worker smoke 通过。
+- 后端 PUT / GET / 404 / 400 通过。
+- 前端 build 通过。
+- 前端页面联调通过。
+- iframe 使用 `sandbox=""`，且无 `allow-scripts`。
+- 未做 Playwright 视觉回归，符合当前限制。
+- 无残留后台服务。
+
 ## 验收总标准
 
 - Worker 复用 `worker/layout_validator.py`，不重写校验逻辑。
@@ -83,3 +104,19 @@ Layout JSON v0.1
 - 产物不允许 `script` 标签、内联事件或 `javascript:` URL。
 - `vueCode` 只展示文本，不要求可运行。
 - Day 6 集成 smoke 只验收和记录问题，不变成功能开发任务。
+
+## 风险 / 待确认事项
+
+- 详情页旧 Week 02 generation 查询失败时，会显示“加载失败 / 任务不存在”，但 Week 04 generated-page 区域仍可正常展示；这是 UX / 联调口径待确认项。
+- `backend/target`、`frontend/dist` 是构建副产物，按忽略规则处理。
+- `backend/mock-data` 是本地 mock 副产物，按忽略规则处理。
+- 当前 generated-page 保存仍是本地 mock 文件，不是数据库持久化。
+- 当前 Layout JSON 仍来自手写 / 示例，不是真实截图解析。
+- 当前静态编译器是规则编译，不是真实 AI 生成。
+
+## Week 05 候选方向
+
+- 方向 A：修正前端详情页 UX，让 generated-page dev 预览不依赖 Week 02 generation job。
+- 方向 B：补后端 / 前端更稳定的自动化测试。
+- 方向 C：增强静态编译器支持更多 Layout JSON 节点和 style subset。
+- 方向 D：如用户确认，再规划 MySQL 持久化；当前不直接进入。

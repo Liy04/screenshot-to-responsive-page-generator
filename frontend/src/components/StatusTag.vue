@@ -8,6 +8,8 @@ const props = defineProps({
   },
 })
 
+const normalizedStatus = computed(() => props.status.toLowerCase())
+
 const statusText = computed(() => {
   const textMap = {
     pending: '待处理',
@@ -16,7 +18,7 @@ const statusText = computed(() => {
     failed: '失败',
   }
 
-  return textMap[props.status] || props.status || '未知'
+  return textMap[normalizedStatus.value] || props.status || '未知'
 })
 
 const statusClass = computed(() => {
@@ -27,7 +29,7 @@ const statusClass = computed(() => {
     failed: 'status-failed',
   }
 
-  return classMap[props.status] || 'status-unknown'
+  return classMap[normalizedStatus.value] || 'status-unknown'
 })
 </script>
 
