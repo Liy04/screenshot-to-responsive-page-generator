@@ -30,11 +30,12 @@ docs/
 
 | 类型 | 路径 | 说明 |
 |---|---|---|
-| 当前阶段事实源 | `docs/current.md` | 当前阶段、目标、允许项、禁止项、推荐实现 |
-| 当前计划摘要 | `docs/plan.md` | Week 04 计划摘要和任务推进顺序 |
-| 当前唯一任务卡 | `docs/task.md` | 当前执行任务，默认是 Week 04 Day 2 Worker 静态编译器 |
-| 当前核心规格 | `docs/spec.md` | Week 04 执行所需核心契约 |
+| 当前阶段事实源 | `docs/current.md` | Week 05 收口状态、目标、允许项、禁止项、推荐实现 |
+| 当前计划摘要 | `docs/plan.md` | Week 05 完成情况和 Week 06 候选方向 |
+| 当前唯一任务卡 | `docs/task.md` | Week 05 Day 7 总结归档 |
+| 当前核心规格 | `docs/spec.md` | Week 04 / Week 05 执行所需核心契约 |
 | context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
+| Week 05 总结归档 | `docs/archive/week/05-summary.md` | Week 05 完成情况和收口结论 |
 | 历史归档 | `docs/archive/` | 历史计划、任务卡、规格、提示词和参考文档 |
 
 ## 归档说明
@@ -46,7 +47,7 @@ docs/
 - `docs/archive/lite-refactor/`
 - `docs/archive/reference/`
 
-早期周文档、旧任务卡、旧规格副本和旧提示词仍保留在已有归档目录中。
+早期周文档、旧任务卡、旧规格副本、旧提示词和 Week 05 原始计划、总结归档仍保留在已有归档目录中。
 
 ## 路径优先级
 

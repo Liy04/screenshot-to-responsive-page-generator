@@ -17,11 +17,12 @@ const props = defineProps({
 
 const generation = ref(null)
 const result = ref(null)
-const isLoading = ref(false)
-const errorMessage = ref('')
+const generationIsLoading = ref(false)
+const generationErrorMessage = ref('')
 const generatedArtifact = ref(null)
 const generatedIsLoading = ref(false)
 const generatedErrorMessage = ref('')
+const generatedErrorKind = ref('')
 
 const layoutJsonText = computed(() => {
   if (!result.value?.layoutJson) {
@@ -36,17 +37,40 @@ const isGeneratedFailed = computed(() => generatedStatus.value === 'FAILED')
 const generatedErrors = computed(() => {
   return generatedArtifact.value?.validation?.errors || []
 })
+const generatedState = computed(() => {
+  if (generatedIsLoading.value) {
+    return 'loading'
+  }
+
+  if (generatedArtifact.value?.status === 'SUCCESS') {
+    return 'success'
+  }
+
+  if (generatedArtifact.value?.status === 'FAILED') {
+    return 'failed'
+  }
+
+  if (generatedErrorKind.value === 'empty') {
+    return 'empty'
+  }
+
+  if (generatedErrorMessage.value) {
+    return 'error'
+  }
+
+  return 'empty'
+})
 
 async function loadGenerationDetail() {
   if (!props.jobId) {
-    errorMessage.value = '任务 ID 缺失，请返回创建页重新创建任务'
+    generationErrorMessage.value = '任务 ID 缺失，请返回创建页重新创建任务'
     return
   }
 
   generation.value = null
   result.value = null
-  errorMessage.value = ''
-  isLoading.value = true
+  generationErrorMessage.value = ''
+  generationIsLoading.value = true
 
   try {
     const [generationData, resultData] = await Promise.all([
@@ -57,27 +81,31 @@ async function loadGenerationDetail() {
     generation.value = generationData
     result.value = resultData
   } catch (error) {
-    errorMessage.value = error.message || '加载任务详情失败'
+    generationErrorMessage.value =
+      error.message || '旧任务信息暂不可用，不影响 generated-page artifact 查看'
   } finally {
-    isLoading.value = false
+    generationIsLoading.value = false
   }
 }
 
 async function loadGeneratedPageArtifact() {
   if (!props.jobId) {
     generatedErrorMessage.value = '任务 ID 缺失，无法查询 generated-page artifact'
+    generatedErrorKind.value = 'error'
     return
   }
 
   generatedArtifact.value = null
   generatedErrorMessage.value = ''
+  generatedErrorKind.value = ''
   generatedIsLoading.value = true
 
   try {
     generatedArtifact.value = await getGeneratedPageArtifact(props.jobId)
   } catch (error) {
-    generatedErrorMessage.value =
-      error.message || 'generated-page artifact 暂不可用'
+    const message = error.message || 'generated-page artifact 暂不可用'
+    generatedErrorMessage.value = message
+    generatedErrorKind.value = message.includes('不存在') ? 'empty' : 'error'
   } finally {
     generatedIsLoading.value = false
   }
@@ -107,16 +135,25 @@ watch(
       </p>
     </section>
 
-    <section v-if="isLoading" class="detail-card loading-card" aria-live="polite">
-      正在加载任务详情...
+    <section
+      v-if="generationIsLoading"
+      class="detail-card loading-card"
+      aria-live="polite"
+    >
+      正在加载旧任务信息...
     </section>
 
-    <section v-else-if="errorMessage" class="detail-card error-state" role="alert">
-      <h2>加载失败</h2>
-      <p>{{ errorMessage }}</p>
+    <section
+      v-else-if="generationErrorMessage"
+      class="detail-card warning-state"
+      role="status"
+    >
+      <h2>旧任务信息不可用</h2>
+      <p>{{ generationErrorMessage }}</p>
+      <p>这不会影响下方 generated-page artifact 的查询和预览。</p>
     </section>
 
-    <template v-if="!isLoading && !errorMessage">
+    <template v-else>
       <section class="detail-card" aria-labelledby="task-info-title">
         <div class="section-title-row">
           <h2 id="task-info-title">任务状态</h2>
@@ -179,15 +216,24 @@ watch(
       </section>
 
       <section
-        v-else-if="generatedErrorMessage"
+        v-else-if="generatedState === 'empty'"
         class="detail-card empty-state"
         role="status"
       >
-        <h2>generated-page artifact 暂不可用</h2>
+        <h2>暂无 generated-page artifact</h2>
+        <p>{{ generatedErrorMessage || '当前任务还没有可展示的静态编译产物。' }}</p>
+      </section>
+
+      <section
+        v-else-if="generatedState === 'error'"
+        class="detail-card error-state"
+        role="alert"
+      >
+        <h2>generated-page artifact 查询失败</h2>
         <p>{{ generatedErrorMessage }}</p>
       </section>
 
-      <template v-else-if="generatedArtifact">
+      <template v-else-if="generatedState === 'success' || generatedState === 'failed'">
         <GeneratedPageMeta :artifact="generatedArtifact" />
 
         <section v-if="isGeneratedFailed" class="detail-card error-state">

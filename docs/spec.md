@@ -249,3 +249,117 @@ GET /api/dev/generation-jobs/{jobId}/artifacts/generated-page
 - 不要求 `vueCode` 可运行。
 - 不做拖拽编辑器、在线编辑器或 ZIP 导出。
 - 不做 Playwright 视觉回归。
+
+## Week 05：generated-page 独立 dev preview 页面规格
+
+Week 05 新增 generated-page 独立 dev preview 页面，用于稳定验证 generated-page artifact 展示链路。
+
+推荐路由：
+
+```text
+/dev/generated-page-preview/:jobId
+```
+
+页面职责：
+
+- 从路由参数读取 `jobId`。
+- 只调用 generated-page artifact GET 接口。
+- 展示 generated-page artifact 状态。
+- 展示 `htmlCode` / `cssCode` / `vueCode`。
+- 展示 `validation.errors` / `validation.warnings`。
+- 展示 `unsupportedNodes`。
+- 展示 `source.layoutHash`。
+- 展示 `generator.name` 和 `generator.version`。
+- `status=SUCCESS` 时展示 sandbox iframe 预览。
+- `status=FAILED` 时不展示 iframe，只展示失败原因和 validation 信息。
+
+页面不依赖：
+
+- Week 02 generation job 详情接口。
+- 旧 mock generation 查询。
+- 任务历史记录。
+- 数据库。
+- 登录状态。
+
+## Week 05：前端预览安全规则
+
+- iframe 必须使用 `sandbox=""`。
+- iframe 不允许 `allow-scripts`。
+- `status=SUCCESS` 才展示 iframe。
+- `status=FAILED` 不展示 iframe。
+- `htmlCode` / `cssCode` / `vueCode` 必须作为代码文本可查看。
+- `vueCode` 仍只作为文本展示，不要求可运行，不要求构建。
+- 页面不得提供拖拽编辑器、在线编辑器或 ZIP 导出。
+
+## Week 05：generated-page 展示状态
+
+generated-page 展示建议区分以下状态：
+
+| 状态 | 含义 |
+|---|---|
+| `loading` | 正在请求 generated-page artifact |
+| `success` | artifact 存在且 `status=SUCCESS` |
+| `empty` | artifact 不存在，例如后端返回 404 |
+| `failed` | artifact 存在但 `status=FAILED` |
+| `error` | 请求异常或非预期错误 |
+
+## Week 05：Worker style subset 增强范围
+
+Week 05 只允许小幅增强以下安全 style subset：
+
+```text
+width
+height
+padding
+margin
+borderRadius
+backgroundColor
+color
+fontSize
+fontWeight
+textAlign
+display
+flexDirection
+gap
+objectFit
+```
+
+增强时必须保持：
+
+- 未知 style 进入 warnings。
+- HTML escape 不退化。
+- 禁止 script。
+- 禁止 inline event。
+- 禁止 javascript URL。
+- 不安全 image src 进入 warning。
+- layoutHash 稳定性不破坏。
+
+明确不做：
+
+- 不做布局推断。
+- 不做复杂响应式算法。
+- 不做复杂 grid 推断。
+- 不做 Tailwind 代码生成。
+- 不做动态交互生成。
+- 不做可运行 Vue SFC 生成。
+- 不做 AI 生成代码。
+
+## Week 05：后端 generated-page mock 接口测试范围
+
+后端测试覆盖：
+
+- PUT 成功保存 generated-page artifact。
+- GET 成功读取 generated-page artifact。
+- artifact 不存在时返回 404。
+- 非法 `jobId` 返回 400。
+- 超过 2MB 返回 400。
+- `status=FAILED` artifact 可以保存和读取。
+- 测试数据隔离，不污染真实 `backend/mock-data`。
+
+实现边界：
+
+- 优先使用项目已有 Spring Boot Test / MockMvc 能力。
+- 如缺少测试依赖，先报告，不擅自新增。
+- 不接 MySQL。
+- 不创建数据库表。
+- 不创建 Entity / Mapper。

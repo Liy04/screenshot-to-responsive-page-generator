@@ -29,6 +29,8 @@ GENERATOR_NAME = "layout-static-generator"
 GENERATOR_VERSION = "0.1"
 
 STYLE_PROPERTIES = {
+    "width": "width",
+    "height": "height",
     "backgroundColor": "background-color",
     "color": "color",
     "fontSize": "font-size",
@@ -36,9 +38,11 @@ STYLE_PROPERTIES = {
     "borderRadius": "border-radius",
     "padding": "padding",
     "margin": "margin",
+    "textAlign": "text-align",
     "display": "display",
     "flexDirection": "flex-direction",
     "gap": "gap",
+    "objectFit": "object-fit",
     "justifyContent": "justify-content",
     "alignItems": "align-items",
 }
@@ -70,6 +74,8 @@ SAFE_COLOR_NAMES = {
 }
 SAFE_DISPLAY_VALUES = {"block", "inline-block", "flex", "grid", "none"}
 SAFE_FLEX_DIRECTIONS = {"row", "row-reverse", "column", "column-reverse"}
+SAFE_TEXT_ALIGN_VALUES = {"left", "right", "center", "justify", "start", "end"}
+SAFE_OBJECT_FIT_VALUES = {"fill", "contain", "cover", "none", "scale-down"}
 SAFE_ALIGN_VALUES = {
     "flex-start",
     "flex-end",
@@ -328,7 +334,7 @@ def compile_style(
 
 def safe_css_value(key: str, value: Any) -> str | None:
     if isinstance(value, (int, float)) and not isinstance(value, bool):
-        if key in {"fontSize", "borderRadius", "padding", "margin", "gap"}:
+        if key in {"width", "height", "fontSize", "borderRadius", "padding", "margin", "gap"}:
             return f"{value}px"
         if key == "fontWeight":
             return str(value) if value in range(100, 1000, 100) else None
@@ -348,14 +354,18 @@ def safe_css_value(key: str, value: Any) -> str | None:
 
     if key in {"backgroundColor", "color"}:
         return stripped if is_safe_color(stripped) else None
-    if key in {"fontSize", "borderRadius", "padding", "margin", "gap"}:
+    if key in {"width", "height", "fontSize", "borderRadius", "padding", "margin", "gap"}:
         return stripped if is_safe_length(stripped) else None
     if key == "fontWeight":
         return stripped if is_safe_font_weight(stripped) else None
+    if key == "textAlign":
+        return stripped if stripped in SAFE_TEXT_ALIGN_VALUES else None
     if key == "display":
         return stripped if stripped in SAFE_DISPLAY_VALUES else None
     if key == "flexDirection":
         return stripped if stripped in SAFE_FLEX_DIRECTIONS else None
+    if key == "objectFit":
+        return stripped if stripped in SAFE_OBJECT_FIT_VALUES else None
     if key in {"justifyContent", "alignItems"}:
         return stripped if stripped in SAFE_ALIGN_VALUES else None
     return None

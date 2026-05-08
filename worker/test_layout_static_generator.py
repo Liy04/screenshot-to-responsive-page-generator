@@ -1,4 +1,6 @@
 import copy
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -113,6 +115,65 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
         self.assertNotIn("url(javascript", artifact["cssCode"])
 
+    def test_width_and_height_are_compiled(self):
+        document = self.document_with_safe_style_subset()
+        document["layout"]["style"]["width"] = "320px"
+        document["layout"]["style"]["height"] = "240px"
+
+        artifact = self.generate_from_document(document)
+
+        self.assertIn("width: 320px;", artifact["cssCode"])
+        self.assertIn("height: 240px;", artifact["cssCode"])
+
+    def test_text_align_is_compiled(self):
+        document = self.document_with_safe_style_subset()
+        text_node = document["layout"]["children"][0]["children"][0]["children"][0]
+        text_node["style"]["textAlign"] = "center"
+
+        artifact = self.generate_from_document(document)
+
+        self.assertIn("text-align: center;", artifact["cssCode"])
+
+    def test_object_fit_is_compiled_for_image(self):
+        document = self.document_with_safe_style_subset()
+        image_node = document["layout"]["children"][0]["children"][1]
+        image_node["style"]["objectFit"] = "cover"
+
+        artifact = self.generate_from_document(document)
+
+        self.assertIn("object-fit: cover;", artifact["cssCode"])
+
+    def test_unsafe_width_or_height_is_skipped_and_warned(self):
+        document = self.document_with_safe_style_subset()
+        document["layout"]["style"]["width"] = "calc(100% - 10px)"
+        document["layout"]["style"]["height"] = "fit-content"
+
+        artifact = self.generate_from_document(document)
+
+        self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
+        self.assertNotIn("width: calc(100% - 10px);", artifact["cssCode"])
+        self.assertNotIn("height: fit-content;", artifact["cssCode"])
+
+    def test_unsafe_text_align_is_skipped_and_warned(self):
+        document = self.document_with_safe_style_subset()
+        text_node = document["layout"]["children"][0]["children"][0]["children"][0]
+        text_node["style"]["textAlign"] = "middle"
+
+        artifact = self.generate_from_document(document)
+
+        self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
+        self.assertNotIn("text-align: middle;", artifact["cssCode"])
+
+    def test_unsafe_object_fit_is_skipped_and_warned(self):
+        document = self.document_with_safe_style_subset()
+        image_node = document["layout"]["children"][0]["children"][1]
+        image_node["style"]["objectFit"] = "zoom"
+
+        artifact = self.generate_from_document(document)
+
+        self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
+        self.assertNotIn("object-fit: zoom;", artifact["cssCode"])
+
     def test_unsafe_image_src_is_skipped_and_warned(self):
         document = self.document_with_safe_style_subset()
         image_node = document["layout"]["children"][0]["children"][1]
@@ -125,12 +186,18 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assertNotIn("onload", artifact["htmlCode"].lower())
 
     def generate_from_document(self, document):
-        temp_path = PROJECT_ROOT / "worker" / ".tmp-layout-static-generator-test.layout.json"
+        temp_file = tempfile.NamedTemporaryFile(
+            mode="w",
+            suffix=".layout.json",
+            prefix="layout-static-generator-test-",
+            dir=PROJECT_ROOT / "worker",
+            delete=False,
+            encoding="utf-8",
+        )
+        temp_path = Path(temp_file.name)
         try:
-            temp_path.write_text(
-                __import__("json").dumps(document, ensure_ascii=False),
-                encoding="utf-8",
-            )
+            with temp_file:
+                temp_file.write(json.dumps(document, ensure_ascii=False))
             artifact, exit_code = generate_artifact(temp_path)
             self.assertEqual(exit_code, 0, artifact["validation"]["errors"])
             return artifact
@@ -149,14 +216,18 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         node["style"] = {
             "backgroundColor": "#ffffff",
             "color": "#111827",
+            "width": "100%",
+            "height": "240px",
             "fontSize": "16px",
             "fontWeight": "bold",
             "borderRadius": "8px",
             "padding": "16px",
             "margin": "0px",
+            "textAlign": "left",
             "display": "flex",
             "flexDirection": "column",
             "gap": "12px",
+            "objectFit": "contain",
             "justifyContent": "center",
             "alignItems": "stretch",
         }

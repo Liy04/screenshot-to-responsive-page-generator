@@ -283,6 +283,21 @@ h2 {
   line-height: 1.6;
 }
 
+.warning-state {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.warning-state h2 {
+  color: #92400e;
+}
+
+.warning-state p {
+  margin: 10px 0 0;
+  color: #92400e;
+  line-height: 1.6;
+}
+
 .section-title-row {
   display: flex;
   align-items: center;
@@ -492,6 +507,19 @@ h2 {
 .layout-artifact-stack {
   display: grid;
   gap: 18px;
+}
+
+.generated-dev-page {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+}
+
+.generated-dev-page .top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 0;
 }
 
 .empty-state p {
