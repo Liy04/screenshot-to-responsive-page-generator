@@ -65,9 +65,45 @@ class LayoutValidatorTest(unittest.TestCase):
 
         self.assert_error_code(result, "SCHEMA_VALIDATION_ERROR")
 
+    def test_root_node_not_page_fails_business_validation(self):
+        document = copy.deepcopy(load_json_file(VALID_EXAMPLES / "landing-page.layout.json"))
+        document["layout"]["type"] = "section"
+
+        result = validate_layout_document(document)
+
+        self.assert_error_code(result, "ROOT_NODE_TYPE_INVALID")
+
+    def test_image_missing_source_adds_warning(self):
+        document = copy.deepcopy(load_json_file(VALID_EXAMPLES / "landing-page.layout.json"))
+        image_node = document["layout"]["children"][0]["children"][1]
+        image_node.pop("assetId")
+
+        result = validate_layout_document(document)
+
+        self.assert_warning_code(result, "IMAGE_SOURCE_MISSING")
+
+    def test_assumptions_target_missing_adds_warning(self):
+        document = copy.deepcopy(load_json_file(VALID_EXAMPLES / "landing-page.layout.json"))
+        document["assumptions"] = [{"target": "missing-node", "message": "test"}]
+
+        result = validate_layout_document(document)
+
+        self.assert_warning_code(result, "TARGET_NOT_FOUND")
+
+    def test_warnings_target_missing_adds_warning(self):
+        document = copy.deepcopy(load_json_file(VALID_EXAMPLES / "landing-page.layout.json"))
+        document["warnings"] = [{"target": "missing-node", "message": "test"}]
+
+        result = validate_layout_document(document)
+
+        self.assert_warning_code(result, "TARGET_NOT_FOUND")
+
     def assert_error_code(self, result, code):
         self.assertFalse(result.ok)
         self.assertIn(code, {error.code for error in result.errors})
+
+    def assert_warning_code(self, result, code):
+        self.assertIn(code, {warning.code for warning in result.warnings})
 
 
 if __name__ == "__main__":

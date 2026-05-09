@@ -2,32 +2,32 @@
 
 ## 当前任务
 
-Week 05 Day 7：总结归档。
+Week 06 已完成，等待用户确认 Week 07 方向。
 
-线程：文档 / 总结线程。
+线程：项目经理线程。
 
-## 任务目标
+## 当前状态
 
-完成 Week 05 总结归档，并把 Lite 文档更新到收口状态，方便项目经理后续验收和提交。
+Week 06 已完成总体验收和归档。后续进入 Week 07 前，需要先由用户确认下一周方向，再更新本文件为 Week 07 Day 1 当前任务。
 
-## 必须完成
+## Week 06 验证结果
 
-1. 新增 `docs/archive/week/05-summary.md`。
-2. 更新 `docs/current.md`，标记 Week 05 已收口并准备进入 Week 06 规划。
-3. 更新 `docs/plan.md`，补充 Week 05 完成情况和 Week 06 候选方向。
-4. 如确有必要，小幅更新 `docs/INDEX.md`，补充总结归档入口。
-5. 记录 Day 1 到 Day 6 完成情况、dev smoke 结果、安全验证结果、未完成事项和已知风险。
+- Worker unittest 通过，35 tests OK。
+- 后端 `mvn test` 通过，10 tests OK。
+- 前端 `npm run test` 通过，4 tests OK。
+- 前端 `npm run build` 通过。
+
+## Week 07 候选方向
+
+1. 图片输入到 Layout JSON 的 mock / 半自动链路。
+2. 继续增强前端演示体验和测试覆盖。
+3. 继续增强 Worker 节点和安全 style subset。
+4. 如用户明确批准，再规划 MySQL 持久化。
+5. 整理实践报告中的系统实现和测试章节。
 
 ## 禁止事项
 
-- 不修改 `frontend/`。
-- 不修改 `backend/`。
-- 不修改 `worker/`。
-- 不新增业务功能。
-- 不新增依赖。
-- 不运行测试。
-- 不启动服务。
-- 不提交 Git。
+- 未经用户确认，不直接进入 Week 07 开发。
 - 不接真实 AI。
 - 不接 Figma API / Figma MCP。
 - 不接 MySQL。
@@ -38,32 +38,3 @@ Week 05 Day 7：总结归档。
 - 不做拖拽编辑器 / 在线编辑器。
 - 不做真实截图解析。
 - 不做 Playwright 视觉回归。
-
-## 建议读取文件
-
-- `AGENTS.md`
-- `docs/current.md`
-- `docs/plan.md`
-- `docs/spec.md`
-- `docs/dev-smoke-week05.md`
-
-## 建议修改文件
-
-- `docs/current.md`
-- `docs/plan.md`
-- `docs/task.md`
-- `docs/INDEX.md`
-- `docs/archive/week/05-summary.md`
-
-## 验收标准
-
-- `docs/archive/week/05-summary.md` 已新增。
-- `docs/current.md` 已切到 Week 05 收口状态。
-- `docs/plan.md` 已标记 Week 05 完成，并给出 Week 06 候选方向。
-- `docs/task.md` 已切为 Day 7 总结归档任务。
-- 如有必要，`docs/INDEX.md` 已补充总结归档入口。
-- 未修改 `frontend/`、`backend/`、`worker/`。
-
-## Codex 执行要求
-
-先输出文档计划，等待确认后再修改文档。完成后输出修改文件、总结摘要、验收结果、风险和 Week 06 建议。

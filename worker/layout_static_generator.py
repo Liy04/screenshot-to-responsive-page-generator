@@ -31,9 +31,11 @@ GENERATOR_VERSION = "0.1"
 STYLE_PROPERTIES = {
     "width": "width",
     "height": "height",
+    "maxWidth": "max-width",
     "backgroundColor": "background-color",
     "color": "color",
     "fontSize": "font-size",
+    "lineHeight": "line-height",
     "fontWeight": "font-weight",
     "borderRadius": "border-radius",
     "padding": "padding",
@@ -334,8 +336,10 @@ def compile_style(
 
 def safe_css_value(key: str, value: Any) -> str | None:
     if isinstance(value, (int, float)) and not isinstance(value, bool):
-        if key in {"width", "height", "fontSize", "borderRadius", "padding", "margin", "gap"}:
+        if key in {"width", "height", "maxWidth", "fontSize", "borderRadius", "padding", "margin", "gap"}:
             return f"{value}px"
+        if key == "lineHeight":
+            return str(value)
         if key == "fontWeight":
             return str(value) if value in range(100, 1000, 100) else None
         return None
@@ -354,8 +358,10 @@ def safe_css_value(key: str, value: Any) -> str | None:
 
     if key in {"backgroundColor", "color"}:
         return stripped if is_safe_color(stripped) else None
-    if key in {"width", "height", "fontSize", "borderRadius", "padding", "margin", "gap"}:
+    if key in {"width", "height", "maxWidth", "fontSize", "borderRadius", "padding", "margin", "gap"}:
         return stripped if is_safe_length(stripped) else None
+    if key == "lineHeight":
+        return stripped if is_safe_line_height(stripped) else None
     if key == "fontWeight":
         return stripped if is_safe_font_weight(stripped) else None
     if key == "textAlign":
@@ -387,6 +393,12 @@ def is_safe_length(value: str) -> bool:
 
 def is_safe_font_weight(value: str) -> bool:
     return value in {"normal", "bold"} or bool(re.fullmatch(r"[1-9]00", value))
+
+
+def is_safe_line_height(value: str) -> bool:
+    if re.fullmatch(r"\d+(\.\d+)?", value):
+        return True
+    return is_safe_length(value)
 
 
 def base_css_blocks() -> list[str]:

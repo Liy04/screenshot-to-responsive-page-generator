@@ -2,9 +2,9 @@
 
 ## 文件目的
 
-本文档是 Week 04 当前执行所需核心契约，供 Worker 静态编译器、后端 mock 保存和前端安全预览共用。
+本文档记录当前 generated-page MVP 闭环仍有效的核心契约，供 Worker 静态编译器、后端 mock 保存和前端安全预览共用。
 
-Week 04 的“生成”是确定性静态编译，不是真实 AI 生成。
+当前“生成”始终指确定性静态编译，不是真实 AI 生成。
 
 ## Layout JSON v0.1 核心结构摘要
 
@@ -249,6 +249,41 @@ GET /api/dev/generation-jobs/{jobId}/artifacts/generated-page
 - 不要求 `vueCode` 可运行。
 - 不做拖拽编辑器、在线编辑器或 ZIP 导出。
 - 不做 Playwright 视觉回归。
+
+## Week 06 相关补充
+
+Week 06 在不改变现有接口契约的前提下，只做稳定性和验收增强。
+
+### generated-page preview 安全规则
+
+- `iframe` 必须使用 `sandbox=""`。
+- `iframe` 不允许 `allow-scripts`。
+- `status=SUCCESS` 时展示 `iframe`。
+- `status=FAILED` 时不展示 `iframe`，只展示失败原因和 validation 信息。
+
+### Worker 小范围增强边界
+
+- 只允许小范围增强少量安全节点或安全 style subset。
+- 不扩成复杂布局引擎。
+- 不做复杂响应式布局算法。
+- 不做 Tailwind 代码生成。
+- 不做 Vue SFC 可运行化。
+
+### 前端测试关注点
+
+- `SUCCESS` / `FAILED` 状态展示是否清晰。
+- `validation.errors` / `validation.warnings` 是否可展示。
+- `unsupportedNodes` 是否可展示。
+- `htmlCode` / `cssCode` / `vueCode` 是否可查看。
+- `iframe` 的安全属性是否符合约定。
+
+### 后端边界测试要求
+
+- 边界测试不应改变接口契约。
+- 仍保持 generated-page artifact 的 PUT / GET 路径不变。
+- 不接 MySQL。
+- 不创建数据库表。
+- 不创建 Entity / Mapper。
 
 ## Week 05：generated-page 独立 dev preview 页面规格
 

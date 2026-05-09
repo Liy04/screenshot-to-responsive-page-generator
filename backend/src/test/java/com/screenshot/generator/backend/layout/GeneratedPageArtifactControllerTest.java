@@ -1,6 +1,7 @@
 package com.screenshot.generator.backend.layout;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,7 +33,12 @@ class GeneratedPageArtifactControllerTest {
             "test_day5_generated_page_success",
             "test_day5_generated_page_failed",
             "test_day5_generated_page_large",
-            "test_day5_generated_page_missing");
+            "test_day5_generated_page_missing",
+            "test_day6_generated_page_boundary",
+            "test_day6_generated_page_empty_body",
+            "test_day6_generated_page_array_body",
+            "test_day6_generated_page_empty_object",
+            "test_day6_generated_page_large");
 
     @Autowired
     private MockMvc mockMvc;
@@ -82,7 +88,10 @@ class GeneratedPageArtifactControllerTest {
                 .andExpect(jsonPath("$.data.status", is("SUCCESS")))
                 .andExpect(jsonPath("$.data.htmlCode", is("<section class=\"lg-section\"><h1>Preview</h1></section>")))
                 .andExpect(jsonPath("$.data.cssCode", is(".lg-section { padding: 24px; }")))
-                .andExpect(jsonPath("$.data.validation.passed", is(true)));
+                .andExpect(jsonPath("$.data.validation.passed", is(true)))
+                .andExpect(jsonPath("$.data.validation.errors", hasSize(0)))
+                .andExpect(jsonPath("$.data.validation.warnings", hasSize(0)))
+                .andExpect(jsonPath("$.data.unsupportedNodes", hasSize(0)));
     }
 
     @Test
@@ -114,8 +123,59 @@ class GeneratedPageArtifactControllerTest {
     }
 
     @Test
+    void generatedPageArtifactReturnsBadRequestForOverlongJobId() throws Exception {
+        String overlongJobId = "a".repeat(65);
+
+        mockMvc.perform(get(BASE_PATH, overlongJobId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(400)))
+                .andExpect(jsonPath("$.message", is("jobId 格式不合法")))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        mockMvc.perform(put(BASE_PATH, overlongJobId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(successArtifact("test_day6_generated_page_boundary")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(400)))
+                .andExpect(jsonPath("$.message", is("jobId 格式不合法")))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    void saveGeneratedPageArtifactReturnsBadRequestWhenBodyIsEmpty() throws Exception {
+        mockMvc.perform(put(BASE_PATH, "test_day6_generated_page_empty_body")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(400)))
+                .andExpect(jsonPath("$.message", is("generated-page artifact 不能为空")))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    void saveGeneratedPageArtifactReturnsBadRequestWhenBodyIsArray() throws Exception {
+        mockMvc.perform(put(BASE_PATH, "test_day6_generated_page_array_body")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[]"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(400)))
+                .andExpect(jsonPath("$.message", is("generated-page artifact 必须是 JSON 对象")))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    void saveGeneratedPageArtifactReturnsBadRequestWhenBodyIsEmptyObject() throws Exception {
+        mockMvc.perform(put(BASE_PATH, "test_day6_generated_page_empty_object")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(400)))
+                .andExpect(jsonPath("$.message", is("generated-page artifact 不能为空")))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
     void saveGeneratedPageArtifactReturnsBadRequestWhenPayloadExceedsTwoMegabytes() throws Exception {
-        String jobId = "test_day5_generated_page_large";
+        String jobId = "test_day6_generated_page_large";
 
         mockMvc.perform(put(BASE_PATH, jobId)
                         .contentType(MediaType.APPLICATION_JSON)

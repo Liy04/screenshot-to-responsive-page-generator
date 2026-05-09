@@ -6,6 +6,9 @@ const apiProxyTarget =
 
 export default defineConfig({
   plugins: [vue()],
+  test: {
+    environment: 'jsdom',
+  },
   server: {
     proxy: {
       '/api': {

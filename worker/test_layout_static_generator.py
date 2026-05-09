@@ -3,8 +3,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from worker.layout_static_generator import generate_artifact
+from worker.layout_static_generator import compile_document, generate_artifact
 from worker.layout_validator import load_json_file
 
 
@@ -58,6 +59,11 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         artifact, _ = generate_artifact(VALID_EXAMPLES / "landing-page.layout.json")
 
         self.assertTrue(REQUIRED_ARTIFACT_FIELDS.issubset(artifact.keys()))
+
+    def test_success_artifact_sets_validation_passed_true(self):
+        artifact, _ = generate_artifact(VALID_EXAMPLES / "landing-page.layout.json")
+
+        self.assertTrue(artifact["validation"]["passed"])
 
     def test_layout_hash_is_stable(self):
         path = VALID_EXAMPLES / "landing-page.layout.json"
@@ -125,6 +131,39 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assertIn("width: 320px;", artifact["cssCode"])
         self.assertIn("height: 240px;", artifact["cssCode"])
 
+    def test_justify_content_is_compiled(self):
+        document = self.document_with_safe_style_subset()
+        document["layout"]["style"]["justifyContent"] = "space-between"
+
+        artifact = self.generate_from_document(document)
+
+        self.assertIn("justify-content: space-between;", artifact["cssCode"])
+
+    def test_align_items_is_compiled(self):
+        document = self.document_with_safe_style_subset()
+        document["layout"]["style"]["alignItems"] = "center"
+
+        artifact = self.generate_from_document(document)
+
+        self.assertIn("align-items: center;", artifact["cssCode"])
+
+    def test_max_width_is_compiled(self):
+        document = self.document_with_safe_style_subset()
+        document["layout"]["style"]["maxWidth"] = "640px"
+
+        artifact = self.generate_from_document(document)
+
+        self.assertIn("max-width: 640px;", artifact["cssCode"])
+
+    def test_line_height_is_compiled(self):
+        document = self.document_with_safe_style_subset()
+        text_node = document["layout"]["children"][0]["children"][0]["children"][0]
+        text_node["style"]["lineHeight"] = "1.5"
+
+        artifact = self.generate_from_document(document)
+
+        self.assertIn("line-height: 1.5;", artifact["cssCode"])
+
     def test_text_align_is_compiled(self):
         document = self.document_with_safe_style_subset()
         text_node = document["layout"]["children"][0]["children"][0]["children"][0]
@@ -153,6 +192,25 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
         self.assertNotIn("width: calc(100% - 10px);", artifact["cssCode"])
         self.assertNotIn("height: fit-content;", artifact["cssCode"])
+
+    def test_unsafe_max_width_is_skipped_and_warned(self):
+        document = self.document_with_safe_style_subset()
+        document["layout"]["style"]["maxWidth"] = "min(100%, 500px)"
+
+        artifact = self.generate_from_document(document)
+
+        self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
+        self.assertNotIn("max-width: min(100%, 500px);", artifact["cssCode"])
+
+    def test_unsafe_line_height_is_skipped_and_warned(self):
+        document = self.document_with_safe_style_subset()
+        text_node = document["layout"]["children"][0]["children"][0]["children"][0]
+        text_node["style"]["lineHeight"] = "calc(1 + 2)"
+
+        artifact = self.generate_from_document(document)
+
+        self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
+        self.assertNotIn("line-height: calc(1 + 2);", artifact["cssCode"])
 
     def test_unsafe_text_align_is_skipped_and_warned(self):
         document = self.document_with_safe_style_subset()
@@ -184,6 +242,37 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assert_warning_code(artifact, "IMAGE_SAFE_SRC_MISSING")
         self.assertNotIn("data:image", artifact["htmlCode"])
         self.assertNotIn("onload", artifact["htmlCode"].lower())
+
+    def test_failed_artifact_keeps_empty_code_fields(self):
+        artifact, exit_code = generate_artifact(INVALID_EXAMPLES / "invalid-missing-version.layout.json")
+
+        self.assertEqual(exit_code, 1)
+        self.assertFalse(artifact["validation"]["passed"])
+        self.assertEqual(artifact["htmlCode"], "")
+        self.assertEqual(artifact["cssCode"], "")
+        self.assertEqual(artifact["vueCode"], "")
+
+    def test_unsupported_node_is_recorded_without_rendering_html(self):
+        document = self.document_with_safe_style_subset()
+        unsupported = {
+            "id": "landing-unsupported-node",
+            "type": "table",
+            "role": "unsupported",
+            "bounds": {"x": 0, "y": 0, "width": 100, "height": 40},
+            "style": {},
+            "constraints": {"horizontal": "fill", "vertical": "hug"},
+            "interactions": [],
+            "children": [],
+        }
+        document["layout"]["children"].append(unsupported)
+
+        with patch("worker.layout_static_generator.node_mapping", wraps=__import__("worker.layout_static_generator", fromlist=["node_mapping"]).node_mapping):
+            html_code, _, _, warnings, unsupported_nodes = compile_document(document)
+
+        self.assertEqual(unsupported_nodes[0]["id"], "landing-unsupported-node")
+        self.assertEqual(unsupported_nodes[0]["type"], "table")
+        self.assertNotIn("landing-unsupported-node", html_code)
+        self.assertIn("UNSUPPORTED_NODE_TYPE", {warning.code for warning in warnings})
 
     def generate_from_document(self, document):
         temp_file = tempfile.NamedTemporaryFile(
@@ -218,7 +307,9 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
             "color": "#111827",
             "width": "100%",
             "height": "240px",
+            "maxWidth": "960px",
             "fontSize": "16px",
+            "lineHeight": "1.4",
             "fontWeight": "bold",
             "borderRadius": "8px",
             "padding": "16px",
