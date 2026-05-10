@@ -553,6 +553,58 @@ h2 {
   white-space: pre;
 }
 
+.image-layout-page {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+}
+
+.image-layout-page .top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.image-layout-workbench,
+.image-layout-preview-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.image-layout-form {
+  display: grid;
+  gap: 16px;
+}
+
+.image-layout-label {
+  color: #374151;
+  font-weight: 700;
+}
+
+.image-layout-select {
+  min-height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: #111827;
+}
+
+.image-layout-select:disabled {
+  background: #f3f4f6;
+}
+
+.image-layout-meta {
+  margin-top: 0;
+}
+
+.generated-page-note {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
 @media (max-width: 760px) {
   .page-shell {
     padding: 28px 16px;

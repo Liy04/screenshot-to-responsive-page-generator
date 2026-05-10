@@ -1,0 +1,90 @@
+{
+  "page": {
+    "name": "Invalid Layout Template",
+    "type": "schema-negative",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "screenshot",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {},
+  "layout": {
+    "id": "invalid-layout-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {},
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "invalid-layout-section",
+        "type": "section",
+        "role": "content",
+        "bounds": {
+          "x": 80,
+          "y": 80,
+          "width": 640,
+          "height": 280
+        },
+        "style": {},
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "invalid-layout-title",
+            "type": "text",
+            "role": "heading",
+            "content": "This template intentionally omits version",
+            "bounds": {
+              "x": 120,
+              "y": 120,
+              "width": 420,
+              "height": 40
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": []
+  },
+  "assumptions": [],
+  "warnings": [
+    {
+      "target": "invalid-layout-root",
+      "message": "This fixture is intentionally invalid for later failure tests."
+    }
+  ]
+}

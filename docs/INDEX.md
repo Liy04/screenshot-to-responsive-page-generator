@@ -10,7 +10,6 @@
 docs/
   current.md
   plan.md
-  task.md
   spec.md
   INDEX.md
   playbooks/
@@ -22,7 +21,7 @@ docs/
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/task.md`
+3. `docs/plan.md`
 4. 当前任务相关代码
 5. 必要时读取 `docs/spec.md`
 
@@ -30,21 +29,20 @@ docs/
 
 | 类型 | 路径 | 说明 |
 |---|---|---|
-| 当前阶段事实源 | `docs/current.md` | Week 06 收口状态、完成情况、允许项、禁止项 |
-| 当前计划摘要 | `docs/plan.md` | Week 06 完成情况和 Week 07 候选方向 |
-| 当前唯一任务卡 | `docs/task.md` | Week 06 已完成，等待用户确认 Week 07 方向 |
-| 当前核心规格 | `docs/spec.md` | 当前 generated-page MVP 闭环仍有效的核心契约 |
+| 当前阶段事实源 | `docs/current.md` | Week 08 已完成收口、进入下一周规划准备 |
+| 当前计划摘要 | `docs/plan.md` | Week 08 完成摘要和后续建议 |
+| 当前核心规格 | `docs/spec.md` | 当前 generated-page MVP 闭环与 Week 08 mock 协议核心契约 |
 | context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
 | 历史归档 | `docs/archive/` | 历史计划、任务卡、规格、提示词和参考文档 |
 
-## Week 06 归档
+## Week 08 归档
 
 | 类型 | 路径 |
 |---|---|
-| Week 06 原始计划 | `docs/archive/week/06-plan.md` |
-| Week 06 smoke 文档 | `docs/archive/week/06-dev-smoke.md` |
-| Week 06 实践报告素材 | `docs/archive/week/06-report-material.md` |
-| Week 06 总结 | `docs/archive/week/06-summary.md` |
+| Week 08 原始计划 | `docs/archive/week/08-plan.md` |
+| Week 08 summary | `docs/archive/week/08-summary.md` |
+| Week 08 smoke | `docs/archive/week/08-dev-smoke.md` |
+| Week 08 report material | `docs/archive/week/08-report-material.md` |
 
 ## 归档说明
 
@@ -55,9 +53,15 @@ docs/
 - `docs/archive/lite-refactor/`
 - `docs/archive/reference/`
 
-早期周文档、旧任务卡、旧规格副本、旧提示词、Week 05 原始计划、Week 05 smoke、Week 05 总结归档、Week 06 原始计划、Week 06 smoke、Week 06 报告素材以及 Week 06 总结归档仍保留在已有归档目录中。
+早期周文档、旧任务卡、旧规格副本、旧提示词、Week 05 原始计划、Week 05 smoke、Week 05 总结归档、Week 06 原始计划、Week 06 smoke、Week 06 报告素材、Week 06 总结归档，以及 Week 07 原始计划仍保留在已有归档目录中。
+
+旧日任务卡单独归档为：`docs/archive/task-old.md`。
+
+Week 08 已完成收口后，summary、smoke 和 report material 已归档到 `docs/archive/week/`。
 
 周计划、smoke 文档和总结在完成拆分或收口后应归档到 `docs/archive/week/`，不要长期留在 `docs/` 根目录。
+
+`docs/tasks/day-*.md` 已在 Week 08 收口后清理，`docs/tasks/` 仅保留空目录，等待后续新周再生成新的日任务卡。
 
 ## 路径优先级
 
@@ -65,8 +69,8 @@ docs/
 
 1. `docs/current.md`
 2. `docs/plan.md`
-3. `docs/task.md`
-4. `docs/spec.md`
-5. `docs/playbooks/context-scout.md`
+3. `docs/spec.md`
+4. `docs/playbooks/context-scout.md`
+5. `docs/archive/week/` 中的归档文档（回看或验收时使用）
 
 历史归档中的旧路径允许保留，用于追溯当时上下文。

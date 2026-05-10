@@ -1,0 +1,160 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Landing Basic Template",
+    "type": "marketing",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "screenshot",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {
+    "colors": {},
+    "typography": {},
+    "spacing": {},
+    "radius": {}
+  },
+  "layout": {
+    "id": "landing-basic-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {},
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "landing-basic-hero",
+        "type": "section",
+        "role": "hero",
+        "bounds": {
+          "x": 80,
+          "y": 72,
+          "width": 1280,
+          "height": 420
+        },
+        "style": {},
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "landing-basic-content",
+            "type": "container",
+            "role": "contentGroup",
+            "bounds": {
+              "x": 120,
+              "y": 120,
+              "width": 540,
+              "height": 240
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "hug",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "landing-basic-title",
+                "type": "text",
+                "role": "heading",
+                "content": "Mock landing page from image template",
+                "bounds": {
+                  "x": 120,
+                  "y": 120,
+                  "width": 480,
+                  "height": 72
+                },
+                "style": {},
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              },
+              {
+                "id": "landing-basic-cta",
+                "type": "button",
+                "role": "primaryAction",
+                "content": "Preview layout JSON",
+                "bounds": {
+                  "x": 120,
+                  "y": 220,
+                  "width": 220,
+                  "height": 48
+                },
+                "style": {},
+                "constraints": {
+                  "horizontal": "hug",
+                  "vertical": "fixed"
+                },
+                "interactions": [],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "landing-basic-image",
+            "type": "image",
+            "role": "heroVisual",
+            "src": null,
+            "assetId": "landing-basic-image-asset",
+            "bounds": {
+              "x": 760,
+              "y": 120,
+              "width": 440,
+              "height": 280
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "fixed",
+              "vertical": "fixed"
+            },
+            "interactions": [],
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "landing-basic-image-asset",
+      "type": "image",
+      "status": "placeholder"
+    }
+  ],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "landing-basic-hero",
+        "mode": "stackOnMobile"
+      }
+    ]
+  },
+  "assumptions": [],
+  "warnings": []
+}

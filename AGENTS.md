@@ -34,7 +34,7 @@
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/task.md`
+3. `docs/tasks/day-xx.md`
 4. 当前任务相关代码
 5. 必要时读取 `docs/spec.md`
 
@@ -46,7 +46,7 @@
 
 - 当前阶段事实源：`docs/current.md`
 - 当前计划摘要：`docs/plan.md`
-- 当前唯一任务卡：`docs/task.md`
+- 当前日任务卡：`docs/tasks/day-xx.md`
 - 当前核心规格：`docs/spec.md`
 - 文档索引：`docs/INDEX.md`
 - context-scout 流程：`docs/playbooks/context-scout.md`
@@ -60,7 +60,7 @@
 
 1. 阅读 `AGENTS.md`。
 2. 阅读 `docs/current.md`。
-3. 阅读 `docs/task.md`。
+3. 阅读 `docs/tasks/day-xx.md`。
 4. 根据任务卡读取相关模块代码和必要规格。
 5. 先输出计划，等待用户确认后再编码或执行复杂修改。
 6. 只修改与当前任务直接相关的文件。
@@ -92,6 +92,13 @@
 - Worker / 校验器线程：只处理 worker 脚本、校验器和 worker 测试。
 - 项目经理线程：负责拆任务、控范围、验收、风险判断和最终收口。
 
+## 项目经理边界
+
+项目经理负责统筹、拆任务、验收、风险判断和提交前检查。
+中大型文档、开发、测试任务必须下发给对应线程，不直接由项目经理线程代做。
+项目经理只能直接处理小型文案修正、路径修正、删除临时文件和轻量验收修正。
+不确定是否属于小改动时，默认下发给对应线程。
+
 如果计划同时包含测试和文档、后端和前端、Worker 和后端、功能开发和收口验收，必须拆成 A / B / C 多条任务，并明确执行顺序。
 
 ## 开发约束
@@ -122,7 +129,7 @@ Codex 必须遵守以下约束：
 
 - 当前阶段口径更新到 `docs/current.md`
 - 当前计划摘要更新到 `docs/plan.md`
-- 当前任务更新到 `docs/task.md`
+- 当前任务更新到 `docs/tasks/day-xx.md`
 - 当前核心规格更新到 `docs/spec.md`
 - 文档入口更新到 `docs/INDEX.md`
 - 历史内容归档到 `docs/archive/`
@@ -152,7 +159,7 @@ context-scout 是大任务上下文压缩 / 侦察流程，不是所有任务的
 - 大任务、跨模块任务、阶段边界不清或敏感边界任务，如果策略判断需要 context-scout，可直接运行 context-scout。
 - 运行后必须读取并验收 context-pack；验收通过后才能继续计划、拆任务、编码或测试。
 - 验收不通过必须停止并说明原因。
-- context-pack 只是临时侦察材料，不能覆盖 `AGENTS.md`、`docs/current.md`、`docs/task.md` 和 `docs/spec.md`。
+- context-pack 只是临时侦察材料，不能覆盖 `AGENTS.md`、`docs/current.md`、`docs/tasks/day-xx.md` 和 `docs/spec.md`。
 
 ## 完成定义
 

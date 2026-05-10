@@ -3,6 +3,7 @@ import Dashboard from '../views/Dashboard.vue'
 import GenerationCreate from '../views/GenerationCreate.vue'
 import GenerationDetail from '../views/GenerationDetail.vue'
 import GeneratedPagePreviewDev from '../views/GeneratedPagePreviewDev.vue'
+import ImageToLayoutDev from '../views/ImageToLayoutDev.vue'
 import LayoutJsonViewer from '../views/LayoutJsonViewer.vue'
 
 const routes = [
@@ -36,6 +37,11 @@ const routes = [
     name: 'generated-page-preview-dev',
     component: GeneratedPagePreviewDev,
     props: true,
+  },
+  {
+    path: '/dev/image-to-layout',
+    name: 'image-to-layout-dev',
+    component: ImageToLayoutDev,
   },
   {
     path: '/generation/:jobId',

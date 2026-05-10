@@ -1,0 +1,191 @@
+{
+  "version": "0.1",
+  "page": {
+    "name": "Card List Template",
+    "type": "dashboard",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "source": {
+    "type": "screenshot",
+    "fileUrl": null,
+    "figmaFileKey": null,
+    "figmaNodeId": null
+  },
+  "tokens": {
+    "colors": {},
+    "typography": {},
+    "spacing": {},
+    "radius": {}
+  },
+  "layout": {
+    "id": "card-list-root",
+    "type": "page",
+    "role": "page",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "style": {},
+    "constraints": {
+      "horizontal": "fill",
+      "vertical": "fill"
+    },
+    "interactions": [],
+    "children": [
+      {
+        "id": "card-list-main",
+        "type": "section",
+        "role": "mainContent",
+        "bounds": {
+          "x": 80,
+          "y": 80,
+          "width": 1080,
+          "height": 560
+        },
+        "style": {},
+        "constraints": {
+          "horizontal": "fill",
+          "vertical": "hug"
+        },
+        "interactions": [],
+        "children": [
+          {
+            "id": "card-list-summary-card",
+            "type": "card",
+            "role": "summaryCard",
+            "bounds": {
+              "x": 80,
+              "y": 80,
+              "width": 360,
+              "height": 220
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "fixed",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "card-list-summary-title",
+                "type": "text",
+                "role": "heading",
+                "content": "Template summary",
+                "bounds": {
+                  "x": 112,
+                  "y": 120,
+                  "width": 220,
+                  "height": 32
+                },
+                "style": {},
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": []
+              },
+              {
+                "id": "card-list-summary-button",
+                "type": "button",
+                "role": "secondaryAction",
+                "content": "Open details",
+                "bounds": {
+                  "x": 112,
+                  "y": 176,
+                  "width": 160,
+                  "height": 44
+                },
+                "style": {},
+                "constraints": {
+                  "horizontal": "hug",
+                  "vertical": "fixed"
+                },
+                "interactions": [],
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "card-list-items",
+            "type": "list",
+            "role": "itemList",
+            "bounds": {
+              "x": 480,
+              "y": 80,
+              "width": 520,
+              "height": 260
+            },
+            "style": {},
+            "constraints": {
+              "horizontal": "fill",
+              "vertical": "hug"
+            },
+            "interactions": [],
+            "children": [
+              {
+                "id": "card-list-item-1",
+                "type": "listItem",
+                "role": "item",
+                "bounds": {
+                  "x": 500,
+                  "y": 104,
+                  "width": 480,
+                  "height": 56
+                },
+                "style": {},
+                "constraints": {
+                  "horizontal": "fill",
+                  "vertical": "hug"
+                },
+                "interactions": [],
+                "children": [
+                  {
+                    "id": "card-list-item-1-label",
+                    "type": "text",
+                    "role": "label",
+                    "content": "Mock card-list item",
+                    "bounds": {
+                      "x": 520,
+                      "y": 120,
+                      "width": 240,
+                      "height": 24
+                    },
+                    "style": {},
+                    "constraints": {
+                      "horizontal": "fill",
+                      "vertical": "hug"
+                    },
+                    "interactions": [],
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "responsive": {
+    "breakpoints": {
+      "mobile": 390,
+      "tablet": 768,
+      "desktop": 1440
+    },
+    "rules": [
+      {
+        "target": "card-list-main",
+        "mode": "singleColumnOnTablet"
+      }
+    ]
+  },
+  "assumptions": [],
+  "warnings": []
+}

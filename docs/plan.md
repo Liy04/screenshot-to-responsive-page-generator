@@ -1,35 +1,14 @@
 # Plan
 
-## Week 06 名称
+## Week 08 名称
 
-Generated Page 回归稳定性与演示验收增强（已完成）。
+图片输入场景与 image-page mock 链路验证。
 
 ## 本周目标
 
-Week 06 的目标是围绕已完成的 generated-page 闭环，继续增强稳定性、测试覆盖和演示能力，让项目更好验收、更好复现、更好写进实践报告。
+Week 08 的目标是把 Week 07 的 image-to-layout mock 链路推进到 image-page mock 链路，形成“本地图片选择 -> imageName + templateKey -> POST /api/dev/image-page-jobs -> layoutArtifact -> generatedPageArtifact -> iframe sandbox="" 安全预览”的最小闭环。
 
-Week 06 已完成收口，不扩大到真实 AI、Figma 或数据库。
-
-## 本周完成情况
-
-| Day | 线程 | 目标 | 状态 |
-|---|---|---|---|
-| Day 1 | 文档线程 | 文档计划与任务边界 | 完成 |
-| Day 2 | 前端线程 | 前端 preview 基础测试 | 完成 |
-| Day 3 | Worker 线程 | Worker 小范围增强 | 完成 |
-| Day 4 | Worker 测试线程 | Worker 回归测试 | 完成 |
-| Day 5 | 后端测试线程 | 后端 artifact 边界测试 | 完成 |
-| Day 6 | 文档线程 | smoke 文档与实践报告素材 | 完成 |
-| Day 7 | 文档 / 总结线程 | 总体验收、归档、提交 | 完成 |
-
-## Week 06 验收结果
-
-- Worker unittest 通过，35 tests OK。
-- 后端 `mvn test` 通过，10 tests OK。
-- 前端 `npm run test` 通过，4 tests OK。
-- 前端 `npm run build` 通过。
-- Week 06 smoke 文档和实践报告素材已归档。
-- 未接真实 AI、Figma、MySQL、Redis / RabbitMQ。
+Week 08 已完成收口，当前计划页仅保留结果摘要和下一周建议，不再作为正在执行中的开发计划。
 
 ## 本周不做
 
@@ -42,29 +21,51 @@ Week 06 已完成收口，不扩大到真实 AI、Figma 或数据库。
 - 不做 ZIP 导出。
 - 不做拖拽编辑器 / 在线编辑器。
 - 不做真实截图解析。
-- 不做登录注册 / 复杂权限。
+- 不上传真实图片到后端。
+- 不让后端调用 Python Worker。
 - 不做 Playwright 视觉回归，除非用户明确批准。
-- 不做复杂响应式布局算法。
-- 不做 Tailwind 代码生成。
-- 不做 Vue SFC 可运行化。
 
-## Week 07 候选方向
+## 每日完成情况
 
-1. 图片输入到 Layout JSON 的 mock / 半自动链路。
-2. 继续增强前端演示体验和测试覆盖。
-3. 继续增强 Worker 节点和安全 style subset。
-4. 如用户明确批准，再规划 MySQL 持久化。
-5. 整理实践报告中的系统实现和测试章节。
+| Day | 线程 | 结果 |
+|---|---|---|
+| Day 1 | 文档线程 | 已完成：定义 image-page mock API 契约、归档长计划、生成 day-01 到 day-07 任务卡 |
+| Day 2 | 后端开发线程 | 已完成：实现 `POST /api/dev/image-page-jobs` 和 `GET /api/dev/image-page-jobs/{jobId}` |
+| Day 3 | 后端测试线程 | 已完成：补 image-page API 自动化测试 |
+| Day 4 | 前端开发线程 | 已完成：增强 `/dev/image-to-layout` 页面，展示 layoutArtifact 和 generatedPageArtifact |
+| Day 5 | 前端测试线程 | 已完成：补页面、API 和 iframe 安全测试 |
+| Day 6 | 测试线程 | 已完成：执行 Worker + Backend + Frontend 联调 smoke |
+| Day 7 | 文档线程 | 已完成：归档 Week 08 summary / smoke / report material，清理 day 卡 |
+
+## Week 08 完成摘要
+
+### 完成内容
+
+- image-page mock API 已落地。
+- image-page API 测试已完成。
+- `/dev/image-to-layout` 页面已能展示 generatedPageArtifact。
+- 前端测试已完成。
+- 联调 smoke 已完成。
+- Week 08 summary、smoke、report material 已归档。
+
+### 收口口径
+
+- `docs/tasks/day-*.md` 已清理。
+- `docs/tasks/` 仅保留空目录。
+- `docs/archive/week/08-plan.md` 保留为完整原始计划。
 
 ## 当前约定
 
 - Worker 测试命令使用 `unittest`。
-- Windows 上传命令优先使用 `curl.exe`。
-- 前端日常 smoke 使用 `npm run dev`。
-- 后端默认启动方式使用 `java -jar`。
-- Week 06 原始长计划已归档到 `docs/archive/week/06-plan.md`。
-- Week 06 smoke 文档已归档到 `docs/archive/week/06-dev-smoke.md`。
-- Week 06 实践报告素材已归档到 `docs/archive/week/06-report-material.md`。
-- 周任务执行完后，应将阶段计划、smoke 文档和总结移动到 `docs/archive/week/`，保持 `docs/` 根目录轻量。
+- 后端测试命令使用 `mvn test`。
+- 前端测试命令使用 `npm run test`。
+- 前端构建命令使用 `npm run build`。
+- 后端默认启动优先使用 jar。
+- Windows 上传 artifact 优先使用 `curl.exe`。
+- `docs/archive/week/08-plan.md` 已保存 Week 08 原始计划，日常不作为默认上下文。
 
-当前唯一任务卡见 `docs/task.md`。
+## 后续建议
+
+- Week 09 可以优先考虑统一 Java mock 与 Python fixture 的协议来源。
+- 如果要继续扩展能力，建议先补清更清晰的场景边界，再决定是否进入真实数据链路。
+- 真实 AI、Figma、MySQL、Redis / RabbitMQ 仍建议单独拆任务，不要和当前 mock 链路混做。

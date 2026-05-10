@@ -2,7 +2,7 @@
 
 ## 文件目的
 
-本文档记录当前 generated-page MVP 闭环仍有效的核心契约，供 Worker 静态编译器、后端 mock 保存和前端安全预览共用。
+本文档记录当前 generated-page MVP 闭环仍有效的核心契约，并补充 Week 07 / Week 08 mock 协议，供 Worker、后端 mock 和前端预览共用。
 
 当前“生成”始终指确定性静态编译，不是真实 AI 生成。
 
@@ -398,3 +398,187 @@ objectFit
 - 不接 MySQL。
 - 不创建数据库表。
 - 不创建 Entity / Mapper。
+
+## Week 07：image-to-layout mock 协议
+
+Week 07 目标是把“本地图片选择 -> templateKey -> mock Layout JSON”这条链路定义清楚，但仍不接真实 AI、不接真实图片上传、不让后端调用 Python Worker。
+
+### 协议目标
+
+- 前端只负责本地选择图片并显示浏览器本地预览。
+- 后端只接收 `imageName` 和 `templateKey`。
+- Worker 的 `image_layout_resolver.py` 只作为离线 / 本地 mock resolver。
+- 后端 Week 07 不调用 Python Worker，使用 Java 侧 mock 模板或固定 mock 数据返回。
+
+### 支持的 templateKey
+
+Week 07 至少建议支持以下模板键：
+
+- `landing-basic`
+- `card-list`
+- `invalid-layout`
+
+可选再补：
+
+- `dashboard-simple`
+
+### 请求接口
+
+```text
+POST /api/dev/image-layout-jobs
+GET  /api/dev/image-layout-jobs/{jobId}
+```
+
+### 成功响应包装
+
+后端响应必须使用现有 `ApiResponse` 包装。成功示例：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "jobId": "img-layout-001",
+    "status": "SUCCESS",
+    "sourceType": "IMAGE_TEMPLATE_MOCK",
+    "imageName": "demo-home.png",
+    "templateKey": "landing-basic",
+    "layoutArtifact": {
+      "status": "SUCCESS",
+      "layoutJson": {
+        "version": "0.1",
+        "page": {},
+        "source": {},
+        "tokens": {},
+        "layout": {},
+        "assets": [],
+        "responsive": {},
+        "assumptions": [],
+        "warnings": []
+      }
+    },
+    "errors": [],
+    "warnings": []
+  }
+}
+```
+
+### 错误响应包装
+
+请求参数错误时返回 400，示例：
+
+```json
+{
+  "code": 400,
+  "message": "Unknown templateKey: unknown-template",
+  "data": null
+}
+```
+
+### Layout JSON 结构要求
+
+- Week 07 返回的 `layoutJson` 必须继续使用当前 v0.1 结构。
+- 根节点字段必须是 `layout`，不能改成 `root`。
+- 至少应包含当前 v0.1 必需顶层字段：`version`、`page`、`source`、`tokens`、`layout`、`assets`、`responsive`、`assumptions`、`warnings`。
+
+### templateKey 口径
+
+- `unknown templateKey` 属于请求参数错误，后端返回 400。
+- `invalid-layout` 是已知测试模板，用于返回失败状态或错误展示。
+- `invalid-layout` 不等同于 `unknown templateKey`，不要把它写成 400 和 FAILED 两种互相冲突的口径。
+- 不要在同一计划里同时写 `unknown templateKey` 既可 FAILED 又可 400。
+- `invalid-layout` 的返回仍然可以包在 `ApiResponse` 的 200 响应里，`data.status` 为 `FAILED`，`layoutArtifact.status` 也为 `FAILED`。
+
+### Worker / Backend 职责边界
+
+- `worker/image_layout_resolver.py` 只做 templateKey 到 Layout JSON fixture 的离线解析。
+- 后端 Week 07 不调用 Python Worker。
+- 后端 dev mock API 使用 Java 侧 mock 模板或固定 mock 数据返回。
+- 两边通过相同 templateKey 和文档协议保持一致。
+
+### 兼容性要求
+
+- 不接真实 AI。
+- 不接 Figma。
+- 不接 MySQL。
+- 不创建 Entity / Mapper。
+- 不接 Redis / RabbitMQ。
+- 不做真实图片上传到后端。
+- 不做 ZIP 导出。
+- 不做拖拽编辑器。
+- 不做真实截图解析。
+
+## Week 08：image-page mock 协议
+
+Week 08 目标是把 Week 07 的 image-to-layout mock 链路推进到 image-page mock 链路，但仍只做 mock / 本地验证，不接真实 AI、不接 Figma、不接 MySQL。
+
+### 协议目标
+
+- 前端只负责本地选择图片、浏览器本地预览和选择 `templateKey`。
+- 后端只接收 `imageName` 和 `templateKey`，不接真实图片文件。
+- 后端使用 Java 侧 mock，不调用 Python Worker。
+- `layoutArtifact` 和 `generatedPageArtifact` 一起返回，供前端展示和预览。
+- 后端响应继续使用现有 `ApiResponse` 包装，`unknown templateKey` 返回 `code=400`，不存在 `jobId` 返回 `code=404`。
+
+### 请求接口
+
+```text
+POST /api/dev/image-page-jobs
+GET  /api/dev/image-page-jobs/{jobId}
+```
+
+### 请求体
+
+```json
+{
+  "imageName": "string",
+  "templateKey": "string"
+}
+```
+
+### 成功响应字段
+
+| 字段 | 说明 |
+|---|---|
+| `jobId` | mock job id |
+| `status` | `SUCCESS` 或 `FAILED` |
+| `sourceType` | 固定 `IMAGE_TEMPLATE_MOCK` |
+| `imageName` | 请求中的图片名 |
+| `templateKey` | 请求中的模板键 |
+| `layoutArtifact` | Layout JSON mock 结果 |
+| `generatedPageArtifact` | generated-page mock 结果 |
+| `errors` | 错误列表 |
+| `warnings` | 警告列表 |
+
+### layoutArtifact 口径
+
+- `layoutArtifact.status=SUCCESS` 时应包含可用 `layoutJson`。
+- `layoutArtifact.status=FAILED` 时应包含失败原因或错误信息。
+- `layoutJson` 继续使用当前 v0.1 结构，根节点字段必须是 `layout`。
+
+### generatedPageArtifact 口径
+
+- `generatedPageArtifact` 至少应包含 `status`、`htmlCode`、`cssCode`、`vueCode`。
+- `SUCCESS` 时 `generatedPageArtifact` 不为空，并应展示给前端。
+- `FAILED` 时 `generatedPageArtifact` 为空、`null` 或不返回。
+- `generatedPageArtifact` 仍然必须遵守当前 HTML 安全规则。
+
+### 状态与错误口径
+
+- `landing-basic` 和 `card-list` 返回 `200 + SUCCESS`。
+- `invalid-layout` 返回 `200 + FAILED`。
+- `unknown templateKey` 返回 HTTP 400，并且 `ApiResponse.code=400`。
+- 不存在 `jobId` 返回 HTTP 404，并且 `ApiResponse.code=404`。
+
+### 安全规则
+
+- `generatedPageArtifact` 不包含 `script`。
+- 不包含 `onclick`、`onerror`、`onload`、`javascript:`。
+- 前端 iframe 必须使用 `sandbox=""`。
+- iframe 不允许 `allow-scripts`。
+
+### 职责边界
+
+- Backend 使用 Java 侧 mock，不调用 Python Worker。
+- Worker 仍保留现有 resolver / validator / static generator。
+- Frontend 只上传 `imageName` + `templateKey`，不上传真实图片文件。
