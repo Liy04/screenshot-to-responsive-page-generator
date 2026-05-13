@@ -10,9 +10,17 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  srcdocHtml: {
+    type: String,
+    default: '',
+  },
 })
 
 const previewSrcdoc = computed(() => {
+  if (props.srcdocHtml) {
+    return props.srcdocHtml
+  }
+
   return `<style>${props.cssCode || ''}</style>\n${props.htmlCode || ''}`
 })
 </script>

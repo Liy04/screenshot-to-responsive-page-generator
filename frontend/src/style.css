@@ -116,9 +116,21 @@ h2 {
   padding: 12px 20px;
 }
 
+.secondary-button {
+  background: #ffffff;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+}
+
 .primary-button:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+}
+
+.secondary-button:disabled {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #9ca3af;
 }
 
 .info-grid {
@@ -603,6 +615,22 @@ h2 {
   margin: 0;
   color: #4b5563;
   line-height: 1.6;
+}
+
+.source-image-preview {
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.source-image-preview img {
+  display: block;
+  width: 100%;
+  max-height: 560px;
+  object-fit: contain;
+  background: #ffffff;
 }
 
 @media (max-width: 760px) {

@@ -88,6 +88,7 @@ SAFE_ALIGN_VALUES = {
     "stretch",
     "baseline",
 }
+FORBIDDEN_HTML_SNIPPETS = ("<script", "onclick=", "onload=", "onerror=", "<iframe", "<object", "<embed", "javascript:")
 
 
 def message_to_dict(message: ValidationMessage) -> dict[str, str]:
@@ -198,6 +199,15 @@ def compile_document(document: dict[str, Any]) -> tuple[str, str, str, list[Vali
     css_code = "\n\n".join(css_blocks)
     vue_code = make_vue_text(html_code, css_code)
     return html_code, css_code, vue_code, warnings, unsupported_nodes
+
+
+def compile_preview_document(
+    document: dict[str, Any],
+) -> tuple[str, list[ValidationMessage], list[dict[str, str]], str, str]:
+    html_code, css_code, _, warnings, unsupported_nodes = compile_document(document)
+    page_name = document.get("page", {}).get("name", "Generated Preview")
+    preview_html = build_preview_html(html_code, css_code, str(page_name))
+    return preview_html, warnings, unsupported_nodes, html_code, css_code
 
 
 def compile_node(
@@ -437,6 +447,35 @@ def base_css_blocks() -> list[str]:
             ]
         ),
     ]
+
+
+def build_preview_html(html_code: str, css_code: str, page_title: str = "Generated Preview") -> str:
+    preview_html = "\n".join(
+        [
+            "<!doctype html>",
+            '<html lang="en">',
+            "<head>",
+            '  <meta charset="utf-8" />',
+            '  <meta name="viewport" content="width=device-width, initial-scale=1" />',
+            f"  <title>{html.escape(page_title, quote=False)}</title>",
+            "  <style>",
+            css_code,
+            "  </style>",
+            "</head>",
+            "<body>",
+            html_code,
+            "</body>",
+            "</html>",
+        ]
+    )
+    return enforce_preview_html_safety(preview_html)
+
+
+def enforce_preview_html_safety(preview_html: str) -> str:
+    lowered = preview_html.lower()
+    if any(snippet in lowered for snippet in FORBIDDEN_HTML_SNIPPETS):
+        raise ValueError("Generated preview HTML contains forbidden content")
+    return preview_html
 
 
 def make_vue_text(html_code: str, css_code: str) -> str:

@@ -2,7 +2,7 @@
 
 ## 文件目的
 
-本文档记录当前 generated-page MVP 闭环仍有效的核心契约，并补充 Week 07 / Week 08 mock 协议，供 Worker、后端 mock 和前端预览共用。
+本文档记录当前 generated-page MVP 闭环仍有效的核心契约，并补充 Week 07 / Week 08 mock 协议与 Week 09 真实 AI 最小接入契约，供 Worker、后端 mock / 真实链路和前端预览共用。
 
 当前“生成”始终指确定性静态编译，不是真实 AI 生成。
 
@@ -582,3 +582,94 @@ GET  /api/dev/image-page-jobs/{jobId}
 - Backend 使用 Java 侧 mock，不调用 Python Worker。
 - Worker 仍保留现有 resolver / validator / static generator。
 - Frontend 只上传 `imageName` + `templateKey`，不上传真实图片文件。
+
+## Week 09：真实 AI 最小接入契约
+
+Week 09 在不推翻现有 generated-page / Week 07 / Week 08 契约的前提下，增加真实单图链路的最小协议。
+
+### 真实链路接口
+
+```text
+POST /api/image-page/upload
+GET /api/image-page/jobs/{jobId}/source
+POST /api/image-page/jobs/{jobId}/generate
+```
+
+### 迁移口径
+
+- Week 09 新真实链路接口是新增实现。
+- Week 08 `/api/dev/image-page-jobs*` 先保留，用于回退和对照。
+- 不要求 Day 2 / Day 6 直接删除旧 dev mock 接口。
+
+### 输入边界
+
+- 只支持单张图片。
+- 只支持 `png` / `jpg` / `jpeg` / `webp`。
+- 文件最大 5MB。
+- 不支持多文件、`zip`、`pdf`、`gif`、`svg`。
+
+### Worker 主链路
+
+```text
+单张真实图片
+-> 后端保存临时文件
+-> 后端生成 jobId
+-> 后端调用 Python Worker
+-> Worker 读取真实图片
+-> Worker 调真实 AI
+-> AI 输出先映射为当前 Layout JSON v0.1
+-> validator 校验
+-> 校验失败轻量修正或 fallback
+-> compiler 输出 generated.html
+-> 后端返回 layoutJson + previewHtml
+-> 前端展示原图、Layout JSON 和 iframe 预览
+```
+
+### Layout JSON 口径
+
+- Week 09 继续沿用当前 Layout JSON v0.1 主结构。
+- AI 如果存在简化输出，只能作为 Worker 内部中间态。
+- 对外契约仍然是当前 v0.1，根节点字段仍是 `layout`。
+
+### 安全规则
+
+- 模型原始输出不能直接给前端。
+- 不能让模型直接输出 HTML 给前端使用。
+- generated.html 禁止 `script`、`onload`、`onerror`、`onclick`、`iframe`、`object`、`embed`。
+- 所有文本要 HTML escape。
+- iframe 必须 `sandbox=""`。
+- 不允许 `allow-scripts`。
+- 不返回后端本地 `imagePath` 给前端。
+- `jobId` 必须防路径穿越。
+
+### fallback 规则
+
+- AI 失败可 fallback。
+- validator 失败可 fallback。
+- fallback 仍必须产出当前 v0.1 合法 Layout JSON。
+
+### generated-page 输出
+
+- Week 09 后端最终返回的结果以 `layoutJson + previewHtml` 为主。
+- `previewHtml` 仍只用于 iframe 静态预览，不要求可编辑。
+
+### 运行配置要求
+
+- `OPENAI_BASE_URL` 必须通过环境变量提供；当前已验证可用供应商入口是 `https://api.siliconflow.cn/v1`。
+- `OPENAI_MODEL` 必须通过环境变量提供；当前已验证命中模型是 `Qwen/Qwen3-VL-32B-Instruct`。
+- `OPENAI_API_KEY` 只允许通过环境变量提供，不写入仓库、不写入文档真实值。
+- `IMAGEPAGE_WORKER_PYTHON_COMMAND` 必须指向可用的 Python 3.11+ 解释器；当前已验证路径是 `D:\\environment\\python11\\python.exe`。
+- Python 3.11+ 推荐；当前已验证版本是 `Python 3.11.9`。
+- `imagepage.worker.timeout-seconds` 建议使用 `120`；默认 30 秒不适合真实多模态调用。
+
+PowerShell 示例：
+
+```powershell
+$env:OPENAI_BASE_URL="https://api.siliconflow.cn/v1"
+$env:OPENAI_MODEL="Qwen/Qwen3-VL-32B-Instruct"
+$env:OPENAI_API_KEY="<your-api-key>"
+$env:IMAGEPAGE_WORKER_PYTHON_COMMAND="D:\environment\python11\python.exe"
+
+cd backend
+java -jar target/backend-0.0.1-SNAPSHOT.jar --imagepage.worker.timeout-seconds=120
+```

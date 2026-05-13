@@ -1,98 +1,106 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { createImagePageJob } from '../api/imageLayoutApi'
+import { generateImagePage, uploadImagePageSource } from '../api/imageLayoutApi'
 import CodeBlock from '../components/CodeBlock.vue'
 import GeneratedPagePreview from '../components/generated/GeneratedPagePreview.vue'
 import ImageUploader from '../components/ImageUploader.vue'
 import StatusTag from '../components/StatusTag.vue'
 import JsonPanel from '../components/layout/JsonPanel.vue'
 
-const TEMPLATE_OPTIONS = [
-  { label: 'landing-basic', value: 'landing-basic' },
-  { label: 'card-list', value: 'card-list' },
-  { label: 'invalid-layout', value: 'invalid-layout' },
-]
-
 const selectedFile = ref(null)
-const templateKey = ref(TEMPLATE_OPTIONS[0].value)
-const result = ref(null)
-const errorMessage = ref('')
-const isLoading = ref(false)
-const hasSubmitted = ref(false)
+const uploadedSource = ref(null)
+const generateResult = ref(null)
+const uploadStage = ref('idle')
+const generateStage = ref('idle')
+const uploadErrorMessage = ref('')
+const generateErrorMessage = ref('')
 
-const pageState = computed(() => {
-  if (isLoading.value) {
-    return 'loading'
-  }
-
-  if (errorMessage.value) {
-    return 'error'
-  }
-
-  if (!result.value) {
-    return hasSubmitted.value ? 'empty' : 'empty'
-  }
-
-  if (
-    result.value.status === 'FAILED'
-    || result.value.generatedPageArtifact?.status === 'FAILED'
-    || (
-      result.value.status === 'SUCCESS'
-      && !result.value.generatedPageArtifact
-    )
-  ) {
-    return 'failed'
-  }
-
-  if (
-    result.value.status === 'SUCCESS'
-    && result.value.generatedPageArtifact?.status === 'SUCCESS'
-  ) {
-    return 'success'
-  }
-
-  return 'empty'
+const layoutJson = computed(() => generateResult.value?.layoutJson || null)
+const previewHtml = computed(() => generateResult.value?.previewHtml || '')
+const validationErrors = computed(() => generateResult.value?.validation?.errors || [])
+const validationWarnings = computed(() => generateResult.value?.validation?.warnings || [])
+const sourcePreviewUrl = computed(() => uploadedSource.value?.sourceUrl || '')
+const canUpload = computed(() => {
+  return !!selectedFile.value && uploadStage.value !== 'uploading' && generateStage.value !== 'generating'
 })
-
-const layoutArtifact = computed(() => result.value?.layoutArtifact || null)
-const generatedPageArtifact = computed(() => result.value?.generatedPageArtifact || null)
-const validationErrors = computed(() => result.value?.errors || [])
-const validationWarnings = computed(() => result.value?.warnings || [])
-const generatedPageStatus = computed(() => generatedPageArtifact.value?.status || '')
+const canGenerate = computed(() => {
+  return !!uploadedSource.value?.jobId && generateStage.value !== 'generating'
+})
+const showPreviewIframe = computed(() => {
+  return generateStage.value === 'success' && !!previewHtml.value
+})
+const displaySourceType = computed(() => {
+  return generateResult.value?.sourceType || uploadedSource.value?.sourceType || ''
+})
+const displayAiUsed = computed(() => {
+  const value = generateResult.value?.aiUsed
+  return value === undefined || value === null ? '-' : String(value)
+})
 
 function handleFileChange(file) {
   selectedFile.value = file
-  errorMessage.value = ''
+  uploadedSource.value = null
+  generateResult.value = null
+  uploadStage.value = 'idle'
+  generateStage.value = 'idle'
+  uploadErrorMessage.value = ''
+  generateErrorMessage.value = ''
 }
 
 function handleFileError(message) {
   selectedFile.value = null
-  errorMessage.value = message
+  uploadedSource.value = null
+  generateResult.value = null
+  uploadStage.value = 'upload-error'
+  generateStage.value = 'idle'
+  uploadErrorMessage.value = message
+  generateErrorMessage.value = ''
 }
 
-async function handleSubmit() {
+async function handleUpload() {
   if (!selectedFile.value) {
-    errorMessage.value = '请先选择一张本地图片'
-    hasSubmitted.value = true
-    result.value = null
+    uploadStage.value = 'upload-error'
+    uploadErrorMessage.value = '请先选择一张本地图片'
     return
   }
 
-  isLoading.value = true
-  errorMessage.value = ''
-  result.value = null
-  hasSubmitted.value = true
+  uploadStage.value = 'uploading'
+  uploadErrorMessage.value = ''
+  generateErrorMessage.value = ''
+  uploadedSource.value = null
+  generateResult.value = null
+  generateStage.value = 'idle'
 
   try {
-    result.value = await createImagePageJob({
-      imageName: selectedFile.value.name,
-      templateKey: templateKey.value,
-    })
+    uploadedSource.value = await uploadImagePageSource(selectedFile.value)
+    uploadStage.value = 'uploaded'
   } catch (error) {
-    errorMessage.value = error.message || '创建 image-page mock job 失败'
-  } finally {
-    isLoading.value = false
+    uploadStage.value = 'upload-error'
+    uploadErrorMessage.value = error.message || '上传图片失败'
+  }
+}
+
+async function handleGenerate() {
+  const jobId = uploadedSource.value?.jobId
+
+  if (!jobId) {
+    generateStage.value = 'error'
+    generateErrorMessage.value = '请先上传图片，再开始生成'
+    return
+  }
+
+  generateStage.value = 'generating'
+  generateErrorMessage.value = ''
+  generateResult.value = null
+
+  try {
+    const result = await generateImagePage(jobId)
+    generateResult.value = result
+    generateStage.value = result?.status === 'SUCCESS' ? 'success' : 'failed'
+  } catch (error) {
+    generateStage.value = 'error'
+    generateErrorMessage.value = error.message || '生成失败'
   }
 }
 </script>
@@ -105,38 +113,38 @@ async function handleSubmit() {
     </nav>
 
     <section class="page-heading" aria-labelledby="image-layout-title">
-      <p class="eyebrow">Week 08 Day 4</p>
-      <h1 id="image-layout-title">Image to Page Mock</h1>
+      <p class="eyebrow">Week 09 Day 6</p>
+      <h1 id="image-layout-title">Image to Page 真实链路</h1>
       <p class="summary">
-        选择本地图片后，只把 <code>imageName</code> 和 <code>templateKey</code>
-        发给后端，用于演示 image-page mock 闭环；真实图片不会上传。
+        选择单张真实图片后，先上传到后端，再触发真实生成链路，展示原图、Layout
+        JSON 和 <code>previewHtml</code> iframe 预览。
       </p>
     </section>
 
     <section class="image-layout-workbench">
-      <ImageUploader :disabled="isLoading" @change="handleFileChange" @error="handleFileError" />
+      <ImageUploader
+        :disabled="uploadStage === 'uploading' || generateStage === 'generating'"
+        @change="handleFileChange"
+        @error="handleFileError"
+      />
 
-      <form class="detail-card image-layout-form" @submit.prevent="handleSubmit">
+      <form class="detail-card image-layout-form" @submit.prevent="handleUpload">
         <div class="section-title-row">
-          <h2>创建 Mock Job</h2>
-          <StatusTag :status="pageState === 'failed' ? 'failed' : result?.status || 'pending'" />
+          <h2>上传与生成</h2>
+          <StatusTag
+            :status="
+              generateStage === 'success'
+                ? 'success'
+                : generateStage === 'failed' || generateStage === 'error'
+                  ? 'failed'
+                  : uploadStage === 'uploaded'
+                    ? 'running'
+                    : uploadStage === 'uploading'
+                      ? 'running'
+                      : 'pending'
+            "
+          />
         </div>
-
-        <label class="image-layout-label" for="template-key-select">templateKey</label>
-        <select
-          id="template-key-select"
-          v-model="templateKey"
-          class="image-layout-select"
-          :disabled="isLoading"
-        >
-          <option
-            v-for="option in TEMPLATE_OPTIONS"
-            :key="option.value"
-            :value="option.value"
-          >
-            {{ option.label }}
-          </option>
-        </select>
 
         <dl class="task-meta image-layout-meta">
           <div>
@@ -144,134 +152,211 @@ async function handleSubmit() {
             <dd>{{ selectedFile?.name || '未选择' }}</dd>
           </div>
           <div>
-            <dt>提交字段</dt>
-            <dd>imageName / templateKey</dd>
+            <dt>上传阶段</dt>
+            <dd>{{ uploadStage }}</dd>
+          </div>
+          <div>
+            <dt>生成阶段</dt>
+            <dd>{{ generateStage }}</dd>
+          </div>
+          <div>
+            <dt>真实链路</dt>
+            <dd>upload -> generate -> previewHtml</dd>
           </div>
         </dl>
 
+        <p v-if="uploadErrorMessage" class="error-message">{{ uploadErrorMessage }}</p>
+        <p
+          v-if="generateErrorMessage && generateStage === 'error'"
+          class="error-message"
+        >
+          {{ generateErrorMessage }}
+        </p>
+
         <div class="form-actions">
-          <button class="primary-button" type="submit" :disabled="isLoading">
-            {{ isLoading ? '创建中...' : '创建 Mock Job' }}
+          <button class="primary-button" type="submit" :disabled="!canUpload">
+            {{ uploadStage === 'uploading' ? '上传中...' : '上传图片' }}
+          </button>
+          <button
+            class="primary-button secondary-button"
+            type="button"
+            :disabled="!canGenerate"
+            @click="handleGenerate"
+          >
+            {{ generateStage === 'generating' ? '生成中...' : '开始生成' }}
           </button>
         </div>
       </form>
     </section>
 
-    <section v-if="pageState === 'loading'" class="detail-card loading-card" aria-live="polite">
-      正在创建 image-page mock job...
+    <section
+      v-if="uploadStage === 'uploading'"
+      class="detail-card loading-card"
+      aria-live="polite"
+    >
+      正在上传真实图片...
     </section>
 
     <section
-      v-else-if="pageState === 'error'"
+      v-else-if="uploadStage === 'upload-error' && !uploadedSource"
       class="detail-card error-state"
       role="alert"
     >
-      <h2>请求失败</h2>
-      <p>{{ errorMessage }}</p>
+      <h2>上传失败</h2>
+      <p>{{ uploadErrorMessage }}</p>
     </section>
 
-    <section v-else-if="pageState === 'empty'" class="detail-card empty-state">
-      <h2>{{ hasSubmitted ? '暂无结果' : '等待创建' }}</h2>
+    <section v-else-if="!uploadedSource" class="detail-card empty-state">
+      <h2>等待上传</h2>
       <p>
-        {{ hasSubmitted ? '请检查输入后重新发起 mock job。' : '先选择本地图片，再选择 templateKey。' }}
+        先选择一张真实图片并上传，上传成功后再触发生成。
       </p>
     </section>
 
-    <template v-else>
-      <section class="detail-card" aria-labelledby="image-layout-result-title">
+    <template v-else-if="uploadedSource">
+      <section class="detail-card" aria-labelledby="source-upload-title">
         <div class="section-title-row">
-          <h2 id="image-layout-result-title">Mock Job 结果</h2>
-          <StatusTag :status="result.status" />
+          <h2 id="source-upload-title">原图信息</h2>
+          <StatusTag :status="uploadStage === 'uploaded' ? 'success' : 'running'" />
         </div>
 
         <dl class="task-meta">
           <div>
             <dt>jobId</dt>
-            <dd>{{ result.jobId || '-' }}</dd>
+            <dd>{{ uploadedSource.jobId || '-' }}</dd>
           </div>
           <div>
+            <dt>fileName</dt>
+            <dd>{{ uploadedSource.fileName || selectedFile?.name || '-' }}</dd>
+          </div>
+          <div>
+            <dt>sourceUrl</dt>
+            <dd>
+              <a
+                v-if="uploadedSource.sourceUrl"
+                :href="uploadedSource.sourceUrl"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {{ uploadedSource.sourceUrl }}
+              </a>
+              <span v-else>-</span>
+            </dd>
+          </div>
+          <div>
+            <dt>本地文件名</dt>
+            <dd>{{ selectedFile?.name || '-' }}</dd>
+          </div>
+        </dl>
+
+        <div v-if="sourcePreviewUrl" class="source-image-preview">
+          <img :src="sourcePreviewUrl" alt="上传后的原图" />
+        </div>
+      </section>
+
+      <section
+        v-if="generateStage === 'generating'"
+        class="detail-card loading-card"
+        aria-live="polite"
+      >
+        正在调用真实生成链路...
+      </section>
+
+      <section
+        v-else-if="generateStage === 'error'"
+        class="detail-card error-state"
+        role="alert"
+      >
+        <h2>生成失败</h2>
+        <p>{{ generateErrorMessage }}</p>
+      </section>
+
+      <section
+        v-else-if="generateResult"
+        class="detail-card"
+        aria-labelledby="generate-result-title"
+      >
+        <div class="section-title-row">
+          <h2 id="generate-result-title">生成结果</h2>
+          <StatusTag :status="generateResult.status || 'unknown'" />
+        </div>
+
+        <dl class="task-meta">
+          <div>
             <dt>status</dt>
-            <dd>{{ result.status || '-' }}</dd>
+            <dd>{{ generateResult.status || '-' }}</dd>
+          </div>
+          <div>
+            <dt>mode</dt>
+            <dd>{{ generateResult.mode || '-' }}</dd>
+          </div>
+          <div>
+            <dt>fallbackUsed</dt>
+            <dd>{{ generateResult.fallbackUsed === undefined ? '-' : String(generateResult.fallbackUsed) }}</dd>
           </div>
           <div>
             <dt>sourceType</dt>
-            <dd>{{ result.sourceType || '-' }}</dd>
+            <dd>{{ displaySourceType || '-' }}</dd>
           </div>
           <div>
-            <dt>imageName</dt>
-            <dd>{{ result.imageName || '-' }}</dd>
-          </div>
-          <div>
-            <dt>templateKey</dt>
-            <dd>{{ result.templateKey || '-' }}</dd>
-          </div>
-          <div>
-            <dt>layoutArtifact.status</dt>
-            <dd>{{ layoutArtifact?.status || '-' }}</dd>
-          </div>
-          <div>
-            <dt>generatedPageArtifact.status</dt>
-            <dd>{{ generatedPageStatus || '-' }}</dd>
+            <dt>aiUsed</dt>
+            <dd>{{ displayAiUsed }}</dd>
           </div>
         </dl>
       </section>
 
-      <section class="generated-validation-grid" aria-label="错误与警告">
+      <section
+        v-if="generateResult"
+        class="generated-validation-grid"
+        aria-label="错误与警告"
+      >
         <CodeBlock
-          title="errors"
+          title="validation.errors"
           :code="validationErrors.length ? JSON.stringify(validationErrors, null, 2) : ''"
         />
         <CodeBlock
-          title="warnings"
+          title="validation.warnings"
           :code="validationWarnings.length ? JSON.stringify(validationWarnings, null, 2) : ''"
         />
         <CodeBlock
-          title="layoutArtifact.status"
-          :code="layoutArtifact?.status || ''"
+          title="previewHtml"
+          :code="previewHtml"
         />
       </section>
 
-      <JsonPanel title="layoutArtifact.layoutJson" :value="layoutArtifact?.layoutJson" />
+      <JsonPanel
+        v-if="generateResult"
+        title="layoutJson"
+        :value="layoutJson"
+      />
 
       <section
+        v-if="generateResult"
         class="detail-card generated-page-section"
-        aria-labelledby="generated-page-artifact-title"
+        aria-labelledby="preview-html-title"
       >
         <div class="section-title-row">
-          <h2 id="generated-page-artifact-title">generatedPageArtifact</h2>
-          <StatusTag :status="generatedPageStatus || 'unknown'" />
+          <h2 id="preview-html-title">iframe 预览</h2>
+          <StatusTag :status="generateResult.status || 'unknown'" />
         </div>
 
-        <p v-if="pageState === 'failed'" class="generated-page-note">
-          当前结果为 FAILED 或缺少 generatedPageArtifact，不展示 iframe 预览。
-        </p>
         <p
-          v-else-if="!generatedPageArtifact"
+          v-if="generateStage === 'failed' || generateResult.status === 'FAILED'"
           class="generated-page-note"
         >
-          当前结果暂无 generatedPageArtifact。
+          当前结果为 FAILED，不展示 iframe 预览。
+        </p>
+        <p
+          v-else-if="!previewHtml"
+          class="generated-page-note"
+        >
+          当前结果暂无可预览的 previewHtml。
         </p>
 
         <GeneratedPagePreview
-          v-if="pageState === 'success' && generatedPageArtifact"
-          :html-code="generatedPageArtifact.htmlCode"
-          :css-code="generatedPageArtifact.cssCode"
+          v-if="showPreviewIframe"
+          :srcdoc-html="previewHtml"
         />
-
-        <section class="result-grid" aria-label="generated-page artifact 代码展示">
-          <CodeBlock
-            title="generatedPageArtifact.htmlCode"
-            :code="generatedPageArtifact?.htmlCode || ''"
-          />
-          <CodeBlock
-            title="generatedPageArtifact.cssCode"
-            :code="generatedPageArtifact?.cssCode || ''"
-          />
-          <CodeBlock
-            title="generatedPageArtifact.vueCode"
-            :code="generatedPageArtifact?.vueCode || ''"
-          />
-        </section>
       </section>
     </template>
   </main>

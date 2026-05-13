@@ -12,6 +12,8 @@ TEMPLATE_FIXTURES = {
     "card-list": "card-list.layout.json",
     "invalid-layout": "invalid-layout.layout.json",
 }
+DEFAULT_TEMPLATE_KEY = "landing-basic"
+CARD_LIST_KEYWORDS = ("card", "list", "dashboard")
 
 
 def configure_output_encoding() -> None:
@@ -57,6 +59,13 @@ def load_fixture(template_key: str) -> Any:
     fixture_path = FIXTURE_DIR / fixture_name
     with fixture_path.open("r", encoding="utf-8") as file:
         return json.load(file)
+
+
+def infer_template_key_from_image_name(image_name: str) -> str:
+    normalized = image_name.lower()
+    if any(keyword in normalized for keyword in CARD_LIST_KEYWORDS):
+        return "card-list"
+    return DEFAULT_TEMPLATE_KEY
 
 
 def resolve_image_layout(template_key: str, image_name: str) -> dict[str, Any]:
@@ -114,6 +123,11 @@ def resolve_image_layout(template_key: str, image_name: str) -> dict[str, Any]:
         errors=[],
         warnings=[],
     )
+
+
+def resolve_fallback_image_layout(image_name: str) -> dict[str, Any]:
+    template_key = infer_template_key_from_image_name(image_name)
+    return resolve_image_layout(template_key, image_name)
 
 
 def parse_args() -> argparse.Namespace:

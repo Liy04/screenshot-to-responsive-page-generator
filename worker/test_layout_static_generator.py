@@ -5,7 +5,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from worker.layout_static_generator import compile_document, generate_artifact
+from worker.layout_static_generator import (
+    build_preview_html,
+    compile_document,
+    compile_preview_document,
+    generate_artifact,
+)
 from worker.layout_validator import load_json_file
 
 
@@ -88,6 +93,38 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assertIn("&amp; text", html_code)
         self.assertIn('Click "now" &amp; continue', html_code)
         self.assertNotIn("<script", html_code.lower())
+
+    def test_preview_html_wraps_compiled_document(self):
+        document = self.document_with_safe_style_subset()
+
+        preview_html, warnings, _, html_code, css_code = compile_preview_document(document)
+
+        self.assertTrue(preview_html)
+        self.assertIn("<!doctype html>", preview_html.lower())
+        self.assertIn("<html", preview_html.lower())
+        self.assertIn("<style>", preview_html.lower())
+        self.assertIn(html_code, preview_html)
+        self.assertIn(css_code, preview_html)
+        self.assertIsInstance(warnings, list)
+
+    def test_preview_html_excludes_forbidden_tags_and_events(self):
+        document = self.document_with_safe_style_subset()
+        text_node = document["layout"]["children"][0]["children"][0]["children"][0]
+        button_node = document["layout"]["children"][0]["children"][0]["children"][1]
+        text_node["content"] = '<script>alert("x")</script>'
+        button_node["content"] = '<iframe src="x"></iframe>'
+
+        preview_html, _, _, _, _ = compile_preview_document(document)
+        lowered = preview_html.lower()
+
+        self.assertNotIn("<script", lowered)
+        self.assertNotIn("onclick=", lowered)
+        self.assertNotIn("onload=", lowered)
+        self.assertNotIn("onerror=", lowered)
+        self.assertNotIn("<iframe", lowered)
+        self.assertNotIn("<object", lowered)
+        self.assertNotIn("<embed", lowered)
+        self.assertNotIn("javascript:", lowered)
 
     def test_html_excludes_inline_events_and_javascript_urls(self):
         document = self.document_with_safe_style_subset()
@@ -273,6 +310,10 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assertEqual(unsupported_nodes[0]["type"], "table")
         self.assertNotIn("landing-unsupported-node", html_code)
         self.assertIn("UNSUPPORTED_NODE_TYPE", {warning.code for warning in warnings})
+
+    def test_preview_html_raises_on_forbidden_markup_wrapper_input(self):
+        with self.assertRaises(ValueError):
+            build_preview_html("<script>alert(1)</script>", ".ok{}", "Unsafe")
 
     def generate_from_document(self, document):
         temp_file = tempfile.NamedTemporaryFile(

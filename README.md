@@ -4,14 +4,15 @@
 
 本项目用于探索“截图 / Figma 设计信息 -> 响应式页面代码”的生成链路，并沉淀适合个人学习、Codex 执行和 MVP 推进的轻量协作方式。
 
-当前阶段不是接入真实 AI 生成页面，而是 Week 04 的确定性规则编译闭环：
+当前阶段已进入 Week 09 Fast Track，主线是“真实 AI 最小接入 + 单张真实图片最小闭环”：
 
 ```text
-Layout JSON v0.1
--> Worker 校验
--> Worker 静态编译 htmlCode / cssCode
--> generated-page artifact
--> 后端 mock 保存 / 查询
+单张真实图片
+-> 后端保存临时文件
+-> 后端调用 Python Worker
+-> Worker 调真实 AI / fallback
+-> Layout JSON v0.1
+-> generated-page HTML
 -> 前端 iframe sandbox 安全预览
 ```
 
@@ -21,7 +22,7 @@ Layout JSON v0.1
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/task.md`
+3. `docs/tasks/day-xx.md`
 4. 当前任务相关代码
 5. 必要时读取 `docs/spec.md`
 
@@ -31,7 +32,7 @@ Layout JSON v0.1
 |---|---|
 | 当前阶段 | `docs/current.md` |
 | 当前计划 | `docs/plan.md` |
-| 当前任务 | `docs/task.md` |
+| 当前任务 | `docs/tasks/day-xx.md` |
 | 当前规格 | `docs/spec.md` |
 | 文档索引 | `docs/INDEX.md` |
 | 上下文侦察流程 | `docs/playbooks/context-scout.md` |
@@ -51,7 +52,6 @@ Layout JSON v0.1
 
 ## 当前禁止
 
-- 不接真实 AI / OpenAI / Claude / Gemini SDK。
 - 不接 Figma API / Figma MCP。
 - 不接 MySQL 实际落库。
 - 不创建数据库表、Entity、Mapper。
@@ -68,7 +68,7 @@ Layout JSON v0.1
 ```text
 AGENTS.md
 docs/current.md
-docs/task.md
+docs/tasks/day-xx.md
 当前任务相关代码
 必要时 docs/spec.md
 ```
@@ -78,5 +78,12 @@ docs/task.md
 ## 本地运行
 
 本地启动和 smoke 命令以 `tests/smoke/README.md` 为准。
+
+如需执行 Week 09 Real AI smoke：
+
+- 需要 Python 3.11+。
+- 需要 SiliconFlow `OPENAI_*` 环境变量。
+- backend 启动时需要 `--imagepage.worker.timeout-seconds=120`。
+- 详细运行配置见 `docs/spec.md`。
 
 如启动 dev server 或后端服务，验证完成后需要停止进程，不留下后台服务。

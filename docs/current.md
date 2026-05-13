@@ -8,55 +8,69 @@
 
 ## 当前阶段
 
-Week 08：image-page mock 链路已完成收口，进入下一周规划准备。
+Week 09 已完成收口：真实 AI 最小接入，打通单张真实图片到 Layout JSON / generated-page 预览的最小闭环。
 
 ## 阶段背景
 
-Week 08 已完成 image-page mock API、API 测试、`/dev/image-to-layout` 页面增强、前端测试和联调 smoke。当前重点不再是继续补 Week 08 功能，而是保留收口事实、归档 smoke / summary / report material，并准备下一周计划。
+Week 08 已完成收口。Week 09 已完成真实主链路最小闭环，已经验证单张真实图片可以接入后端、Python Worker、真实多模态模型、Layout JSON validator、generated-page HTML compiler 和前端 iframe 预览。
 
-Week 08 目标链路：
+Week 09 目标链路：
 
 ```text
-本地选择图片
--> 选择 templateKey
--> POST /api/dev/image-page-jobs
--> 返回 layoutArtifact
--> 返回 generatedPageArtifact
--> 前端展示 Layout JSON
--> 前端展示 generated-page artifact
--> iframe sandbox="" 安全预览
+单张真实图片
+-> 后端保存临时文件
+-> 后端创建 jobId
+-> 后端调用 Python Worker
+-> Worker 读取真实图片
+-> Worker 调用真实多模态模型
+-> 模型输出简化结构
+-> Worker 映射到 Layout JSON v0.1
+-> validator 校验
+-> fallback rule resolver 保底
+-> compiler 输出 generated.html
+-> 后端返回 layoutJson + previewHtml
+-> 前端展示原图、Layout JSON 和 iframe 预览
 ```
 
 ## 当前完成内容
 
-1. image-page mock API 已完成。
-2. image-page API 测试已完成。
-3. `/dev/image-to-layout` 页面已能展示 generatedPageArtifact。
-4. 前端测试已完成。
-5. 联调 smoke 已完成。
-6. Week 08 summary、smoke 和 report material 已归档。
+1. Week 08 已完成收口。
+2. Week 08 summary、smoke 和 report material 已归档。
+3. Week 09 已完成真实 AI 最小闭环：
+   `真实图片 -> 后端上传 -> 后端调用 Python Worker -> Worker 调 SiliconFlow Qwen3-VL -> REAL_AI 命中 -> Layout JSON v0.1 -> previewHtml -> 前端 iframe 预览`。
+4. 最终关键通过结果已确认：
+   `status=SUCCESS`、`mode=real-ai`、`fallbackUsed=false`、`sourceType=REAL_AI`、`layoutJson.version=0.1`、`validation.ok=true`、`previewHtml` 非空、iframe 渲染成功、`sandbox=""`、无 `allow-scripts`。
+5. 已确认 REAL_AI 命中依赖运行配置：Python 3.11.9、`D:\environment\python11\python.exe`、`IMAGEPAGE_WORKER_PYTHON_COMMAND`、后端 `--imagepage.worker.timeout-seconds=120` 和 SiliconFlow `OPENAI_*` 环境变量。
+6. Week 09 的 summary、dev smoke 和原始计划已进入 `docs/archive/week/` 归档。
 
 ## 当前不做
 
-- 不接真实 AI。
-- 不接 OpenAI / Claude / Gemini SDK。
-- 不接 Figma API / Figma MCP。
+- 不接 Figma API / MCP。
 - 不接 MySQL。
 - 不创建数据库表。
 - 不创建 Entity / Mapper。
 - 不接 Redis / RabbitMQ。
+- 不做 Playwright 视觉回归。
+- 不做多页面。
+- 不做批量任务。
+- 不做登录注册。
+- 不做拖拽编辑器。
+- 不做在线编辑器。
 - 不做 ZIP 导出。
-- 不做拖拽编辑器 / 在线编辑器。
-- 不做真实截图解析。
-- 不上传真实图片到后端。
-- 不让后端调用 Python Worker。
-- 不做 Playwright 视觉回归，除非用户明确批准。
 
 ## 当前允许
 
-- 文档可以回看 Week 08 结果、总结和归档说明。
-- Worker / 后端 / 前端的既有 mock 能力可以被总结、归档和回看。
-- 当前仍保留 Week 07 的 mock 协议与安全预览边界，供回溯使用。
+- 允许真实图片上传。
+- 允许后端调用 Python Worker。
+- 允许 Worker 读取真实图片。
+- 允许 Worker 调用真实 AI。
+- 允许 fallback rule resolver 保底。
+- 允许前端展示原图、Layout JSON 和 iframe 预览。
+
+## 当前待补
+
+- Week 10 规划与任务拆分。
+- 如继续推进真实链路质量，可补更稳定的页面级验收和生成结果一致性策略。
 
 ## 当前文档入口
 
@@ -64,17 +78,15 @@ Week 08 目标链路：
 - 当前规格：`docs/spec.md`
 - 文档索引：`docs/INDEX.md`
 - context-scout 流程：`docs/playbooks/context-scout.md`
-- Week 08 原始计划归档：`docs/archive/week/08-plan.md`
-- Week 08 summary：`docs/archive/week/08-summary.md`
-- Week 08 smoke：`docs/archive/week/08-dev-smoke.md`
-- Week 08 report material：`docs/archive/week/08-report-material.md`
-- Week 07 原始计划归档：`docs/archive/week/07-plan.md`
+- Week 09 归档：`docs/archive/week/09-plan.md`、`docs/archive/week/09-summary.md`、`docs/archive/week/09-dev-smoke.md`
 - 历史归档：`docs/archive/`
 
 ## 当前状态说明
 
-Week 08 已完成收口，当前可以进入下一周计划准备，不再继续扩展 Week 08 功能。
+Week 09 已完成收口，项目已经进入“可提交 / 可归档 / 可进入下一周规划”的状态。
 
-`docs/tasks/day-*.md` 已在收口后清理，`docs/tasks/` 仅保留空目录，等待后续新周再生成新的日任务卡。
+真实 AI 后端链路已稳定命中过一次 `REAL_AI` 成功结果；当前最重要的运行前提是不要遗漏 Python 3.11、Worker 路径、120 秒 timeout 和 `OPENAI_*` 环境变量。
 
-周计划和总结在完成拆分或收口后应归档到 `docs/archive/week/`，不要长期留在 `docs/` 根目录。
+Week 09 的临时 `docs/tasks/day-*.md` 已按收口规则清理，`docs/tasks/` 目录保留为空目录，等待下一周重新生成任务卡。
+
+下一步准备进入 Week 10 规划，但本文件不展开新的长计划。
