@@ -12,6 +12,7 @@ except ImportError:  # pragma: no cover - environment dependent
 
 
 DEFAULT_OPENAI_MODEL = "gpt-4.1-mini"
+PROMPT_VERSION = "week10-v1"
 
 
 class RealAIError(RuntimeError):
@@ -43,6 +44,7 @@ def build_prompt(job_id: str, image_name: str) -> str:
             "You are a layout extraction assistant.",
             "Look at the provided webpage screenshot and return JSON only.",
             "Do not return markdown or prose.",
+            f"Prompt version: {PROMPT_VERSION}",
             "Target schema for your JSON output:",
             "{",
             '  "pageName": "string",',
@@ -73,24 +75,82 @@ def image_path_to_data_url(image_path: Path) -> str:
     return f"data:{mime_type};base64,{encoded}"
 
 
+def parse_json_object(candidate: str) -> dict[str, Any]:
+    parsed = json.loads(candidate)
+    if not isinstance(parsed, dict):
+        raise RealAIResponseError("Model output JSON must be an object")
+    return parsed
+
+
+def find_first_json_object(text: str) -> dict[str, Any] | None:
+    for start_index, char in enumerate(text):
+        if char != "{":
+            continue
+
+        depth = 0
+        in_string = False
+        escape = False
+        for end_index in range(start_index, len(text)):
+            current = text[end_index]
+            if in_string:
+                if escape:
+                    escape = False
+                elif current == "\\":
+                    escape = True
+                elif current == '"':
+                    in_string = False
+                continue
+
+            if current == '"':
+                in_string = True
+                continue
+
+            if current == "{":
+                depth += 1
+                continue
+
+            if current == "}":
+                depth -= 1
+                if depth == 0:
+                    candidate = text[start_index : end_index + 1]
+                    try:
+                        return parse_json_object(candidate)
+                    except (json.JSONDecodeError, RealAIResponseError):
+                        break
+    return None
+
+
 def parse_json_payload(text: str) -> dict[str, Any]:
     stripped = text.strip()
     if not stripped:
         raise RealAIResponseError("Model returned empty text output")
 
     try:
-        parsed = json.loads(stripped)
+        return parse_json_object(stripped)
     except json.JSONDecodeError:
-        match = re.search(r"```json\s*(\{.*\})\s*```", stripped, re.DOTALL)
-        if not match:
-            match = re.search(r"(\{.*\})", stripped, re.DOTALL)
-        if not match:
-            raise RealAIResponseError("Model output did not contain valid JSON")
-        parsed = json.loads(match.group(1))
+        pass
 
-    if not isinstance(parsed, dict):
-        raise RealAIResponseError("Model output JSON must be an object")
-    return parsed
+    fenced_blocks = re.findall(r"```(?:json)?\s*(.*?)\s*```", stripped, re.DOTALL | re.IGNORECASE)
+    for block in fenced_blocks:
+        candidate = block.strip()
+        if not candidate:
+            continue
+        try:
+            return parse_json_object(candidate)
+        except json.JSONDecodeError:
+            nested = find_first_json_object(candidate)
+            if nested is not None:
+                return nested
+        except RealAIResponseError:
+            nested = find_first_json_object(candidate)
+            if nested is not None:
+                return nested
+
+    extracted = find_first_json_object(stripped)
+    if extracted is not None:
+        return extracted
+
+    raise RealAIResponseError("Model output did not contain valid JSON")
 
 
 def build_openai_client() -> Any:

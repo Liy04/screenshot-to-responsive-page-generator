@@ -6,16 +6,23 @@ try:
     from .layout_static_generator import compile_preview_document
     from .image_layout_resolver import infer_template_key_from_image_name, resolve_fallback_image_layout
     from .layout_validator import ValidationMessage, validate_layout_document
-    from .real_ai_layout_client import RealAIError, request_layout_intermediate
+    from .real_ai_layout_client import PROMPT_VERSION, RealAIError, request_layout_intermediate
 except ImportError:
     from layout_static_generator import compile_preview_document
     from image_layout_resolver import infer_template_key_from_image_name, resolve_fallback_image_layout
     from layout_validator import ValidationMessage, validate_layout_document
-    from real_ai_layout_client import RealAIError, request_layout_intermediate
+    from real_ai_layout_client import PROMPT_VERSION, RealAIError, request_layout_intermediate
 
 
 ALLOWED_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+FALLBACK_REASON_MODEL_UNAVAILABLE = "MODEL_UNAVAILABLE"
+FALLBACK_REASON_MODEL_NON_JSON_OUTPUT = "MODEL_NON_JSON_OUTPUT"
+FALLBACK_REASON_JSON_PARSE_FAILED = "JSON_PARSE_FAILED"
+FALLBACK_REASON_SCHEMA_VALIDATION_FAILED = "SCHEMA_VALIDATION_FAILED"
+FALLBACK_REASON_IMAGE_READ_FAILED = "IMAGE_READ_FAILED"
+FALLBACK_REASON_WORKER_TIMEOUT = "WORKER_TIMEOUT"
+FALLBACK_REASON_PREVIEW_COMPILE_FAILED = "PREVIEW_COMPILE_FAILED"
 
 
 def message_to_dict(message: ValidationMessage) -> dict[str, str]:
@@ -41,13 +48,17 @@ def make_result(
     warnings: list[ValidationMessage],
     message: str,
     preview_html: str = "",
+    prompt_version: str | None = PROMPT_VERSION,
+    fallback_reason: str | None = None,
 ) -> dict[str, Any]:
     return {
         "jobId": job_id,
         "status": status,
         "mode": mode,
         "fallbackUsed": fallback_used,
+        "fallbackReason": fallback_reason,
         "sourceType": source_type,
+        "promptVersion": prompt_version,
         "layoutJson": layout_json,
         "previewHtml": preview_html,
         "validation": {
@@ -98,6 +109,10 @@ def normalize_page_type(value: Any) -> str:
     if not isinstance(value, str) or not value.strip():
         return "generic"
     return value.strip().lower()
+
+
+def default_page_name(image_name: str) -> str:
+    return Path(image_name).stem.replace("-", " ").replace("_", " ").title() or "Generated Page"
 
 
 def default_bounds(x: int, y: int, width: int, height: int) -> dict[str, int]:
@@ -182,7 +197,7 @@ def infer_children_from_section(section: dict[str, Any], start_y: int, assets: l
 def map_intermediate_to_layout_json(intermediate: dict[str, Any], image_name: str) -> dict[str, Any]:
     page_name = intermediate.get("pageName")
     if not isinstance(page_name, str) or not page_name.strip():
-        page_name = Path(image_name).stem.replace("-", " ").replace("_", " ").title() or "Generated Page"
+        page_name = default_page_name(image_name)
 
     page_type = normalize_page_type(intermediate.get("pageType"))
     sections = intermediate.get("sections")
@@ -265,6 +280,56 @@ def map_intermediate_to_layout_json(intermediate: dict[str, Any], image_name: st
         ],
         "warnings": [],
     }
+
+
+def repair_intermediate_payload(intermediate: Any, image_name: str) -> tuple[dict[str, Any], bool]:
+    if not isinstance(intermediate, dict):
+        return {}, False
+
+    repaired = copy.deepcopy(intermediate)
+    used = False
+
+    page_name = repaired.get("pageName")
+    if not isinstance(page_name, str) or not page_name.strip():
+        repaired["pageName"] = default_page_name(image_name)
+        used = True
+
+    page_type = repaired.get("pageType")
+    if not isinstance(page_type, str) or not page_type.strip():
+        repaired["pageType"] = "generic"
+        used = True
+
+    sections = repaired.get("sections")
+    if not isinstance(sections, list):
+        repaired["sections"] = []
+        sections = repaired["sections"]
+        used = True
+
+    normalized_sections: list[dict[str, Any]] = []
+    sections_changed = False
+    for section in sections:
+        if not isinstance(section, dict):
+            sections_changed = True
+            continue
+
+        normalized_section = copy.deepcopy(section)
+        role = normalized_section.get("role")
+        if not isinstance(role, str) or not role.strip():
+            normalized_section["role"] = "content"
+            sections_changed = True
+
+        elements = normalized_section.get("elements")
+        if not isinstance(elements, list):
+            normalized_section["elements"] = []
+            sections_changed = True
+
+        normalized_sections.append(normalized_section)
+
+    if sections_changed:
+        repaired["sections"] = normalized_sections
+        used = True
+
+    return repaired, used
 
 
 def repair_layout_json(document: Any, image_name: str) -> dict[str, Any]:
@@ -393,12 +458,26 @@ def compile_preview_html(
     return preview_html, warnings, unsupported_nodes
 
 
+def infer_fallback_reason_from_ai_error(exc: Exception) -> str:
+    message = str(exc).lower()
+    if "did not contain valid json" in message or "non-json" in message:
+        return FALLBACK_REASON_MODEL_NON_JSON_OUTPUT
+    if "json" in message and "parse" in message:
+        return FALLBACK_REASON_JSON_PARSE_FAILED
+    if "image" in message and ("read" in message or "type" in message):
+        return FALLBACK_REASON_IMAGE_READ_FAILED
+    if "timeout" in message:
+        return FALLBACK_REASON_WORKER_TIMEOUT
+    return FALLBACK_REASON_MODEL_UNAVAILABLE
+
+
 def process_image_layout_job(
     job_id: str,
     image_path: str | Path,
     mode: str,
     fallback: bool,
 ) -> tuple[dict[str, Any], int]:
+    fallback_reason: str | None = None
     validated_path, input_errors = validate_image_path(image_path)
     if input_errors:
         result = make_result(
@@ -412,6 +491,7 @@ def process_image_layout_job(
             warnings=[],
             message="Input image path validation failed.",
             preview_html="",
+            fallback_reason=FALLBACK_REASON_IMAGE_READ_FAILED,
         )
         return result, 1
 
@@ -432,6 +512,7 @@ def process_image_layout_job(
                 fallback_warnings,
                 "Fallback resolver failed.",
                 "",
+                fallback_reason=None,
             )
             return result, 1
 
@@ -456,12 +537,22 @@ def process_image_layout_job(
             warnings,
             message,
             preview_html,
+            fallback_reason=None,
         )
         return result, 0 if status == "SUCCESS" else 1
 
     ai_warnings: list[ValidationMessage] = []
     try:
         intermediate = request_layout_intermediate(validated_path, job_id)
+        intermediate, intermediate_repaired = repair_intermediate_payload(intermediate, image_name)
+        if intermediate_repaired:
+            ai_warnings.append(
+                make_message(
+                    "INTERMEDIATE_REPAIRED",
+                    "AI intermediate payload was lightly repaired before layout mapping.",
+                    "$.ai",
+                )
+            )
         candidate_layout = map_intermediate_to_layout_json(intermediate, image_name)
         final_layout, errors, warnings, repaired = validate_or_repair_layout(candidate_layout, image_name)
         all_warnings = ai_warnings + warnings
@@ -482,14 +573,18 @@ def process_image_layout_job(
                 all_warnings,
                 message,
                 preview_html,
+                fallback_reason=None,
             )
             return result, 0
+        fallback_reason = FALLBACK_REASON_SCHEMA_VALIDATION_FAILED
         ai_warnings = all_warnings + [
             make_message("AI_LAYOUT_INVALID", "AI output could not pass validation without fallback.", "$.layout")
         ]
     except RealAIError as exc:
+        fallback_reason = infer_fallback_reason_from_ai_error(exc)
         ai_warnings.append(make_message("REAL_AI_UNAVAILABLE", str(exc), "$.ai"))
     except Exception as exc:  # pragma: no cover - defensive path
+        fallback_reason = FALLBACK_REASON_MODEL_UNAVAILABLE
         ai_warnings.append(make_message("REAL_AI_UNAVAILABLE", f"Unexpected AI error: {exc}", "$.ai"))
 
     if not fallback:
@@ -504,6 +599,7 @@ def process_image_layout_job(
             ai_warnings,
             "Real AI generation failed and no fallback was allowed.",
             "",
+            fallback_reason=fallback_reason,
         )
         return result, 1
 
@@ -521,6 +617,7 @@ def process_image_layout_job(
             ai_warnings + fallback_warnings,
             "Real AI failed and fallback layout could not be created.",
             "",
+            fallback_reason=fallback_reason,
         )
         return result, 1
 
@@ -545,5 +642,6 @@ def process_image_layout_job(
         combined_warnings,
         message,
         preview_html,
+        fallback_reason=fallback_reason,
     )
     return result, 0 if status == "SUCCESS" else 1

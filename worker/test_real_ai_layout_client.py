@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from worker.real_ai_layout_client import (
+    PROMPT_VERSION,
     RealAIResponseError,
     RealAIUnavailableError,
     build_openai_client,
@@ -41,6 +42,32 @@ class RealAILayoutClientTest(unittest.TestCase):
         with self.assertRaises(RealAIResponseError):
             parse_json_payload("not-json-response")
 
+    def test_parse_json_payload_accepts_plain_json(self):
+        payload = parse_json_payload('{"pageName":"Demo","pageType":"marketing","sections":[]}')
+
+        self.assertEqual(payload["pageName"], "Demo")
+
+    def test_parse_json_payload_accepts_json_code_fence(self):
+        payload = parse_json_payload(
+            '```json\n{"pageName":"Demo","pageType":"marketing","sections":[]}\n```'
+        )
+
+        self.assertEqual(payload["pageType"], "marketing")
+
+    def test_parse_json_payload_accepts_plain_code_fence(self):
+        payload = parse_json_payload(
+            '```\n{"pageName":"Demo","pageType":"marketing","sections":[]}\n```'
+        )
+
+        self.assertEqual(payload["pageType"], "marketing")
+
+    def test_parse_json_payload_extracts_json_with_surrounding_text(self):
+        payload = parse_json_payload(
+            'Here is the extracted result:\n{"pageName":"Demo","pageType":"marketing","sections":[]}\nUse it carefully.'
+        )
+
+        self.assertEqual(payload["pageName"], "Demo")
+
     def test_extract_chat_completion_text_from_string_content(self):
         response = SimpleNamespace(
             choices=[SimpleNamespace(message=SimpleNamespace(content='{"pageName":"Demo"}'))]
@@ -76,6 +103,7 @@ class RealAILayoutClientTest(unittest.TestCase):
 
         self.assertEqual(payload["pageName"], "Demo")
         self.assertEqual(payload["pageType"], "marketing")
+        self.assertEqual(PROMPT_VERSION, "week10-v1")
 
     def test_request_layout_intermediate_raises_for_non_json_model_output(self):
         mock_client = SimpleNamespace(

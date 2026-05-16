@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from worker.image_layout_pipeline import process_image_layout_job
 from worker.layout_validator import validate_layout_document
+from worker.real_ai_layout_client import PROMPT_VERSION, RealAIResponseError
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -27,7 +28,9 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(result["status"], "SUCCESS")
         self.assertTrue(result["fallbackUsed"])
+        self.assertIsNone(result["fallbackReason"])
         self.assertEqual(result["sourceType"], "FALLBACK_RULE")
+        self.assertEqual(result["promptVersion"], PROMPT_VERSION)
         self.assertTrue(result["validation"]["ok"])
         self.assertIsInstance(result["layoutJson"], dict)
         self.assertTrue(result["previewHtml"])
@@ -46,6 +49,7 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(result["status"], "FAILED")
         self.assertFalse(result["validation"]["ok"])
         self.assertEqual(result["previewHtml"], "")
+        self.assertEqual(result["fallbackReason"], "IMAGE_READ_FAILED")
         self.assertIn("IMAGE_PATH_NOT_FOUND", {item["code"] for item in result["validation"]["errors"]})
 
     def test_real_ai_unavailable_uses_fallback_when_enabled(self):
@@ -67,7 +71,9 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(result["status"], "SUCCESS")
         self.assertTrue(result["fallbackUsed"])
+        self.assertEqual(result["fallbackReason"], "MODEL_UNAVAILABLE")
         self.assertEqual(result["sourceType"], "FALLBACK_RULE")
+        self.assertEqual(result["promptVersion"], PROMPT_VERSION)
         self.assertTrue(result["previewHtml"])
         self.assert_preview_html_safe(result["previewHtml"])
         self.assertIn("REAL_AI_UNAVAILABLE", {item["code"] for item in result["validation"]["warnings"]})
@@ -92,6 +98,7 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertEqual(result["status"], "FAILED")
         self.assertFalse(result["fallbackUsed"])
+        self.assertEqual(result["fallbackReason"], "MODEL_UNAVAILABLE")
         self.assertEqual(result["layoutJson"], None)
         self.assertEqual(result["previewHtml"], "")
         self.assertIn("REAL_AI_GENERATION_FAILED", {item["code"] for item in result["validation"]["errors"]})
@@ -125,7 +132,9 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(result["status"], "SUCCESS")
         self.assertFalse(result["fallbackUsed"])
+        self.assertIsNone(result["fallbackReason"])
         self.assertEqual(result["sourceType"], "REAL_AI")
+        self.assertEqual(result["promptVersion"], PROMPT_VERSION)
         self.assertTrue(result["validation"]["ok"])
         self.assertTrue(result["previewHtml"])
         self.assert_preview_html_safe(result["previewHtml"])
@@ -149,7 +158,9 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(result["status"], "SUCCESS")
         self.assertTrue(result["fallbackUsed"])
+        self.assertEqual(result["fallbackReason"], "SCHEMA_VALIDATION_FAILED")
         self.assertEqual(result["sourceType"], "FALLBACK_RULE")
+        self.assertEqual(result["promptVersion"], PROMPT_VERSION)
         self.assertTrue(result["validation"]["ok"])
         self.assertTrue(result["previewHtml"])
         self.assert_preview_html_safe(result["previewHtml"])
@@ -170,6 +181,60 @@ class ImageLayoutPipelineTest(unittest.TestCase):
 
         serialized = json.dumps(result, ensure_ascii=False)
         self.assertNotIn(str(image_path), serialized)
+
+    def test_real_ai_non_json_output_uses_fallback_without_crashing(self):
+        image_path = self.create_temp_image_file("landing-shot.png")
+        try:
+            with patch(
+                "worker.image_layout_pipeline.request_layout_intermediate",
+                side_effect=RealAIResponseError("Model output did not contain valid JSON"),
+            ):
+                result, exit_code = process_image_layout_job(
+                    job_id="job-ai-non-json-fallback",
+                    image_path=image_path,
+                    mode="real-ai",
+                    fallback=True,
+                )
+        finally:
+            image_path.unlink(missing_ok=True)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertTrue(result["fallbackUsed"])
+        self.assertEqual(result["fallbackReason"], "MODEL_NON_JSON_OUTPUT")
+        self.assertEqual(result["promptVersion"], PROMPT_VERSION)
+        self.assertTrue(result["previewHtml"])
+        self.assertIn("REAL_AI_UNAVAILABLE", {item["code"] for item in result["validation"]["warnings"]})
+
+    def test_real_ai_intermediate_repair_keeps_real_ai_path(self):
+        image_path = self.create_temp_image_file("repair-me.png")
+        ai_payload = {
+            "sections": [
+                {
+                    "elements": [
+                        {"type": "text", "role": "heading", "content": "Hello"},
+                    ]
+                }
+            ]
+        }
+        try:
+            with patch("worker.image_layout_pipeline.request_layout_intermediate", return_value=ai_payload):
+                result, exit_code = process_image_layout_job(
+                    job_id="job-ai-repair-success",
+                    image_path=image_path,
+                    mode="real-ai",
+                    fallback=True,
+                )
+        finally:
+            image_path.unlink(missing_ok=True)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertFalse(result["fallbackUsed"])
+        self.assertIsNone(result["fallbackReason"])
+        self.assertEqual(result["sourceType"], "REAL_AI")
+        self.assertIn("INTERMEDIATE_REPAIRED", {item["code"] for item in result["validation"]["warnings"]})
+        self.assertTrue(validate_layout_document(result["layoutJson"]).ok)
 
     def assert_preview_html_safe(self, preview_html: str) -> None:
         lowered = preview_html.lower()
