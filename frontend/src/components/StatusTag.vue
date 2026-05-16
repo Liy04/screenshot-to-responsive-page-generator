@@ -16,6 +16,10 @@ const statusText = computed(() => {
     running: '生成中',
     success: '成功',
     failed: '失败',
+    fallback: 'FALLBACK',
+    timeout: 'TIMEOUT',
+    'real-ai': 'REAL_AI',
+    real_ai: 'REAL_AI',
   }
 
   return textMap[normalizedStatus.value] || props.status || '未知'
@@ -27,6 +31,10 @@ const statusClass = computed(() => {
     running: 'status-running',
     success: 'status-success',
     failed: 'status-failed',
+    fallback: 'status-fallback',
+    timeout: 'status-timeout',
+    'real-ai': 'status-real-ai',
+    real_ai: 'status-real-ai',
   }
 
   return classMap[normalizedStatus.value] || 'status-unknown'

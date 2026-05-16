@@ -16,10 +16,35 @@ const generateStage = ref('idle')
 const uploadErrorMessage = ref('')
 const generateErrorMessage = ref('')
 
+function normalizeItems(value) {
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  if (value === undefined || value === null || value === '') {
+    return []
+  }
+
+  return [value]
+}
+
+function isTimeoutMessage(message) {
+  if (!message) {
+    return false
+  }
+
+  return /timeout|timed out|超时/i.test(message)
+}
+
 const layoutJson = computed(() => generateResult.value?.layoutJson || null)
 const previewHtml = computed(() => generateResult.value?.previewHtml || '')
-const validationErrors = computed(() => generateResult.value?.validation?.errors || [])
-const validationWarnings = computed(() => generateResult.value?.validation?.warnings || [])
+const topLevelErrors = computed(() => normalizeItems(generateResult.value?.errors))
+const topLevelWarnings = computed(() => normalizeItems(generateResult.value?.warnings))
+const validationErrors = computed(() => normalizeItems(generateResult.value?.validation?.errors))
+const validationWarnings = computed(() => normalizeItems(generateResult.value?.validation?.warnings))
+const artifactInfo = computed(() => generateResult.value?.artifact || null)
+const promptVersion = computed(() => generateResult.value?.promptVersion || '')
+const fallbackReason = computed(() => generateResult.value?.fallbackReason || '')
 const sourcePreviewUrl = computed(() => uploadedSource.value?.sourceUrl || '')
 const canUpload = computed(() => {
   return !!selectedFile.value && uploadStage.value !== 'uploading' && generateStage.value !== 'generating'
@@ -28,7 +53,7 @@ const canGenerate = computed(() => {
   return !!uploadedSource.value?.jobId && generateStage.value !== 'generating'
 })
 const showPreviewIframe = computed(() => {
-  return generateStage.value === 'success' && !!previewHtml.value
+  return generateResult.value?.status === 'SUCCESS' && generateStage.value !== 'timeout' && !!previewHtml.value
 })
 const displaySourceType = computed(() => {
   return generateResult.value?.sourceType || uploadedSource.value?.sourceType || ''
@@ -36,6 +61,63 @@ const displaySourceType = computed(() => {
 const displayAiUsed = computed(() => {
   const value = generateResult.value?.aiUsed
   return value === undefined || value === null ? '-' : String(value)
+})
+const artifactReused = computed(() => {
+  const value = artifactInfo.value?.reused
+  return value === undefined || value === null ? '-' : String(value)
+})
+const resultState = computed(() => {
+  if (generateStage.value === 'timeout') {
+    return 'timeout'
+  }
+
+  if (generateResult.value?.status === 'FAILED' || generateStage.value === 'failed') {
+    return 'failed'
+  }
+
+  if (generateResult.value?.fallbackUsed === true) {
+    return 'fallback'
+  }
+
+  if (generateResult.value?.sourceType === 'REAL_AI' && generateResult.value?.fallbackUsed === false) {
+    return 'real-ai'
+  }
+
+  if (generateResult.value?.status === 'SUCCESS') {
+    return 'success'
+  }
+
+  return ''
+})
+const resultHeadline = computed(() => {
+  const textMap = {
+    'real-ai': 'REAL_AI 成功',
+    fallback: 'FALLBACK',
+    failed: 'FAILED',
+    timeout: 'TIMEOUT',
+    success: 'SUCCESS',
+  }
+
+  return textMap[resultState.value] || '生成结果'
+})
+const resultDescription = computed(() => {
+  if (resultState.value === 'real-ai') {
+    return '当前结果由真实 AI 直接生成，未触发 fallback。'
+  }
+
+  if (resultState.value === 'fallback') {
+    return '当前结果使用 fallback 口径返回，请结合 fallbackReason、warnings 和 errors 一起判断。'
+  }
+
+  if (resultState.value === 'timeout') {
+    return '当前请求已超时，本次没有可预览内容。'
+  }
+
+  if (resultState.value === 'failed') {
+    return '当前结果为 FAILED，请优先查看 errors、warnings 和 artifact 信息。'
+  }
+
+  return '当前结果已返回，可继续查看 layoutJson 和 previewHtml。'
 })
 
 function handleFileChange(file) {
@@ -99,8 +181,9 @@ async function handleGenerate() {
     generateResult.value = result
     generateStage.value = result?.status === 'SUCCESS' ? 'success' : 'failed'
   } catch (error) {
-    generateStage.value = 'error'
-    generateErrorMessage.value = error.message || '生成失败'
+    const message = error.message || '生成失败'
+    generateErrorMessage.value = message
+    generateStage.value = isTimeoutMessage(message) ? 'timeout' : 'error'
   }
 }
 </script>
@@ -113,11 +196,11 @@ async function handleGenerate() {
     </nav>
 
     <section class="page-heading" aria-labelledby="image-layout-title">
-      <p class="eyebrow">Week 09 Day 6</p>
+      <p class="eyebrow">Week 10 Day 05</p>
       <h1 id="image-layout-title">Image to Page 真实链路</h1>
       <p class="summary">
         选择单张真实图片后，先上传到后端，再触发真实生成链路，展示原图、Layout
-        JSON 和 <code>previewHtml</code> iframe 预览。
+        JSON、状态元信息和 <code>previewHtml</code> iframe 预览。
       </p>
     </section>
 
@@ -135,7 +218,7 @@ async function handleGenerate() {
             :status="
               generateStage === 'success'
                 ? 'success'
-                : generateStage === 'failed' || generateStage === 'error'
+                : generateStage === 'failed' || generateStage === 'error' || generateStage === 'timeout'
                   ? 'failed'
                   : uploadStage === 'uploaded'
                     ? 'running'
@@ -167,7 +250,7 @@ async function handleGenerate() {
 
         <p v-if="uploadErrorMessage" class="error-message">{{ uploadErrorMessage }}</p>
         <p
-          v-if="generateErrorMessage && generateStage === 'error'"
+          v-if="generateErrorMessage && (generateStage === 'error' || generateStage === 'timeout')"
           class="error-message"
         >
           {{ generateErrorMessage }}
@@ -263,11 +346,11 @@ async function handleGenerate() {
       </section>
 
       <section
-        v-else-if="generateStage === 'error'"
+        v-else-if="generateStage === 'error' || generateStage === 'timeout'"
         class="detail-card error-state"
         role="alert"
       >
-        <h2>生成失败</h2>
+        <h2>{{ generateStage === 'timeout' ? '生成超时' : '生成失败' }}</h2>
         <p>{{ generateErrorMessage }}</p>
       </section>
 
@@ -278,7 +361,12 @@ async function handleGenerate() {
       >
         <div class="section-title-row">
           <h2 id="generate-result-title">生成结果</h2>
-          <StatusTag :status="generateResult.status || 'unknown'" />
+          <StatusTag :status="resultState || generateResult.status || 'unknown'" />
+        </div>
+
+        <div class="result-summary-copy">
+          <p class="result-summary-title">{{ resultHeadline }}</p>
+          <p class="generated-page-note">{{ resultDescription }}</p>
         </div>
 
         <dl class="task-meta">
@@ -302,14 +390,60 @@ async function handleGenerate() {
             <dt>aiUsed</dt>
             <dd>{{ displayAiUsed }}</dd>
           </div>
+          <div>
+            <dt>promptVersion</dt>
+            <dd>{{ promptVersion || '-' }}</dd>
+          </div>
+          <div>
+            <dt>fallbackReason</dt>
+            <dd>{{ fallbackReason || '-' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section
+        v-if="generateResult"
+        class="detail-card"
+        aria-labelledby="artifact-info-title"
+      >
+        <div class="section-title-row">
+          <h2 id="artifact-info-title">Artifact 信息</h2>
+          <StatusTag :status="artifactInfo ? 'success' : 'pending'" />
+        </div>
+
+        <dl class="task-meta">
+          <div>
+            <dt>artifact.reused</dt>
+            <dd>{{ artifactReused }}</dd>
+          </div>
+          <div>
+            <dt>layoutFileName</dt>
+            <dd>{{ artifactInfo?.layoutFileName || '-' }}</dd>
+          </div>
+          <div>
+            <dt>previewFileName</dt>
+            <dd>{{ artifactInfo?.previewFileName || '-' }}</dd>
+          </div>
+          <div>
+            <dt>metadataFileName</dt>
+            <dd>{{ artifactInfo?.metadataFileName || '-' }}</dd>
+          </div>
         </dl>
       </section>
 
       <section
         v-if="generateResult"
         class="generated-validation-grid"
-        aria-label="错误与警告"
+        aria-label="错误、警告与调试信息"
       >
+        <CodeBlock
+          title="errors"
+          :code="topLevelErrors.length ? JSON.stringify(topLevelErrors, null, 2) : ''"
+        />
+        <CodeBlock
+          title="warnings"
+          :code="topLevelWarnings.length ? JSON.stringify(topLevelWarnings, null, 2) : ''"
+        />
         <CodeBlock
           title="validation.errors"
           :code="validationErrors.length ? JSON.stringify(validationErrors, null, 2) : ''"
@@ -337,11 +471,17 @@ async function handleGenerate() {
       >
         <div class="section-title-row">
           <h2 id="preview-html-title">iframe 预览</h2>
-          <StatusTag :status="generateResult.status || 'unknown'" />
+          <StatusTag :status="resultState || generateResult.status || 'unknown'" />
         </div>
 
         <p
-          v-if="generateStage === 'failed' || generateResult.status === 'FAILED'"
+          v-if="generateStage === 'timeout'"
+          class="generated-page-note"
+        >
+          当前请求已超时，暂无可预览内容。
+        </p>
+        <p
+          v-else-if="generateStage === 'failed' || generateResult.status === 'FAILED'"
           class="generated-page-note"
         >
           当前结果为 FAILED，不展示 iframe 预览。

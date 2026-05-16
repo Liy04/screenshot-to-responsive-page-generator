@@ -7,23 +7,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 @Service
 public class ImagePageGenerateService {
 
     private final ImagePageUploadService imagePageUploadService;
+    private final ImagePageArtifactStorageService artifactStorageService;
+    private final ImagePageWorkerRunner workerRunner;
     private final ObjectMapper objectMapper;
     private final String pythonCommand;
     private final String workerMode;
@@ -33,6 +27,8 @@ public class ImagePageGenerateService {
 
     public ImagePageGenerateService(
             ImagePageUploadService imagePageUploadService,
+            ImagePageArtifactStorageService artifactStorageService,
+            ImagePageWorkerRunner workerRunner,
             ObjectMapper objectMapper,
             @Value("${imagepage.worker.python-command:python}") String pythonCommand,
             @Value("${imagepage.worker.mode:real-ai}") String workerMode,
@@ -41,6 +37,8 @@ public class ImagePageGenerateService {
             @Value("${imagepage.worker.timeout-seconds:30}") long workerTimeoutSeconds
     ) {
         this.imagePageUploadService = imagePageUploadService;
+        this.artifactStorageService = artifactStorageService;
+        this.workerRunner = workerRunner;
         this.objectMapper = objectMapper;
         this.pythonCommand = pythonCommand;
         this.workerMode = workerMode;
@@ -51,95 +49,108 @@ public class ImagePageGenerateService {
 
     public ImagePageGenerateResponse generate(String jobId) {
         ImagePageSourceRecord sourceRecord = imagePageUploadService.getSource(jobId);
-        Path workerMainScript = resolveWorkerMainScript();
-
-        ProcessBuilder processBuilder = new ProcessBuilder(buildCommand(jobId, sourceRecord.filePath(), workerMainScript));
-        processBuilder.directory(resolveRepoRoot().toFile());
-        processBuilder.environment().put("PYTHONIOENCODING", "utf-8");
-
-        Process process;
-        try {
-            process = processBuilder.start();
-        } catch (IOException exception) {
-            throw new IllegalStateException("Python Worker 启动失败: " + exception.getMessage(), exception);
+        Path jobDirectory = sourceRecord.filePath().toAbsolutePath().normalize().getParent();
+        if (jobDirectory == null) {
+            throw new IllegalStateException("未找到 job artifact 目录");
         }
 
-        ProcessOutput processOutput = readProcessOutput(process);
-
-        boolean finished;
-        try {
-            finished = process.waitFor(workerTimeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            process.destroyForcibly();
-            processOutput.close();
-            throw new IllegalStateException("等待 Python Worker 结果时被中断", exception);
+        Optional<ImagePageGenerateResponse> cachedArtifact = artifactStorageService.loadSuccessfulArtifact(jobId, jobDirectory);
+        if (cachedArtifact.isPresent()) {
+            return cachedArtifact.get();
         }
 
-        if (!finished) {
-            process.destroyForcibly();
-            processOutput.close();
-            throw new ImagePageWorkerTimeoutException("Python Worker 执行超时，超过 " + workerTimeout.toSeconds() + " 秒");
+        ImagePageWorkerExecutionResult executionResult = workerRunner.run(
+                jobId,
+                sourceRecord.filePath(),
+                pythonCommand,
+                resolveWorkerMainScript().toAbsolutePath().normalize().toString(),
+                workerMode,
+                workerFallback,
+                workerTimeout,
+                resolveRepoRoot()
+        );
+
+        JsonNode workerResult = parseWorkerResult(executionResult.stdout());
+
+        if (executionResult.exitCode() != 0 && workerResult.isMissingNode()) {
+            throw new IllegalStateException("Python Worker 执行失败，exitCode=" + executionResult.exitCode() + ", stderr=" + executionResult.stderr());
         }
 
-        String stdout = processOutput.stdout();
-        String stderr = processOutput.stderr();
-        int exitCode = process.exitValue();
-        JsonNode workerResult = parseWorkerResult(stdout);
+        ImagePageGenerateResponse response = toResponse(jobId, executionResult, workerResult, false);
 
-        if (exitCode != 0 && workerResult.isMissingNode()) {
-            throw new IllegalStateException("Python Worker 执行失败，exitCode=" + exitCode + ", stderr=" + stderr);
+        if (executionResult.exitCode() != 0 && isBlank(response.status()) && isBlank(response.message())) {
+            throw new IllegalStateException("Python Worker 执行失败，exitCode=" + executionResult.exitCode() + ", stderr=" + executionResult.stderr());
         }
 
-        ImagePageGenerateResponse response = toResponse(jobId, exitCode, stdout, stderr, workerResult);
-
-        if (exitCode != 0 && isBlank(response.status()) && isBlank(response.message())) {
-            throw new IllegalStateException("Python Worker 执行失败，exitCode=" + exitCode + ", stderr=" + stderr);
+        if (isSuccessfulArtifact(response)) {
+            artifactStorageService.saveSuccessArtifact(jobDirectory, response);
+            return withArtifactReuseFlag(response, false);
         }
 
         return response;
     }
 
-    private List<String> buildCommand(String jobId, Path imagePath, Path workerMainScript) {
-        List<String> command = new ArrayList<>();
-        command.add(pythonCommand);
-        command.add(workerMainScript.toAbsolutePath().normalize().toString());
-        command.add("--job-id");
-        command.add(jobId.toString());
-        command.add("--image-path");
-        command.add(imagePath.toAbsolutePath().normalize().toString());
-        command.add("--mode");
-        command.add(workerMode);
-        command.add("--fallback");
-        command.add(Boolean.toString(workerFallback));
-        return command;
-    }
-
     private ImagePageGenerateResponse toResponse(
             String fallbackJobId,
-            int exitCode,
-            String stdout,
-            String stderr,
-            JsonNode workerResult
+            ImagePageWorkerExecutionResult executionResult,
+            JsonNode workerResult,
+            boolean reused
     ) {
         JsonNode validationNode = getOptionalNode(workerResult, "validation");
         JsonNode layoutJsonNode = getOptionalNode(workerResult, "layoutJson");
+        JsonNode warningsNode = getOptionalNode(validationNode, "warnings");
+        JsonNode errorsNode = getOptionalNode(validationNode, "errors");
 
         return new ImagePageGenerateResponse(
                 getText(workerResult, "jobId", fallbackJobId),
-                getText(workerResult, "status", exitCode == 0 ? "SUCCESS" : "FAILED"),
+                getText(workerResult, "status", executionResult.exitCode() == 0 ? "SUCCESS" : "FAILED"),
                 getText(workerResult, "mode", workerMode),
                 getBoolean(workerResult, "fallbackUsed", workerFallback),
+                textOrNull(workerResult, "fallbackReason"),
                 getText(workerResult, "sourceType", ""),
+                textOrNull(workerResult, "promptVersion"),
                 layoutJsonNode,
                 getText(workerResult, "previewHtml", ""),
                 validationNode,
-                getText(workerResult, "message", exitCode == 0 ? "Worker finished successfully." : "Worker returned a non-zero exit code."),
-                exitCode,
-                stdout,
-                stderr,
+                warningsNode,
+                errorsNode,
+                getText(workerResult, "message", executionResult.exitCode() == 0 ? "Worker finished successfully." : "Worker returned a non-zero exit code."),
+                artifactStorageService.buildArtifactInfo(reused),
+                executionResult.exitCode(),
+                executionResult.stdout(),
+                executionResult.stderr(),
                 workerResult.isMissingNode() ? null : workerResult
         );
+    }
+
+    private ImagePageGenerateResponse withArtifactReuseFlag(ImagePageGenerateResponse response, boolean reused) {
+        return new ImagePageGenerateResponse(
+                response.jobId(),
+                response.status(),
+                response.mode(),
+                response.fallbackUsed(),
+                response.fallbackReason(),
+                response.sourceType(),
+                response.promptVersion(),
+                response.layoutJson(),
+                response.previewHtml(),
+                response.validation(),
+                response.warnings(),
+                response.errors(),
+                response.message(),
+                artifactStorageService.buildArtifactInfo(reused),
+                response.exitCode(),
+                response.stdout(),
+                response.stderr(),
+                response.workerResult()
+        );
+    }
+
+    private boolean isSuccessfulArtifact(ImagePageGenerateResponse response) {
+        return "SUCCESS".equals(response.status())
+                && response.layoutJson() != null
+                && response.previewHtml() != null
+                && !response.previewHtml().isBlank();
     }
 
     private JsonNode parseWorkerResult(String stdout) {
@@ -150,26 +161,6 @@ public class ImagePageGenerateService {
             return objectMapper.readTree(stdout);
         } catch (IOException exception) {
             throw new IllegalStateException("解析 Python Worker JSON 输出失败: " + exception.getMessage(), exception);
-        }
-    }
-
-    private String readStream(InputStream inputStream) {
-        try {
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).trim();
-        } catch (IOException exception) {
-            throw new IllegalStateException("读取 Python Worker 输出流失败: " + exception.getMessage(), exception);
-        }
-    }
-
-    private ProcessOutput readProcessOutput(Process process) {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        try {
-            Future<String> stdoutFuture = executorService.submit(() -> readStream(process.getInputStream()));
-            Future<String> stderrFuture = executorService.submit(() -> readStream(process.getErrorStream()));
-            return new ProcessOutput(stdoutFuture, stderrFuture, executorService);
-        } catch (RuntimeException exception) {
-            executorService.shutdownNow();
-            throw exception;
         }
     }
 
@@ -220,6 +211,11 @@ public class ImagePageGenerateService {
         return text == null ? fallbackValue : text;
     }
 
+    private String textOrNull(JsonNode node, String fieldName) {
+        JsonNode value = getOptionalNode(node, fieldName);
+        return value == null ? null : value.asText();
+    }
+
     private boolean getBoolean(JsonNode node, String fieldName, boolean fallbackValue) {
         JsonNode value = getOptionalNode(node, fieldName);
         return value == null ? fallbackValue : value.asBoolean(fallbackValue);
@@ -227,35 +223,5 @@ public class ImagePageGenerateService {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
-    }
-
-    private record ProcessOutput(Future<String> stdoutFuture, Future<String> stderrFuture, ExecutorService executorService) {
-
-        String stdout() {
-            return get(stdoutFuture);
-        }
-
-        String stderr() {
-            try {
-                return get(stderrFuture);
-            } finally {
-                close();
-            }
-        }
-
-        void close() {
-            executorService.shutdownNow();
-        }
-
-        private String get(Future<String> future) {
-            try {
-                return future.get();
-            } catch (InterruptedException exception) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException("读取 Python Worker 输出时被中断", exception);
-            } catch (ExecutionException exception) {
-                throw new IllegalStateException("读取 Python Worker 输出失败: " + exception.getCause().getMessage(), exception.getCause());
-            }
-        }
     }
 }

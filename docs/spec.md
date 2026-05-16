@@ -703,7 +703,7 @@ Week 10 不改 Week 09 主链路，只补稳定性、可解释性和可复验相
 
 - Worker 返回的 metadata 应包含 `promptVersion`。
 - `promptVersion` 用于标识当前真实 AI 提示词版本，便于回看和比对。
-- 示例值可为 `week10-v1`，但最终值由实现线程决定。
+- 当前已收口值为 `week10-v1`。
 
 ### fallbackReason
 
@@ -742,6 +742,7 @@ Week 10 约定同一 `jobId` 对应的本地 artifact 至少包含：
 - 同一 `jobId` 已存在成功 artifact 时，不应重复调用真实 AI。
 - 查询已有结果时应优先返回本地 artifact。
 - 复用结果时返回内容应与原始生成结果保持一致或在 metadata 中说明差异来源。
+- 当前收口口径：第二次 generate 命中 `artifact.reused=true`，不重复调用 Worker。
 
 ### API key 安全规则
 
@@ -759,3 +760,9 @@ Week 10 约定同一 `jobId` 对应的本地 artifact 至少包含：
 - Worker smoke 示例应使用明确存在的样例路径，例如：
   - `samples/01-simple-card-page.png`
 - 不要依赖不存在的路径，如 `storage/temp/job_demo/input.png`。
+
+### 运行副产物规则
+
+- `backend/storage/` 属于运行副产物目录，不应提交到仓库。
+- `frontend/dist/` 和其他本地产物同样不应提交。
+- 本轮 smoke 使用临时公开安全样例图，不要求把私人本地图片路径固化进文档或仓库。

@@ -1,136 +1,123 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import ImageToLayoutDev from '../ImageToLayoutDev.vue'
-import { createImagePageJob } from '../../api/imageLayoutApi'
+import { generateImagePage, uploadImagePageSource } from '../../api/imageLayoutApi'
 
 vi.mock('../../api/imageLayoutApi', () => ({
-  createImagePageJob: vi.fn(),
+  uploadImagePageSource: vi.fn(),
+  generateImagePage: vi.fn(),
 }))
 
-const landingSuccessResult = {
-  jobId: 'img-page-landing-001',
+const uploadResult = {
+  jobId: 'imgjob_real_001',
+  fileName: 'demo.png',
+  sourceUrl: '/api/image-page/jobs/imgjob_real_001/source',
+}
+
+const realAiResult = {
   status: 'SUCCESS',
-  sourceType: 'IMAGE_TEMPLATE_MOCK',
-  imageName: 'demo.png',
-  templateKey: 'landing-basic',
-  layoutArtifact: {
-    status: 'SUCCESS',
-    layoutJson: {
-      version: '0.1',
-      page: {
-        title: 'Landing Page',
-      },
-      source: {
-        type: 'manual',
-      },
-      tokens: {},
-      layout: {
-        type: 'page',
-        children: [
-          {
-            type: 'section',
-            children: [
-              {
-                type: 'text',
-                role: 'heading',
-                content: 'Landing Hero',
-              },
-            ],
-          },
-        ],
-      },
-      assets: [],
-      responsive: {},
-      assumptions: [],
-      warnings: [],
-    },
-  },
-  generatedPageArtifact: {
-    status: 'SUCCESS',
-    htmlCode: '<main><section><h1>Landing Hero</h1></section></main>',
-    cssCode: '.hero { color: #111827; }',
-    vueCode: '<template><main>Landing Hero</main></template>',
-  },
-  errors: [],
+  mode: 'real-ai',
+  fallbackUsed: false,
+  sourceType: 'REAL_AI',
+  promptVersion: 'week10-v1',
+  fallbackReason: '',
   warnings: [],
+  errors: [],
+  artifact: {
+    reused: false,
+    layoutFileName: 'layout.json',
+    previewFileName: 'preview.html',
+    metadataFileName: 'metadata.json',
+  },
+  validation: {
+    ok: true,
+    errors: [],
+    warnings: [],
+  },
+  layoutJson: {
+    version: '0.1',
+    page: {
+      name: '产品管理',
+    },
+    source: {
+      type: 'screenshot',
+    },
+    tokens: {},
+    layout: {
+      type: 'page',
+      children: [],
+    },
+    assets: [],
+    responsive: {},
+    assumptions: [],
+    warnings: [],
+  },
+  previewHtml: '<!doctype html><html><body><main>REAL_AI</main></body></html>',
 }
 
-const cardListSuccessResult = {
-  ...landingSuccessResult,
-  jobId: 'img-page-card-list-001',
-  imageName: 'cards.png',
-  templateKey: 'card-list',
-  layoutArtifact: {
-    ...landingSuccessResult.layoutArtifact,
-    layoutJson: {
-      ...landingSuccessResult.layoutArtifact.layoutJson,
-      page: {
-        title: 'Card List',
-      },
-      layout: {
-        type: 'page',
-        children: [
-          {
-            type: 'list',
-            children: [
-              {
-                type: 'listItem',
-                children: [
-                  {
-                    type: 'text',
-                    content: 'Card Item 1',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
+const fallbackResult = {
+  ...realAiResult,
+  status: 'SUCCESS',
+  mode: 'fallback',
+  fallbackUsed: true,
+  sourceType: 'FALLBACK_RULE',
+  fallbackReason: 'MODEL_NON_JSON_OUTPUT',
+  warnings: [
+    {
+      code: 'FALLBACK_USED',
+      message: '模型输出不可解析，已启用 fallback',
     },
-  },
-  generatedPageArtifact: {
-    status: 'SUCCESS',
-    htmlCode: '<main><ul><li>Card Item 1</li></ul></main>',
-    cssCode: '.card-list { display: grid; gap: 16px; }',
-    vueCode: '<template><main>Card List</main></template>',
-  },
-}
-
-const invalidLayoutResult = {
-  jobId: 'img-page-invalid-001',
-  status: 'FAILED',
-  sourceType: 'IMAGE_TEMPLATE_MOCK',
-  imageName: 'invalid.png',
-  templateKey: 'invalid-layout',
-  layoutArtifact: {
-    status: 'FAILED',
-    layoutJson: {
-      version: '0.1',
-      page: {},
-      source: {},
-      tokens: {},
-      layout: {},
-      assets: [],
-      responsive: {},
-      assumptions: [],
-      warnings: [],
-    },
-  },
-  generatedPageArtifact: null,
+  ],
   errors: [
     {
-      code: 'LAYOUT_INVALID',
-      message: 'layout 根节点缺失必要字段',
-      path: 'layout',
+      code: 'MODEL_NON_JSON_OUTPUT',
+      message: '模型未返回合法 JSON',
+    },
+  ],
+  artifact: {
+    reused: true,
+    layoutFileName: 'layout.json',
+    previewFileName: 'preview.html',
+    metadataFileName: 'metadata.json',
+  },
+  previewHtml: '<!doctype html><html><body><main>FALLBACK</main></body></html>',
+}
+
+const failedResult = {
+  ...realAiResult,
+  status: 'FAILED',
+  mode: 'real-ai',
+  fallbackUsed: false,
+  sourceType: 'REAL_AI',
+  previewHtml: '',
+  errors: [
+    {
+      code: 'PREVIEW_COMPILE_FAILED',
+      message: 'preview 编译失败',
     },
   ],
   warnings: [
     {
-      code: 'TEMPLATE_DEGRADED',
-      message: '模板仅返回失败调试信息',
-      path: 'layout',
+      code: 'PARTIAL_LAYOUT',
+      message: '部分节点已被跳过',
     },
   ],
+  validation: {
+    ok: false,
+    errors: [
+      {
+        code: 'LAYOUT_INVALID',
+        message: 'layout 根节点缺失必要字段',
+      },
+    ],
+    warnings: [],
+  },
+  artifact: {
+    reused: false,
+    layoutFileName: 'layout.json',
+    previewFileName: '',
+    metadataFileName: 'metadata.json',
+  },
 }
 
 function mountPage() {
@@ -155,8 +142,13 @@ async function selectFile(wrapper, file) {
   await input.trigger('change')
 }
 
-async function submitForm(wrapper) {
+async function uploadSelectedFile(wrapper) {
   await wrapper.find('form').trigger('submit.prevent')
+  await flushPromises()
+}
+
+async function generateForUploadedFile(wrapper) {
+  await wrapper.find('button.secondary-button').trigger('click')
   await flushPromises()
 }
 
@@ -172,37 +164,29 @@ describe('ImageToLayoutDev', () => {
     vi.clearAllMocks()
   })
 
-  it('submits landing-basic with imageName and shows SUCCESS artifact with secure iframe', async () => {
-    createImagePageJob.mockResolvedValue(landingSuccessResult)
+  it('shows REAL_AI state, promptVersion, artifact info, and secure iframe preview', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue(realAiResult)
 
     const wrapper = mountPage()
     const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
 
     await selectFile(wrapper, file)
-    await wrapper.find('#template-key-select').setValue('landing-basic')
-    await submitForm(wrapper)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
 
-    expect(createImagePageJob).toHaveBeenCalledWith({
-      imageName: 'demo.png',
-      templateKey: 'landing-basic',
-    })
+    expect(uploadImagePageSource).toHaveBeenCalledTimes(1)
+    expect(uploadImagePageSource).toHaveBeenCalledWith(file)
+    expect(generateImagePage).toHaveBeenCalledWith('imgjob_real_001')
 
-    const requestPayload = createImagePageJob.mock.calls[0][0]
-    expect(requestPayload).not.toBe(file)
-    expect(requestPayload.file).toBeUndefined()
-    expect(requestPayload.base64).toBeUndefined()
-    expect(requestPayload.formData).toBeUndefined()
-    expect(requestPayload.imageName).toBe('demo.png')
-    expect(requestPayload.templateKey).toBe('landing-basic')
-
-    expect(wrapper.text()).toContain('img-page-landing-001')
-    expect(wrapper.text()).toContain('SUCCESS')
-    expect(wrapper.text()).toContain('IMAGE_TEMPLATE_MOCK')
-    expect(wrapper.text()).toContain('Landing Page')
-    expect(wrapper.text()).toContain('generatedPageArtifact')
-    expect(wrapper.text()).toContain('Landing Hero')
-    expect(wrapper.text()).toContain('.hero { color: #111827; }')
-    expect(wrapper.text()).toContain('<template><main>Landing Hero</main></template>')
+    expect(wrapper.text()).toContain('REAL_AI 成功')
+    expect(wrapper.text()).toContain('REAL_AI')
+    expect(wrapper.text()).toContain('week10-v1')
+    expect(wrapper.text()).toContain('layout.json')
+    expect(wrapper.text()).toContain('preview.html')
+    expect(wrapper.text()).toContain('metadata.json')
+    expect(wrapper.text()).toContain('false')
+    expect(wrapper.text()).toContain('/api/image-page/jobs/imgjob_real_001/source')
 
     const iframe = wrapper.find('iframe')
     expect(iframe.exists()).toBe(true)
@@ -211,75 +195,74 @@ describe('ImageToLayoutDev', () => {
     expect(iframe.html()).not.toContain('allow-scripts')
   })
 
-  it('shows generatedPageArtifact for card-list and keeps iframe sandbox safe', async () => {
-    createImagePageJob.mockResolvedValue(cardListSuccessResult)
+  it('shows FALLBACK state and fallbackReason with visible warnings and errors', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue(fallbackResult)
 
     const wrapper = mountPage()
-    const file = new File(['fake-image'], 'cards.png', { type: 'image/png' })
+    const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
 
     await selectFile(wrapper, file)
-    await wrapper.find('#template-key-select').setValue('card-list')
-    await submitForm(wrapper)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
 
-    expect(createImagePageJob).toHaveBeenCalledWith({
-      imageName: 'cards.png',
-      templateKey: 'card-list',
-    })
-    expect(wrapper.text()).toContain('img-page-card-list-001')
-    expect(wrapper.text()).toContain('Card List')
-    expect(wrapper.text()).toContain('Card Item 1')
-    expect(wrapper.text()).toContain('.card-list { display: grid; gap: 16px; }')
-    expect(wrapper.text()).toContain('<template><main>Card List</main></template>')
+    expect(wrapper.text()).toContain('FALLBACK')
+    expect(wrapper.text()).toContain('MODEL_NON_JSON_OUTPUT')
+    expect(wrapper.text()).toContain('模型未返回合法 JSON')
+    expect(wrapper.text()).toContain('模型输出不可解析，已启用 fallback')
+    expect(wrapper.text()).toContain('true')
+    expect(wrapper.text()).toContain('FALLBACK_RULE')
+    expect(wrapper.text()).toContain('artifact.reused')
+    expect(wrapper.text()).toContain('true')
 
     const iframe = wrapper.find('iframe')
     expect(iframe.exists()).toBe(true)
     expect(iframe.attributes('sandbox')).toBe('')
     expect(iframe.attributes('allow')).toBeUndefined()
-    expect(iframe.html()).not.toContain('allow-scripts')
   })
 
-  it('shows FAILED state for invalid-layout and does not render iframe', async () => {
-    createImagePageJob.mockResolvedValue(invalidLayoutResult)
+  it('shows FAILED state, errors, warnings, and no iframe preview', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue(failedResult)
 
     const wrapper = mountPage()
-    const file = new File(['fake-image'], 'invalid.png', { type: 'image/png' })
+    const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
 
     await selectFile(wrapper, file)
-    await wrapper.find('#template-key-select').setValue('invalid-layout')
-    await submitForm(wrapper)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
 
-    expect(createImagePageJob).toHaveBeenCalledWith({
-      imageName: 'invalid.png',
-      templateKey: 'invalid-layout',
-    })
     expect(wrapper.text()).toContain('FAILED')
+    expect(wrapper.text()).toContain('preview 编译失败')
+    expect(wrapper.text()).toContain('PARTIAL_LAYOUT')
     expect(wrapper.text()).toContain('LAYOUT_INVALID')
-    expect(wrapper.text()).toContain('layout 根节点缺失必要字段')
-    expect(wrapper.text()).toContain('TEMPLATE_DEGRADED')
-    expect(wrapper.text()).toContain('当前结果为 FAILED 或缺少 generatedPageArtifact，不展示 iframe 预览。')
+    expect(wrapper.text()).toContain('当前结果为 FAILED，不展示 iframe 预览。')
     expect(wrapper.find('iframe').exists()).toBe(false)
   })
 
-  it('shows error state when createImagePageJob rejects', async () => {
-    createImagePageJob.mockRejectedValue(new Error('Unknown templateKey'))
+  it('shows TIMEOUT state when generate request times out', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockRejectedValue(new Error('Worker timeout after 120 seconds'))
 
     const wrapper = mountPage()
     const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
 
     await selectFile(wrapper, file)
-    await submitForm(wrapper)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
 
-    expect(wrapper.text()).toContain('请求失败')
-    expect(wrapper.text()).toContain('Unknown templateKey')
+    expect(wrapper.text()).toContain('生成超时')
+    expect(wrapper.text()).toContain('Worker timeout after 120 seconds')
     expect(wrapper.find('iframe').exists()).toBe(false)
   })
 
-  it('does not submit when no image is selected', async () => {
+  it('does not upload when no image is selected', async () => {
     const wrapper = mountPage()
 
-    await submitForm(wrapper)
+    await uploadSelectedFile(wrapper)
 
-    expect(createImagePageJob).not.toHaveBeenCalled()
+    expect(uploadImagePageSource).not.toHaveBeenCalled()
+    expect(generateImagePage).not.toHaveBeenCalled()
     expect(wrapper.text()).toContain('请先选择一张本地图片')
     expect(wrapper.find('iframe').exists()).toBe(false)
   })

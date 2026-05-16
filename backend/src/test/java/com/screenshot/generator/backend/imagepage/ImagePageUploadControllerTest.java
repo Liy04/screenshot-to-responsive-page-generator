@@ -10,15 +10,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,6 +46,31 @@ class ImagePageUploadControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private ImagePageWorkerRunner workerRunner;
+
+    private final List<String> createdJobIds = new ArrayList<>();
+
+    @AfterEach
+    void cleanupCreatedJobDirectories() throws IOException {
+        for (String jobId : createdJobIds) {
+            Path jobDirectory = Path.of("storage", "temp", jobId).toAbsolutePath().normalize();
+            if (!Files.exists(jobDirectory)) {
+                continue;
+            }
+            try (var pathStream = Files.walk(jobDirectory)) {
+                pathStream.sorted(Comparator.reverseOrder())
+                        .forEach(path -> {
+                            try {
+                                Files.deleteIfExists(path);
+                            } catch (IOException ignored) {
+                            }
+                        });
+            }
+        }
+        createdJobIds.clear();
+    }
 
     @Test
     void uploadPngReturnsJobIdFileNameAndSourceUrl() throws Exception {
@@ -177,12 +218,18 @@ class ImagePageUploadControllerTest {
                 "generate.png",
                 "image/png",
                 "generate-content".getBytes());
+        when(workerRunner.run(anyString(), any(Path.class), anyString(), anyString(), anyString(), anyBoolean(), any(), any(Path.class)))
+                .thenAnswer(invocation -> {
+                    String jobId = invocation.getArgument(0, String.class);
+                    return new ImagePageWorkerExecutionResult(0, successWorkerJson(jobId), "");
+                });
 
         MvcResult uploadResult = mockMvc.perform(multipart(UPLOAD_PATH).file(file))
                 .andExpect(status().isOk())
                 .andReturn();
         String responseBody = uploadResult.getResponse().getContentAsString();
         String jobId = responseBody.replaceFirst("(?s).*\"jobId\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+        createdJobIds.add(jobId);
 
         mockMvc.perform(post(GENERATE_PATH, jobId))
                 .andExpect(status().isOk())
@@ -190,16 +237,74 @@ class ImagePageUploadControllerTest {
                 .andExpect(jsonPath("$.data.jobId", is(jobId)))
                 .andExpect(jsonPath("$.data.status", is("SUCCESS")))
                 .andExpect(jsonPath("$.data.mode", is("real-ai")))
-                .andExpect(jsonPath("$.data.fallbackUsed").exists())
-                .andExpect(jsonPath("$.data.sourceType", matchesPattern(".+")))
+                .andExpect(jsonPath("$.data.fallbackUsed", is(true)))
+                .andExpect(jsonPath("$.data.fallbackReason", is("MODEL_UNAVAILABLE")))
+                .andExpect(jsonPath("$.data.sourceType", is("FALLBACK_RULE")))
+                .andExpect(jsonPath("$.data.promptVersion", is("week10-v1")))
                 .andExpect(jsonPath("$.data.exitCode", is(0)))
                 .andExpect(jsonPath("$.data.layoutJson.version", is("0.1")))
                 .andExpect(jsonPath("$.data.layoutJson.layout").exists())
                 .andExpect(jsonPath("$.data.previewHtml", containsString("<!doctype html>")))
                 .andExpect(jsonPath("$.data.validation.ok", is(true)))
+                .andExpect(jsonPath("$.data.validation.errors.length()", is(0)))
+                .andExpect(jsonPath("$.data.validation.warnings.length()", is(1)))
+                .andExpect(jsonPath("$.data.warnings.length()", is(1)))
+                .andExpect(jsonPath("$.data.errors.length()", is(0)))
                 .andExpect(jsonPath("$.data.message", matchesPattern(".+")))
+                .andExpect(jsonPath("$.data.artifact.reused", is(false)))
+                .andExpect(jsonPath("$.data.artifact.layoutFileName", is("layout.json")))
+                .andExpect(jsonPath("$.data.artifact.previewFileName", is("preview.html")))
+                .andExpect(jsonPath("$.data.artifact.metadataFileName", is("metadata.json")))
                 .andExpect(jsonPath("$.data.stdout", containsString(jobId)))
                 .andExpect(jsonPath("$.data.layoutJson.imagePath").doesNotExist());
+
+        Path jobDirectory = Path.of("storage", "temp", jobId).toAbsolutePath().normalize();
+        Path layoutPath = jobDirectory.resolve("layout.json");
+        Path previewPath = jobDirectory.resolve("preview.html");
+        Path metadataPath = jobDirectory.resolve("metadata.json");
+        org.junit.jupiter.api.Assertions.assertTrue(Files.exists(layoutPath));
+        org.junit.jupiter.api.Assertions.assertTrue(Files.exists(previewPath));
+        org.junit.jupiter.api.Assertions.assertTrue(Files.exists(metadataPath));
+
+        String metadata = Files.readString(metadataPath);
+        org.junit.jupiter.api.Assertions.assertTrue(metadata.contains("\"promptVersion\" : \"week10-v1\""));
+        org.junit.jupiter.api.Assertions.assertTrue(metadata.contains("\"fallbackReason\" : \"MODEL_UNAVAILABLE\""));
+        org.junit.jupiter.api.Assertions.assertFalse(metadata.contains("OPENAI_API_KEY"));
+    }
+
+    @Test
+    void generateReusesSuccessfulArtifactWithoutCallingWorkerAgain() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "reuse.png",
+                "image/png",
+                "reuse-content".getBytes());
+        when(workerRunner.run(anyString(), any(Path.class), anyString(), anyString(), anyString(), anyBoolean(), any(), any(Path.class)))
+                .thenAnswer(invocation -> {
+                    String jobId = invocation.getArgument(0, String.class);
+                    return new ImagePageWorkerExecutionResult(0, successWorkerJson(jobId), "");
+                });
+
+        MvcResult uploadResult = mockMvc.perform(multipart(UPLOAD_PATH).file(file))
+                .andExpect(status().isOk())
+                .andReturn();
+        String responseBody = uploadResult.getResponse().getContentAsString();
+        String jobId = responseBody.replaceFirst("(?s).*\"jobId\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+        createdJobIds.add(jobId);
+
+        mockMvc.perform(post(GENERATE_PATH, jobId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.artifact.reused", is(false)));
+
+        mockMvc.perform(post(GENERATE_PATH, jobId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.jobId", is(jobId)))
+                .andExpect(jsonPath("$.data.status", is("SUCCESS")))
+                .andExpect(jsonPath("$.data.artifact.reused", is(true)))
+                .andExpect(jsonPath("$.data.layoutJson.version", is("0.1")))
+                .andExpect(jsonPath("$.data.previewHtml", containsString("<!doctype html>")));
+
+        verify(workerRunner, times(1)).run(eq(jobId), any(Path.class), anyString(), anyString(), anyString(), anyBoolean(), any(), any(Path.class));
     }
 
     @Test
@@ -218,5 +323,84 @@ class ImagePageUploadControllerTest {
                 .andExpect(jsonPath("$.code", is(400)))
                 .andExpect(jsonPath("$.message", is("jobId 格式不合法")))
                 .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    private String successWorkerJson(String jobId) {
+        return """
+                {
+                  "jobId": "%s",
+                  "status": "SUCCESS",
+                  "mode": "real-ai",
+                  "fallbackUsed": true,
+                  "fallbackReason": "MODEL_UNAVAILABLE",
+                  "sourceType": "FALLBACK_RULE",
+                  "promptVersion": "week10-v1",
+                  "layoutJson": {
+                    "version": "0.1",
+                    "page": {
+                      "name": "Generated Page",
+                      "type": "generic",
+                      "viewport": {
+                        "width": 1440,
+                        "height": 900
+                      }
+                    },
+                    "source": {
+                      "type": "screenshot",
+                      "fileUrl": null,
+                      "figmaFileKey": null,
+                      "figmaNodeId": null
+                    },
+                    "tokens": {
+                      "colors": {},
+                      "typography": {},
+                      "spacing": {},
+                      "radius": {}
+                    },
+                    "layout": {
+                      "id": "root",
+                      "type": "page",
+                      "role": "page",
+                      "bounds": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 1440,
+                        "height": 900
+                      },
+                      "style": {},
+                      "constraints": {
+                        "horizontal": "fill",
+                        "vertical": "fill"
+                      },
+                      "interactions": [],
+                      "children": []
+                    },
+                    "assets": [],
+                    "responsive": {
+                      "breakpoints": {
+                        "mobile": 390,
+                        "tablet": 768,
+                        "desktop": 1440
+                      },
+                      "rules": []
+                    },
+                    "assumptions": [],
+                    "warnings": []
+                  },
+                  "previewHtml": "<!doctype html><html><body><main>preview</main></body></html>",
+                  "validation": {
+                    "ok": true,
+                    "errors": [],
+                    "warnings": [
+                      {
+                        "code": "FALLBACK_TEMPLATE_USED",
+                        "message": "Fallback template was used.",
+                        "path": "$.layout"
+                      }
+                    ]
+                  },
+                  "message": "Real AI failed, fallback resolver produced a validated Layout JSON."
+                }
+                """.formatted(jobId);
     }
 }
