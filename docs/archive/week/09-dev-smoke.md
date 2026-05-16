@@ -81,6 +81,23 @@ npm run dev
 - `previewHtml` 非空
 - 页面 iframe 渲染成功
 
+## 8A. 最终 smoke 结果
+
+Week 09 最终 smoke 已通过，最终确认口径如下：
+
+- 真实图片上传成功
+- 后端成功调用 Python Worker
+- Worker 成功调用 SiliconFlow Qwen3-VL
+- `REAL_AI` 命中
+- `sourceType=REAL_AI`
+- `fallbackUsed=false`
+- `layoutJson.version=0.1`
+- `validation.ok=true`
+- `previewHtml` 非空
+- 前端页面 iframe 正常渲染
+- iframe 使用 `sandbox=""`
+- 运行时代码中未发现 `allow-scripts`
+
 ## 9. fallback 可接受但需说明的标准
 
 以下情况可以继续记录为“可接受但未命中 REAL_AI”：
@@ -126,3 +143,14 @@ npm run dev
 
 - 现象：接口成功但未命中真实 AI
 - 处理：检查 `OPENAI_*`、Python 路径、超时时间、模型可用性，并记录为 fallback 成功而非 REAL_AI 成功
+
+## 12. 最终复测配置摘要
+
+- Python：`D:\environment\python11\python.exe`
+- Python 版本：`3.11.9`
+- backend 启动参数：`--imagepage.worker.timeout-seconds=120`
+- 环境变量：
+  - `OPENAI_BASE_URL=https://api.siliconflow.cn/v1`
+  - `OPENAI_MODEL=Qwen/Qwen3-VL-32B-Instruct`
+  - `OPENAI_API_KEY` 仅通过环境变量提供，文档不写真实值
+  - `IMAGEPAGE_WORKER_PYTHON_COMMAND=D:\environment\python11\python.exe`

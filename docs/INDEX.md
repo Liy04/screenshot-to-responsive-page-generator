@@ -32,31 +32,31 @@ docs/
 
 | 类型 | 路径 | 说明 |
 |---|---|---|
-| 当前阶段事实源 | `docs/current.md` | Week 09 已完成收口，准备进入下一周规划 |
-| 当前计划摘要 | `docs/plan.md` | Week 09 完成摘要和后续建议 |
-| 当前核心规格 | `docs/spec.md` | 当前 generated-page MVP 闭环、Week 09 真实链路契约与运行配置要求 |
-| 当前任务卡目录 | `docs/tasks/` | Week 09 日卡已清理，等待下一周重新生成 `day-xx.md` |
+| 当前阶段事实源 | `docs/current.md` | Week 10：真实 AI 链路稳定化与可复现验收 |
+| 当前计划摘要 | `docs/plan.md` | Week 10 简版开发计划、P0/P1/P2 和 7 天计划 |
+| 当前核心规格 | `docs/spec.md` | Week 09 真实链路契约 + Week 10 稳定化补充契约 |
+| 当前任务卡 | `docs/tasks/day-xx.md` | 由项目经理按当天指定的 Week 10 任务卡 |
 | context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
-| 历史归档 | `docs/archive/` | 历史计划、任务卡、规格、提示词和参考文档 |
+| 历史归档 | `docs/archive/` | 历史计划、总结、smoke、提示词和参考文档 |
 
-## Week 09 入口
+## Week 10 入口
 
 | 类型 | 路径 |
 |---|---|
-| Week 09 原始长计划归档 | `docs/archive/week/09-plan.md` |
-| Week 09 总结归档 | `docs/archive/week/09-summary.md` |
-| Week 09 smoke 归档 | `docs/archive/week/09-dev-smoke.md` |
-| Week 09 运行配置说明 | `docs/spec.md` |
+| Week 10 原始计划归档 | `docs/archive/week/10-acceptance-plan.md` |
+| Week 10 Day 01 | `docs/tasks/day-01.md` |
+| Week 10 Day 02 | `docs/tasks/day-02.md` |
+| Week 10 Day 03 | `docs/tasks/day-03.md` |
+| Week 10 Day 04 | `docs/tasks/day-04.md` |
+| Week 10 Day 05 | `docs/tasks/day-05.md` |
+| Week 10 Day 06 | `docs/tasks/day-06.md` |
+| Week 10 Day 07 | `docs/tasks/day-07.md` |
 
 ## 归档说明
 
 `docs/archive/` 只用于历史追溯，不参与默认上下文。
 
-Week 09 的原始长计划、summary 和 dev smoke 已归档到 `docs/archive/week/`。
-
-Week 09 已完成 backend `REAL_AI` 命中验证和前端 iframe 预览验证；后续运行配置以 `docs/spec.md` 为准。
-
-当前没有正在执行中的 `docs/tasks/day-xx.md`；下一周开始时再由文档线程重新生成。
+`docs/archive/week/10-acceptance-plan.md` 是 Week 10 原始验收计划来源，不作为日常默认上下文。
 
 ## 路径优先级
 
@@ -65,8 +65,6 @@ Week 09 已完成 backend `REAL_AI` 命中验证和前端 iframe 预览验证；
 1. `docs/current.md`
 2. `docs/plan.md`
 3. `docs/spec.md`
-4. 当存在活跃日卡时，再读取当天对应的 `docs/tasks/day-xx.md`
+4. 当天对应的 `docs/tasks/day-xx.md`
 5. `docs/playbooks/context-scout.md`
 6. `docs/archive/week/` 中的归档文档（回看或验收时使用）
-
-历史归档中的旧路径允许保留，用于追溯当时上下文。

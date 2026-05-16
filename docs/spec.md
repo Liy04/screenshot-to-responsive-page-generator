@@ -4,7 +4,7 @@
 
 本文档记录当前 generated-page MVP 闭环仍有效的核心契约，并补充 Week 07 / Week 08 mock 协议与 Week 09 真实 AI 最小接入契约，供 Worker、后端 mock / 真实链路和前端预览共用。
 
-当前“生成”始终指确定性静态编译，不是真实 AI 生成。
+当前 Week 09 已允许真实 AI 生成布局中间结果；但对外仍以 Layout JSON v0.1 为契约，`previewHtml` 仍由 Worker 的确定性静态编译器生成，不直接把模型原始输出当页面代码使用。
 
 ## Layout JSON v0.1 核心结构摘要
 
@@ -662,6 +662,27 @@ POST /api/image-page/jobs/{jobId}/generate
 - Python 3.11+ 推荐；当前已验证版本是 `Python 3.11.9`。
 - `imagepage.worker.timeout-seconds` 建议使用 `120`；默认 30 秒不适合真实多模态调用。
 
+### 最终 smoke 可复现条件
+
+- Week 09 最终通过的 REAL_AI 闭环依赖以下条件同时满足：
+  - `OPENAI_BASE_URL=https://api.siliconflow.cn/v1`
+  - `OPENAI_MODEL=Qwen/Qwen3-VL-32B-Instruct`
+  - `OPENAI_API_KEY` 已通过环境变量设置，但不得写入仓库或文档真实值
+  - `IMAGEPAGE_WORKER_PYTHON_COMMAND=D:\\environment\\python11\\python.exe`
+  - Python 版本为 `3.11.9`
+  - backend 启动参数带 `--imagepage.worker.timeout-seconds=120`
+- 默认 30 秒超时不适合 Week 09 真实多模态调用。
+- 如果缺少 `OPENAI_*` 环境变量、Python 版本不符、Worker 路径错误或 timeout 不足，结果可能 fallback 或直接失败。
+- 最终通过口径是：
+  - `status=SUCCESS`
+  - `mode=real-ai`
+  - `fallbackUsed=false`
+  - `sourceType=REAL_AI`
+  - `layoutJson.version=0.1`
+  - `validation.ok=true`
+  - `previewHtml` 非空
+  - 前端 iframe 正常渲染，且 `sandbox=""`、无 `allow-scripts`
+
 PowerShell 示例：
 
 ```powershell
@@ -673,3 +694,68 @@ $env:IMAGEPAGE_WORKER_PYTHON_COMMAND="D:\environment\python11\python.exe"
 cd backend
 java -jar target/backend-0.0.1-SNAPSHOT.jar --imagepage.worker.timeout-seconds=120
 ```
+
+## Week 10：稳定化与可复现验收补充契约
+
+Week 10 不改 Week 09 主链路，只补稳定性、可解释性和可复验相关契约。
+
+### promptVersion
+
+- Worker 返回的 metadata 应包含 `promptVersion`。
+- `promptVersion` 用于标识当前真实 AI 提示词版本，便于回看和比对。
+- 示例值可为 `week10-v1`，但最终值由实现线程决定。
+
+### fallbackReason
+
+- fallback 时必须返回 `fallbackReason`。
+- 建议至少支持以下值：
+  - `MODEL_UNAVAILABLE`
+  - `MODEL_NON_JSON_OUTPUT`
+  - `JSON_PARSE_FAILED`
+  - `SCHEMA_VALIDATION_FAILED`
+  - `IMAGE_READ_FAILED`
+  - `WORKER_TIMEOUT`
+  - `PREVIEW_COMPILE_FAILED`
+
+### warnings / errors
+
+- `warnings` 和 `errors` 必须作为数组返回。
+- `warnings` 用于提示可继续展示但质量受影响的情况。
+- `errors` 用于提示本次失败或 fallback 的直接原因。
+
+### artifact 文件约定
+
+Week 10 约定同一 `jobId` 对应的本地 artifact 至少包含：
+
+- `layout.json`
+- `preview.html`
+- `metadata.json`
+
+如实现线程需要，也可补：
+
+- `warnings.json`
+- `errors.json`
+- `input.png`
+
+### jobId 复用规则
+
+- 同一 `jobId` 已存在成功 artifact 时，不应重复调用真实 AI。
+- 查询已有结果时应优先返回本地 artifact。
+- 复用结果时返回内容应与原始生成结果保持一致或在 metadata 中说明差异来源。
+
+### API key 安全规则
+
+- `OPENAI_API_KEY` 只允许通过环境变量提供。
+- 不允许写入代码、仓库、文档、日志或 artifact 文件。
+- 检查环境变量时，只允许确认是否存在，不允许打印真实值。
+
+### 样例图规则
+
+- `samples/` 目录只允许放公开、无隐私、可提交的测试图片。
+- 不允许提交私人截图、账号信息、公司资料、密钥或敏感页面。
+
+### Worker smoke 样例路径
+
+- Worker smoke 示例应使用明确存在的样例路径，例如：
+  - `samples/01-simple-card-page.png`
+- 不要依赖不存在的路径，如 `storage/temp/job_demo/input.png`。

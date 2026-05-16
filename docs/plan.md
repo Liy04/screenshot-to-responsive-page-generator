@@ -1,80 +1,89 @@
 # Plan
 
-## Week 09 名称
+## Week 10 名称
 
-真实 AI 最小接入，打通单张真实图片到 Layout JSON / generated-page 预览。
+真实 AI 链路稳定化与可复现验收。
 
-## 本周核心目标
+## 本周总目标
 
-Week 09 的目标是打通单张真实图片的最小闭环：
+Week 10 的目标不是扩功能，而是让 Week 09 已跑通的真实 AI 主链路更稳定、更可解释、更可复验：
 
 ```text
-真实图片上传 -> 后端保存临时文件 -> 后端调用 Python Worker -> Worker 调真实 AI
--> Layout JSON v0.1 校验 -> fallback rule resolver 保底 -> generated.html 编译
--> 后端返回 layoutJson + previewHtml -> 前端展示原图、Layout JSON 和 iframe 预览
+真实图片
+-> 后端上传
+-> Python Worker
+-> 真实 AI / fallback
+-> Layout JSON v0.1
+-> previewHtml
+-> 前端状态展示与 iframe 预览
+-> artifact 保存与复用
 ```
 
-本周只追求最小闭环，不追求高保真还原。
+## P0 / P1 / P2
+
+### P0
+
+- `promptVersion` 口径固定。
+- JSON 清洗可处理 markdown code fence 和前后废话。
+- `fallbackReason`、`warnings`、`errors` 可返回。
+- `layout.json`、`preview.html`、`metadata.json` artifact 约定清楚。
+- 同一 `jobId` 可复用，不重复调用 AI。
+- 前端可区分 `REAL_AI` / `FALLBACK` / `FAILED` / `TIMEOUT`。
+- smoke 文档与可公开样例图口径清楚。
+
+### P1
+
+- repair 轻修复规则更稳。
+- Worker / 后端 / 前端测试覆盖更完整。
+- 结果说明、错误提示、调试字段更清楚。
+
+### P2
+
+- `durationMs`、`repairUsed`、debug metadata 展示增强。
+- 结果缓存和一致性策略进一步细化。
 
 ## 本周禁止事项
 
-- 不接 Figma API / MCP。
 - 不接 MySQL。
-- 不创建数据库表。
 - 不创建 Entity / Mapper。
+- 不接 Figma API / Figma MCP。
 - 不接 Redis / RabbitMQ。
-- 不做 Playwright 视觉回归。
 - 不做多页面。
-- 不做批量任务。
-- 不做登录注册。
 - 不做拖拽编辑器。
 - 不做在线编辑器。
 - 不做 ZIP 导出。
+- 不做登录注册 / 权限系统。
+- 不做高保真截图还原。
+- 不提交真实 API key。
+- 不提交私人截图或敏感图片。
 
-## 每日计划
+## 7 天计划
 
-| Day | 线程 | 完成情况 |
+| Day | 线程 | 目标 |
 |---|---|---|
-| Day 1 | 文档线程 | 已完成 Week 09 范围、协议和入口切换 |
-| Day 2 | 后端开发线程 | 已完成单张图片上传与 source 接口 |
-| Day 3 | 后端开发线程（Worker 调用链路） | 已完成后端调用 Python Worker |
-| Day 4 | Worker 开发线程 | 已完成真实图片读取、AI、fallback、validator |
-| Day 5 | Worker 开发线程（HTML compiler 子任务） | 已完成 Layout JSON 到 previewHtml 编译 |
-| Day 6 | 前端开发线程 | 已完成真实主链路接入和 iframe 预览 |
-| Day 7 | 测试线程 | 已完成全链路 smoke 验收与问题收敛 |
+| Day 01 | 文档线程 | 切换 Week 10 Lite 文档、补契约、生成 day 卡、归档原始长计划 |
+| Day 02 | Worker 线程 | 增加 `promptVersion` 与 JSON 清洗 |
+| Day 03 | Worker 线程 | 增加 repair、`fallbackReason` 与相关测试口径 |
+| Day 04 | 后端线程 | 保存 artifact、支持 `jobId` 复用、补返回字段 |
+| Day 05 | 前端线程 | 清晰展示 REAL_AI / FALLBACK / FAILED / TIMEOUT 与 iframe 安全 |
+| Day 06 | 测试线程 | 固化 Worker / 后端 / 前端测试与真实链路 smoke |
+| Day 07 | 文档线程 | 收口 summary / dev smoke / 验收结果，并清理 day 卡 |
 
-## Day 边界
+## Day 2 到 Day 6 边界摘要
 
-- Day 2 保持在上传与原图访问边界内完成。
-- Day 3 只承担后端调用 Python Worker 的调用链路。
-- Day 4 以 Worker 真实 AI、fallback 和 validator 为主。
-- Day 5 只完成 HTML compiler 子任务，不新增 Vue、ZIP 或编辑器。
-- Day 6 只接前端真实链路和 iframe 预览。
-- Day 7 只负责 smoke、记录问题和给出通过 / 不通过结论，不混入修复线程职责。
+- Day 02 只动 Worker 的 `promptVersion` 和 JSON 清洗，不改前后端。
+- Day 03 只动 Worker 的 repair、fallbackReason 和相关测试口径，不扩大成复杂修复系统。
+- Day 04 只动后端 artifact 保存、读取和 `jobId` 复用，不接数据库。
+- Day 05 只动前端状态展示和 iframe 安全，不做编辑器或大 UI 迁移。
+- Day 06 只做测试和 smoke，不修改业务代码。
 
-## 完成摘要
+## 最终交付物
 
-Week 09 已完成真实 AI 最小闭环，项目当前已经具备：
+- Week 10 活跃文档与 day 卡。
+- 可公开样例图约定。
+- Worker / 后端 / 前端测试与 smoke 文档口径。
+- Week 10 summary、dev smoke、验收报告归档。
 
-- 单张真实图片上传。
-- 后端保存临时文件并生成 jobId。
-- 后端真实调用 Python Worker。
-- Worker 读取真实图片并调用 SiliconFlow OpenAI-compatible 模型。
-- AI 输出映射到 Layout JSON v0.1。
-- validator、fallback 和 previewHtml 编译链路。
-- 前端展示原图、Layout JSON、previewHtml 和 iframe 预览。
+## 原始计划来源
 
-## 当前状态
-
-- Week 09 已完成收口。
-- Day 7 阻断最终收敛为运行配置问题，而不是协议设计问题。
-- backend generate 已在 `--imagepage.worker.timeout-seconds=120` 条件下命中 `REAL_AI`。
-- 最终成功链路已确认：`HTTP 200`、`status=SUCCESS`、`mode=real-ai`、`fallbackUsed=false`、`sourceType=REAL_AI`、`layoutJson.version=0.1`、`validation.ok=true`、`previewHtml` 非空、前端 iframe 渲染成功、`sandbox=""`、无 `allow-scripts`。
-- `docs/tasks/day-01.md` 到 `docs/tasks/day-07.md` 已按收口规则清理，`docs/tasks/` 保留为空目录。
-
-## 后续建议
-
-- Week 10 可优先考虑提升真实 AI 输出质量和稳定性。
-- 可以考虑固定生成参数或缓存结果，降低同图重复生成的轻微差异。
-- 可以继续增强 Layout JSON 映射质量、测试覆盖和报告材料。
-- 暂不急于接 MySQL、Figma 或编辑器类能力。
+`docs/archive/week/10-acceptance-plan.md` 是 Week 10 原始验收计划来源，不作为日常默认上下文。

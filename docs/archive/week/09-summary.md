@@ -80,6 +80,25 @@ Week 09：真实 AI 最小接入，打通单张真实图片到 Layout JSON / gen
 - 前端页面级 iframe 预览已验证成功。
 - Week 09 已达到“可归档、可回看、可进入下一周规划”的状态。
 
+## 最终验收结论
+
+- Week 09 任务 A、B、C 已全部通过：
+  - A：后端 / 配置收口已确认
+  - B：前端真实页面联调已通过
+  - C：Week 09 最终 smoke 已通过
+- 最终 smoke 结论成立：
+  - `status=SUCCESS`
+  - `mode=real-ai`
+  - `fallbackUsed=false`
+  - `sourceType=REAL_AI`
+  - `layoutJson.version=0.1`
+  - `validation.ok=true`
+  - `previewHtml` 非空
+  - 前端 iframe 正常渲染
+  - iframe 使用 `sandbox=""`
+  - 未发现 `allow-scripts`
+- Week 09 已正式完成最终收口。
+
 ## 风险
 
 - 需要 Python 3.11+。
