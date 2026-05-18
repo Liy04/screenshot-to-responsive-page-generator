@@ -2,13 +2,15 @@
 
 ## 文件目的
 
-本文档是当前阶段事实源。Codex 日常任务默认读取 `AGENTS.md`、本文档、当天对应的 `docs/tasks/day-xx.md` 和当前任务相关代码即可；必要时再读取 `docs/spec.md`。
+本文档是当前阶段事实源。Codex 日常任务默认读取 `AGENTS.md`、本文档、当前活跃任务卡和当前任务相关代码即可；必要时再读取 `docs/spec.md`。
 
 `docs/archive/` 只做历史归档，不参与默认上下文。
 
 ## 当前阶段
 
 Week 10 已完成收口：真实 AI 链路稳定化与可复现验收。
+
+当前准备进入 Week 11 规划，并从 Week 11 开始试运行 Codex Lead + Lightweight Agents Workflow。
 
 ## 阶段背景
 
@@ -75,6 +77,7 @@ Week 09 已完成真实 AI 最小闭环。Week 10 在不扩大功能面的前提
 - 当前计划：`docs/plan.md`
 - 当前规格：`docs/spec.md`
 - 文档索引：`docs/INDEX.md`
+- Codex 角色边界：`docs/agents/README.md`
 - Week 10 原始计划归档：`docs/archive/week/10-acceptance-plan.md`
 - Week 10 总结归档：`docs/archive/week/10-summary.md`
 - Week 10 smoke 归档：`docs/archive/week/10-dev-smoke.md`
@@ -85,4 +88,6 @@ Week 09 已完成真实 AI 最小闭环。Week 10 在不扩大功能面的前提
 
 Week 10 已完成收口，当前项目已经进入“可提交 / 可归档 / 可进入 Week 11 规划”的状态。
 
-本次不展开 Week 11 大计划，只保留进入下一周规划的准备状态。
+本次不展开 Week 11 大计划，只保留进入下一周规划的准备状态。后续任务卡应指定负责角色，并继续遵守 Docs Lite 默认读取方式。
+
+agents 是 Codex 的角色阶段和边界规则，不是 Claude Code Custom Subagents，也不是自动并发系统。大任务、跨模块任务或边界不清任务先进入 `explorer-agent` 阶段；实现后进入 `tester-agent` 做最小验证，涉及代码变更时建议进入 `reviewer-agent` 做审查。
