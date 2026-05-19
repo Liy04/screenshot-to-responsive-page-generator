@@ -18,6 +18,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,9 @@ class ImagePageUploadControllerTest {
 
     @MockBean
     private ImagePageWorkerRunner workerRunner;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final List<String> createdJobIds = new ArrayList<>();
 
@@ -241,6 +246,8 @@ class ImagePageUploadControllerTest {
                 .andExpect(jsonPath("$.data.fallbackReason", is("MODEL_UNAVAILABLE")))
                 .andExpect(jsonPath("$.data.sourceType", is("FALLBACK_RULE")))
                 .andExpect(jsonPath("$.data.promptVersion", is("week10-v1")))
+                .andExpect(jsonPath("$.data.durationMs", is(1234)))
+                .andExpect(jsonPath("$.data.model", is("gpt-4.1-mini")))
                 .andExpect(jsonPath("$.data.exitCode", is(0)))
                 .andExpect(jsonPath("$.data.layoutJson.version", is("0.1")))
                 .andExpect(jsonPath("$.data.layoutJson.layout").exists())
@@ -270,6 +277,9 @@ class ImagePageUploadControllerTest {
         org.junit.jupiter.api.Assertions.assertTrue(metadata.contains("\"promptVersion\" : \"week10-v1\""));
         org.junit.jupiter.api.Assertions.assertTrue(metadata.contains("\"fallbackReason\" : \"MODEL_UNAVAILABLE\""));
         org.junit.jupiter.api.Assertions.assertFalse(metadata.contains("OPENAI_API_KEY"));
+        JsonNode metadataJson = objectMapper.readTree(metadata);
+        org.junit.jupiter.api.Assertions.assertEquals(1234, metadataJson.path("durationMs").asInt());
+        org.junit.jupiter.api.Assertions.assertEquals("gpt-4.1-mini", metadataJson.path("model").asText());
     }
 
     @Test
@@ -294,12 +304,16 @@ class ImagePageUploadControllerTest {
 
         mockMvc.perform(post(GENERATE_PATH, jobId))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.durationMs", is(1234)))
+                .andExpect(jsonPath("$.data.model", is("gpt-4.1-mini")))
                 .andExpect(jsonPath("$.data.artifact.reused", is(false)));
 
         mockMvc.perform(post(GENERATE_PATH, jobId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.jobId", is(jobId)))
                 .andExpect(jsonPath("$.data.status", is("SUCCESS")))
+                .andExpect(jsonPath("$.data.durationMs", is(1234)))
+                .andExpect(jsonPath("$.data.model", is("gpt-4.1-mini")))
                 .andExpect(jsonPath("$.data.artifact.reused", is(true)))
                 .andExpect(jsonPath("$.data.layoutJson.version", is("0.1")))
                 .andExpect(jsonPath("$.data.previewHtml", containsString("<!doctype html>")));
@@ -335,6 +349,8 @@ class ImagePageUploadControllerTest {
                   "fallbackReason": "MODEL_UNAVAILABLE",
                   "sourceType": "FALLBACK_RULE",
                   "promptVersion": "week10-v1",
+                  "durationMs": 1234,
+                  "model": "gpt-4.1-mini",
                   "layoutJson": {
                     "version": "0.1",
                     "page": {

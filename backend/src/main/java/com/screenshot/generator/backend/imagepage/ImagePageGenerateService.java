@@ -109,6 +109,8 @@ public class ImagePageGenerateService {
                 textOrNull(workerResult, "fallbackReason"),
                 getText(workerResult, "sourceType", ""),
                 textOrNull(workerResult, "promptVersion"),
+                integerOrNull(workerResult, "durationMs"),
+                textOrNull(workerResult, "model"),
                 layoutJsonNode,
                 getText(workerResult, "previewHtml", ""),
                 validationNode,
@@ -132,6 +134,8 @@ public class ImagePageGenerateService {
                 response.fallbackReason(),
                 response.sourceType(),
                 response.promptVersion(),
+                response.durationMs(),
+                response.model(),
                 response.layoutJson(),
                 response.previewHtml(),
                 response.validation(),
@@ -214,6 +218,11 @@ public class ImagePageGenerateService {
     private String textOrNull(JsonNode node, String fieldName) {
         JsonNode value = getOptionalNode(node, fieldName);
         return value == null ? null : value.asText();
+    }
+
+    private Integer integerOrNull(JsonNode node, String fieldName) {
+        JsonNode value = getOptionalNode(node, fieldName);
+        return value == null || !value.canConvertToInt() ? null : value.asInt();
     }
 
     private boolean getBoolean(JsonNode node, String fieldName, boolean fallbackValue) {

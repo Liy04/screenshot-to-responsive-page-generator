@@ -8,69 +8,57 @@
 
 ## 当前阶段
 
-Week 10 已完成收口：真实 AI 链路稳定化与可复现验收。
+Week 11：真实 AI 链路可复现验收与样例资产建设已完成并进入归档状态。
 
-当前准备进入 Week 11 规划，并从 Week 11 开始试运行 Codex Lead + Lightweight Agents Workflow。
+当前项目已经完成 Week 09 真实 AI 最小闭环、Week 10 稳定化收口，以及 Week 11 的 samples 建设、真实 AI smoke 文档化、轻量 metadata 增强和最终验收归档。下一阶段尚未开启新主线。
 
-## 阶段背景
+## Week 11 完成结果
 
-Week 09 已完成真实 AI 最小闭环。Week 10 在不扩大功能面的前提下，完成了对真实链路稳定性、失败可解释性、artifact 保存与复用、前端状态展示和可重复 smoke 的收口。
+1. 已完成 Day 1 任务卡与 Week 11 边界确认。
+2. 已建立公开安全、可提交的 `samples/` 样例集。
+3. 已固化真实 AI smoke 的输入、命令、环境变量和验收口径。
+4. 已明确 `REAL_AI` / `FALLBACK` / `FAILED` 三种结果判断方式。
+5. 已完成轻量 metadata 可解释性增强：`durationMs`、`model`、`artifact.reused` 展示、保存和复用。
+6. 已完成 Week 11 summary、dev smoke 和 acceptance report 归档。
 
-## 当前完成内容
+## 当前完成基础
 
-1. Worker：
-   - `promptVersion` 已加入输出，当前值 `week10-v1`。
-   - JSON 清洗支持纯 JSON、markdown code fence、前后带说明文字。
-   - 非 JSON 输出不会崩溃，可进入 fallback。
-   - 轻量 intermediate repair 已支持。
-   - `fallbackReason` 已加入输出。
-   - `REAL_AI` / `FALLBACK` / `FAILED` 路径已验证。
-2. 后端：
-   - 已保存 `layout.json`、`preview.html`、`metadata.json` artifact。
-   - 同一 `jobId` 成功 artifact 可复用。
-   - 第二次 generate 命中 `artifact.reused=true`，不重复调用 Worker。
-   - 返回结构已包含 `promptVersion`、`fallbackReason`、`warnings`、`errors`、`artifact`。
-   - 未接 MySQL，未创建 Entity / Mapper。
-3. 前端：
-   - 已展示 `REAL_AI` / `FALLBACK` / `FAILED` / `TIMEOUT`。
-   - 已展示 `promptVersion`、`fallbackReason`、`warnings`、`errors`、artifact 信息。
-   - iframe preview 保持稳定。
-   - iframe 使用 `sandbox=""`，无 `allow-scripts`。
-4. 测试与 smoke：
-   - Worker：`67 / 67` 通过。
-   - Backend：`45 / 45` 通过。
-   - Frontend：`9 / 9` 通过。
-   - 真实链路 smoke 通过。
-   - `REAL_AI` / `FALLBACK` / `FAILED` 三种口径已验证。
-   - artifact 文件检查通过。
-   - `jobId` 复用检查通过。
-   - API key 未泄漏。
-   - `backend/storage/` 是运行副产物，已被 `backend/.gitignore` 忽略。
+- Worker 已支持真实 AI / fallback / failed 路径。
+- `promptVersion` 当前为 `week10-v1`。
+- JSON 清洗、轻量 repair、`fallbackReason` 已完成。
+- 后端已保存 `layout.json`、`preview.html`、`metadata.json` artifact。
+- 同一 `jobId` 成功 artifact 可复用。
+- 前端已展示 `REAL_AI` / `FALLBACK` / `FAILED` / `TIMEOUT`、`promptVersion`、`fallbackReason`、warnings、errors、artifact 信息。
+- 前端已展示 `durationMs`、`model`、`artifact.reused`。
+- iframe 使用 `sandbox=""`，无 `allow-scripts`。
+- Week 11 最终测试记录：Worker `70 / 70`、Backend `45 / 45`、Frontend `10 / 10` 通过。
 
 ## 当前不做
 
 - 不接 MySQL。
-- 不创建数据库表。
+- 不设计数据库表。
 - 不创建 Entity / Mapper。
 - 不接 Figma API / Figma MCP。
 - 不接 Redis / RabbitMQ。
-- 不做多页面。
+- 不做多页面生成。
 - 不做拖拽编辑器。
 - 不做在线编辑器。
 - 不做 ZIP 导出。
 - 不做登录注册 / 权限系统。
 - 不做高保真截图还原。
-- 不提交真实 API key。
-- 不提交私人截图、账号信息、公司资料、密钥或敏感页面。
+- 不做 Playwright 视觉回归。
+- 不提交真实 API key、私人截图、账号信息、公司资料、密钥或敏感页面。
 
 ## 当前风险 / 遗留项
 
-- `samples/` 目录尚未正式落地；本轮使用临时公开安全样例图完成 smoke。
-- `IMAGEPAGE_WORKER_PYTHON_COMMAND` 当前仍建议显式设置，虽然 PATH 上 Python 3.11.9 可用。
-- 真实 AI 调用仍依赖外部模型服务和网络。
+- `samples/` 已正式落地，当前包含 3 张公开安全 mock UI 样例图和说明文档。
+- 真实 AI smoke 依赖外部模型服务、网络、环境变量和较长 timeout。
+- Week 11 Day 5 收口未执行真实联网 smoke，原因是收口阶段不使用真实 key；文档和 example 脚本已支持后续按环境运行。
+- `IMAGEPAGE_WORKER_PYTHON_COMMAND` 建议显式设置为 `D:\environment\python11\python.exe`。
+- 后端真实 AI smoke 推荐使用 `--imagepage.worker.timeout-seconds=120`。
 - 同图多次生成仍可能有轻微差异；`jobId` artifact 复用已缓解重复查询漂移。
-- 当前仍未进入 MySQL / Figma / 编辑器 / 多页面阶段。
 - `backend/storage/`、`frontend/dist/` 及其他运行副产物不能提交。
+- 仍未进入 MySQL / Figma / Redis / RabbitMQ / 多页面 / 编辑器 / Playwright 视觉回归。
 
 ## 当前文档入口
 
@@ -78,16 +66,15 @@ Week 09 已完成真实 AI 最小闭环。Week 10 在不扩大功能面的前提
 - 当前规格：`docs/spec.md`
 - 文档索引：`docs/INDEX.md`
 - Codex 角色边界：`docs/agents/README.md`
-- Week 10 原始计划归档：`docs/archive/week/10-acceptance-plan.md`
-- Week 10 总结归档：`docs/archive/week/10-summary.md`
-- Week 10 smoke 归档：`docs/archive/week/10-dev-smoke.md`
-- Week 10 验收报告：`docs/archive/week/10-acceptance-report.md`
+- 当前任务卡：`docs/tasks/day-01.md` 到 `docs/tasks/day-05.md`
+- Week 11 原始计划归档：`docs/archive/week/11-plan.md`
+- Week 11 总结归档：`docs/archive/week/11-summary.md`
+- Week 11 smoke 归档：`docs/archive/week/11-dev-smoke.md`
+- Week 11 验收归档：`docs/archive/week/11-acceptance-report.md`
 - 历史归档：`docs/archive/`
 
 ## 当前状态说明
 
-Week 10 已完成收口，当前项目已经进入“可提交 / 可归档 / 可进入 Week 11 规划”的状态。
+Week 11 已完成 Day 1 到 Day 5 的任务收口，`samples/` 已正式落地。Week 11 的执行结论、测试结果、安全结论和未进入范围已归档到 `docs/archive/week/`。
 
-本次不展开 Week 11 大计划，只保留进入下一周规划的准备状态。后续任务卡应指定负责角色，并继续遵守 Docs Lite 默认读取方式。
-
-agents 是 Codex 的角色阶段和边界规则，不是 Claude Code Custom Subagents，也不是自动并发系统。大任务、跨模块任务或边界不清任务先进入 `explorer-agent` 阶段；实现后进入 `tester-agent` 做最小验证，涉及代码变更时建议进入 `reviewer-agent` 做审查。
+大任务、跨模块任务或边界不清任务先进入 `explorer-agent` 阶段；实现后进入 `tester-agent` 做最小验证，涉及代码变更时建议进入 `reviewer-agent` 做审查。

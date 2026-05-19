@@ -1,84 +1,98 @@
 # Plan
 
-## Week 10 名称
+## Week 11 名称
 
-真实 AI 链路稳定化与可复现验收。
+真实 AI 链路可复现验收与样例资产建设。
 
 ## 本周总目标
 
-Week 10 的目标是在 Week 09 已跑通真实 AI 最小闭环的基础上，把链路做得更稳定、更可解释、更可复验：
+Week 11 不开启 MySQL、Figma、编辑器、多页面等新主线，而是把 Week 09 / Week 10 已经跑通的真实 AI 能力沉淀为可复现、可验收、可展示、可回归的项目资产。
+
+当前状态：Week 11 已完成并归档。
+
+核心链路：
 
 ```text
-真实图片
--> 后端上传
--> Python Worker
--> 真实 AI / fallback
--> Layout JSON v0.1
--> previewHtml
--> 前端状态展示与 iframe 预览
--> artifact 保存与复用
+公开安全 samples
+-> 真实 AI smoke
+-> Worker / Backend / Frontend 验收
+-> artifact 检查
+-> 安全与密钥检查
+-> Week 11 总结归档
 ```
 
-## P0 完成情况
-
-- `promptVersion` 已固定并返回，当前值 `week10-v1`。
-- JSON 清洗已支持纯 JSON、markdown code fence 和前后说明文字。
-- `fallbackReason`、`warnings`、`errors` 已可返回。
-- `layout.json`、`preview.html`、`metadata.json` artifact 约定已落实。
-- 同一 `jobId` 可复用，不重复调用 AI。
-- 前端已可区分 `REAL_AI` / `FALLBACK` / `FAILED` / `TIMEOUT`。
-- smoke 文档和临时公开安全样例图口径已明确。
-
-## P1 / P2 收口情况
-
-- P1：repair、Worker / 后端 / 前端测试、结果说明与错误提示已进入收口通过状态。
-- P2：`durationMs`、debug metadata 和进一步一致性增强仍可继续优化，但不构成 Week 10 收口阻塞。
-
-## 本周禁止事项
+## 本周不做
 
 - 不接 MySQL。
+- 不设计数据库表。
 - 不创建 Entity / Mapper。
 - 不接 Figma API / Figma MCP。
 - 不接 Redis / RabbitMQ。
-- 不做多页面。
+- 不做多页面生成。
 - 不做拖拽编辑器。
 - 不做在线编辑器。
 - 不做 ZIP 导出。
 - 不做登录注册 / 权限系统。
 - 不做高保真截图还原。
-- 不提交真实 API key。
-- 不提交私人截图或敏感图片。
+- 不做 Playwright 视觉回归。
 
-## Day 02 到 Day 07 完成情况
+## Day 计划
 
-| Day | 线程 | 完成情况 |
-|---|---|---|
-| Day 02 | Worker 线程 | 已完成 `promptVersion` 与 JSON 清洗 |
-| Day 03 | Worker 线程 | 已完成 repair、`fallbackReason` 与相关输出口径 |
-| Day 04 | 后端线程 | 已完成 artifact 保存、`jobId` 复用与返回结构补强 |
-| Day 05 | 前端线程 | 已完成状态展示与 iframe 安全展示 |
-| Day 06 | 测试线程 | 已完成 Worker / 后端 / 前端测试与真实链路 smoke |
-| Day 07 | 文档线程 | 收口 summary / dev smoke / acceptance report，并清理 day 卡 |
+| Day | 主题 | 负责角色 | 交付物 |
+|---|---|---|---|
+| Day 1 | Week 11 任务卡与边界确认 | lead + docs-agent | `docs/tasks/day-01.md` 到 `day-05.md`、归档长计划 |
+| Day 2 | samples/ 安全样例集 | explorer-agent -> docs-agent -> tester-agent -> reviewer-agent | `samples/`、样例说明、安全检查 |
+| Day 3 | 真实 AI smoke 文档与示例脚本 | docs-agent -> tester-agent | `docs/smoke/real-ai-smoke.md`、可选 example 脚本 |
+| Day 4 | metadata 可解释性小增强 | explorer-agent -> worker/backend/frontend -> tester-agent -> reviewer-agent | `durationMs`、`model`、`artifact.reused` 最小增强 |
+| Day 5 | Week 11 验收、总结与 Git 收口 | lead + tester-agent + reviewer-agent + docs-agent | Week 11 summary / smoke / acceptance report |
 
-## 最终 smoke 结论
+执行结果：
 
-- Worker：`67 / 67` 通过。
-- Backend：`45 / 45` 通过。
-- Frontend：`9 / 9` 通过。
-- 真实链路 smoke 通过。
-- `REAL_AI` / `FALLBACK` / `FAILED` 三种口径已验证。
-- artifact 文件检查通过。
-- `jobId` 复用检查通过。
-- API key 未泄漏。
-- iframe 使用 `sandbox=""`，且无 `allow-scripts`。
+- Day 1 已完成任务卡与边界确认。
+- Day 2 已完成 `samples/` 安全样例集。
+- Day 3 已完成真实 AI smoke 文档和 example 脚本。
+- Day 4 已完成轻量 metadata 增强：`durationMs`、`model`、`artifact.reused` 展示、保存和复用。
+- Day 5 已完成 Week 11 最终归档与 current / plan 状态同步。
 
-## 后续建议
+## Day 4 范围控制
 
-- Week 11 可以优先考虑继续提升真实 AI 输出质量和稳定性。
-- 可以继续完善结果一致性策略、缓存策略和测试 / 报告材料。
-- 暂不急于进入 MySQL、Figma、编辑器或多页面方向。
-- Week 11 开始试运行 Codex Lead + Lightweight Agents Workflow，后续 day 卡应明确负责角色。
-- agents 是 Codex 的角色阶段和边界规则，不是 Claude Code Custom Subagents，也不是自动并发系统。
-- 大任务、跨模块任务或边界不清任务先进入 `explorer-agent` 阶段。
-- 实现后进入 `tester-agent` 做最小验证，涉及代码变更时建议进入 `reviewer-agent` 做审查。
-- 不让多个角色阶段同时修改同一目录。
+Day 4 是可选任务。只有 Day 2 / Day 3 完成后才执行。
+
+Day 4 只允许做轻量 metadata polish，优先字段：
+
+- `durationMs`
+- `model`
+- `artifact.reused`
+
+默认不做 `sourceImageName` 和 `baseUrlHost`。如后续确实需要，必须单独验收隐私和配置泄漏风险。
+
+## 验收重点
+
+- `samples/` 图片公开安全、可提交。
+- 真实 AI smoke 文档可复现。
+- `OPENAI_API_KEY` 只通过环境变量配置。
+- `REAL_AI` / `FALLBACK` / `FAILED` 判断标准清楚。
+- artifact 文件检查和 `jobId` 复用检查清楚。
+- 前端能展示 `durationMs` / `model` / `artifact.reused`。
+- Worker `70 / 70`、Backend `45 / 45`、Frontend `10 / 10` 测试通过。
+- Week 11 Day 5 未执行真实联网 smoke，原因是收口阶段不使用真实 key；文档和 example 脚本支持后续按环境运行。
+- 未发现真实 key 泄漏；samples 无隐私 / 品牌 / 版权阻塞；iframe sandbox 未放宽。
+- `backend/storage/`、`frontend/dist/`、真实隐私截图和运行副产物未进入可提交变更。
+
+## 当前执行入口
+
+Week 11 已执行完成。执行记录入口：
+
+- `docs/tasks/day-01.md`
+- `docs/tasks/day-02.md`
+- `docs/tasks/day-03.md`
+- `docs/tasks/day-04.md`
+- `docs/tasks/day-05.md`
+
+原始长计划已归档到 `docs/archive/week/11-plan.md`，不作为日常默认上下文。
+
+最终归档入口：
+
+- `docs/archive/week/11-summary.md`
+- `docs/archive/week/11-dev-smoke.md`
+- `docs/archive/week/11-acceptance-report.md`

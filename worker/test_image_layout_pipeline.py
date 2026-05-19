@@ -31,6 +31,7 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertIsNone(result["fallbackReason"])
         self.assertEqual(result["sourceType"], "FALLBACK_RULE")
         self.assertEqual(result["promptVersion"], PROMPT_VERSION)
+        self.assert_result_metadata(result, expected_model=None)
         self.assertTrue(result["validation"]["ok"])
         self.assertIsInstance(result["layoutJson"], dict)
         self.assertTrue(result["previewHtml"])
@@ -50,21 +51,23 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertFalse(result["validation"]["ok"])
         self.assertEqual(result["previewHtml"], "")
         self.assertEqual(result["fallbackReason"], "IMAGE_READ_FAILED")
+        self.assert_result_metadata(result, expected_model=None)
         self.assertIn("IMAGE_PATH_NOT_FOUND", {item["code"] for item in result["validation"]["errors"]})
 
     def test_real_ai_unavailable_uses_fallback_when_enabled(self):
         image_path = self.create_temp_image_file("dashboard-card.png")
         try:
-            with patch(
-                "worker.image_layout_pipeline.request_layout_intermediate",
-                side_effect=RuntimeError("temporary ai outage"),
-            ):
-                result, exit_code = process_image_layout_job(
-                    job_id="job-ai-fallback",
-                    image_path=image_path,
-                    mode="real-ai",
-                    fallback=True,
-                )
+            with patch.dict("os.environ", {"OPENAI_MODEL": "metadata-model-fallback"}, clear=False):
+                with patch(
+                    "worker.image_layout_pipeline.request_layout_intermediate",
+                    side_effect=RuntimeError("temporary ai outage"),
+                ):
+                    result, exit_code = process_image_layout_job(
+                        job_id="job-ai-fallback",
+                        image_path=image_path,
+                        mode="real-ai",
+                        fallback=True,
+                    )
         finally:
             image_path.unlink(missing_ok=True)
 
@@ -74,6 +77,7 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(result["fallbackReason"], "MODEL_UNAVAILABLE")
         self.assertEqual(result["sourceType"], "FALLBACK_RULE")
         self.assertEqual(result["promptVersion"], PROMPT_VERSION)
+        self.assert_result_metadata(result, expected_model="metadata-model-fallback")
         self.assertTrue(result["previewHtml"])
         self.assert_preview_html_safe(result["previewHtml"])
         self.assertIn("REAL_AI_UNAVAILABLE", {item["code"] for item in result["validation"]["warnings"]})
@@ -82,16 +86,17 @@ class ImageLayoutPipelineTest(unittest.TestCase):
     def test_real_ai_unavailable_fails_when_fallback_disabled(self):
         image_path = self.create_temp_image_file("landing-shot.png")
         try:
-            with patch(
-                "worker.image_layout_pipeline.request_layout_intermediate",
-                side_effect=RuntimeError("temporary ai outage"),
-            ):
-                result, exit_code = process_image_layout_job(
-                    job_id="job-ai-no-fallback",
-                    image_path=image_path,
-                    mode="real-ai",
-                    fallback=False,
-                )
+            with patch.dict("os.environ", {"OPENAI_MODEL": "metadata-model-failed"}, clear=False):
+                with patch(
+                    "worker.image_layout_pipeline.request_layout_intermediate",
+                    side_effect=RuntimeError("temporary ai outage"),
+                ):
+                    result, exit_code = process_image_layout_job(
+                        job_id="job-ai-no-fallback",
+                        image_path=image_path,
+                        mode="real-ai",
+                        fallback=False,
+                    )
         finally:
             image_path.unlink(missing_ok=True)
 
@@ -101,6 +106,7 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertEqual(result["fallbackReason"], "MODEL_UNAVAILABLE")
         self.assertEqual(result["layoutJson"], None)
         self.assertEqual(result["previewHtml"], "")
+        self.assert_result_metadata(result, expected_model="metadata-model-failed")
         self.assertIn("REAL_AI_GENERATION_FAILED", {item["code"] for item in result["validation"]["errors"]})
 
     def test_real_ai_success_returns_valid_layout_without_fallback(self):
@@ -119,13 +125,14 @@ class ImageLayoutPipelineTest(unittest.TestCase):
             ],
         }
         try:
-            with patch("worker.image_layout_pipeline.request_layout_intermediate", return_value=ai_payload):
-                result, exit_code = process_image_layout_job(
-                    job_id="job-ai-success",
-                    image_path=image_path,
-                    mode="real-ai",
-                    fallback=True,
-                )
+            with patch.dict("os.environ", {"OPENAI_MODEL": "metadata-model-success"}, clear=False):
+                with patch("worker.image_layout_pipeline.request_layout_intermediate", return_value=ai_payload):
+                    result, exit_code = process_image_layout_job(
+                        job_id="job-ai-success",
+                        image_path=image_path,
+                        mode="real-ai",
+                        fallback=True,
+                    )
         finally:
             image_path.unlink(missing_ok=True)
 
@@ -135,6 +142,7 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertIsNone(result["fallbackReason"])
         self.assertEqual(result["sourceType"], "REAL_AI")
         self.assertEqual(result["promptVersion"], PROMPT_VERSION)
+        self.assert_result_metadata(result, expected_model="metadata-model-success")
         self.assertTrue(result["validation"]["ok"])
         self.assertTrue(result["previewHtml"])
         self.assert_preview_html_safe(result["previewHtml"])
@@ -181,6 +189,36 @@ class ImageLayoutPipelineTest(unittest.TestCase):
 
         serialized = json.dumps(result, ensure_ascii=False)
         self.assertNotIn(str(image_path), serialized)
+
+    def test_result_metadata_does_not_expose_openai_api_key_value(self):
+        image_path = self.create_temp_image_file("dashboard-card.png")
+        secret_value = "sk-test-secret-value"
+        try:
+            with patch.dict(
+                "os.environ",
+                {
+                    "OPENAI_API_KEY": secret_value,
+                    "OPENAI_MODEL": "metadata-safe-model",
+                },
+                clear=False,
+            ):
+                with patch(
+                    "worker.image_layout_pipeline.request_layout_intermediate",
+                    side_effect=RuntimeError("temporary ai outage"),
+                ):
+                    result, exit_code = process_image_layout_job(
+                        job_id="job-metadata-secret-check",
+                        image_path=image_path,
+                        mode="real-ai",
+                        fallback=True,
+                    )
+        finally:
+            image_path.unlink(missing_ok=True)
+
+        self.assertEqual(exit_code, 0)
+        self.assert_result_metadata(result, expected_model="metadata-safe-model")
+        serialized = json.dumps(result, ensure_ascii=False)
+        self.assertNotIn(secret_value, serialized)
 
     def test_real_ai_non_json_output_uses_fallback_without_crashing(self):
         image_path = self.create_temp_image_file("landing-shot.png")
@@ -246,6 +284,13 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertNotIn("<object", lowered)
         self.assertNotIn("<embed", lowered)
         self.assertNotIn("javascript:", lowered)
+
+    def assert_result_metadata(self, result: dict, expected_model: str | None) -> None:
+        self.assertIn("durationMs", result)
+        self.assertIsInstance(result["durationMs"], int)
+        self.assertGreaterEqual(result["durationMs"], 0)
+        self.assertIn("model", result)
+        self.assertEqual(result["model"], expected_model)
 
     def create_temp_image_file(self, name: str) -> Path:
         temp_file = tempfile.NamedTemporaryFile(

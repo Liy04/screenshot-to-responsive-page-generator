@@ -59,6 +59,8 @@ public class ImagePageArtifactStorageService {
                     textOrNull(metadata, "fallbackReason"),
                     metadata.path("sourceType").asText(""),
                     textOrNull(metadata, "promptVersion"),
+                    integerOrNull(metadata, "durationMs"),
+                    textOrNull(metadata, "model"),
                     layoutJson,
                     previewHtml,
                     validation,
@@ -117,6 +119,16 @@ public class ImagePageArtifactStorageService {
         } else {
             metadata.putNull("promptVersion");
         }
+        if (response.durationMs() != null) {
+            metadata.put("durationMs", response.durationMs());
+        } else {
+            metadata.putNull("durationMs");
+        }
+        if (response.model() != null) {
+            metadata.put("model", response.model());
+        } else {
+            metadata.putNull("model");
+        }
         if (response.validation() != null) {
             metadata.set("validation", response.validation());
         } else {
@@ -170,5 +182,10 @@ public class ImagePageArtifactStorageService {
     private String textOrNull(JsonNode node, String fieldName) {
         JsonNode value = getOptionalNode(node, fieldName);
         return value == null ? null : value.asText();
+    }
+
+    private Integer integerOrNull(JsonNode node, String fieldName) {
+        JsonNode value = getOptionalNode(node, fieldName);
+        return value == null || !value.canConvertToInt() ? null : value.asInt();
     }
 }

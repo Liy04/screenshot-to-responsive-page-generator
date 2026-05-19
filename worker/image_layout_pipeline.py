@@ -1,4 +1,5 @@
 import copy
+import time
 from pathlib import Path
 from typing import Any
 
@@ -6,12 +7,12 @@ try:
     from .layout_static_generator import compile_preview_document
     from .image_layout_resolver import infer_template_key_from_image_name, resolve_fallback_image_layout
     from .layout_validator import ValidationMessage, validate_layout_document
-    from .real_ai_layout_client import PROMPT_VERSION, RealAIError, request_layout_intermediate
+    from .real_ai_layout_client import PROMPT_VERSION, RealAIError, get_configured_model, request_layout_intermediate
 except ImportError:
     from layout_static_generator import compile_preview_document
     from image_layout_resolver import infer_template_key_from_image_name, resolve_fallback_image_layout
     from layout_validator import ValidationMessage, validate_layout_document
-    from real_ai_layout_client import PROMPT_VERSION, RealAIError, request_layout_intermediate
+    from real_ai_layout_client import PROMPT_VERSION, RealAIError, get_configured_model, request_layout_intermediate
 
 
 ALLOWED_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
@@ -68,6 +69,22 @@ def make_result(
         },
         "message": message,
     }
+
+
+def result_model_for_mode(mode: str) -> str | None:
+    if mode == "fallback-only":
+        return None
+    return get_configured_model()
+
+
+def add_runtime_metadata(
+    result: dict[str, Any],
+    started_at: float,
+    model: str | None,
+) -> dict[str, Any]:
+    result["durationMs"] = int((time.perf_counter() - started_at) * 1000)
+    result["model"] = model
+    return result
 
 
 def validate_image_path(image_path: str | Path) -> tuple[Path | None, list[ValidationMessage]]:
@@ -477,6 +494,12 @@ def process_image_layout_job(
     mode: str,
     fallback: bool,
 ) -> tuple[dict[str, Any], int]:
+    started_at = time.perf_counter()
+    result_model = result_model_for_mode(mode)
+
+    def finish(result: dict[str, Any], exit_code: int) -> tuple[dict[str, Any], int]:
+        return add_runtime_metadata(result, started_at, result_model), exit_code
+
     fallback_reason: str | None = None
     validated_path, input_errors = validate_image_path(image_path)
     if input_errors:
@@ -493,7 +516,7 @@ def process_image_layout_job(
             preview_html="",
             fallback_reason=FALLBACK_REASON_IMAGE_READ_FAILED,
         )
-        return result, 1
+        return finish(result, 1)
 
     assert validated_path is not None
     image_name = validated_path.name
@@ -514,7 +537,7 @@ def process_image_layout_job(
                 "",
                 fallback_reason=None,
             )
-            return result, 1
+            return finish(result, 1)
 
         final_layout, errors, warnings, repaired = validate_or_repair_layout(fallback_layout, image_name)
         warnings = fallback_warnings + warnings
@@ -539,7 +562,7 @@ def process_image_layout_job(
             preview_html,
             fallback_reason=None,
         )
-        return result, 0 if status == "SUCCESS" else 1
+        return finish(result, 0 if status == "SUCCESS" else 1)
 
     ai_warnings: list[ValidationMessage] = []
     try:
@@ -575,7 +598,7 @@ def process_image_layout_job(
                 preview_html,
                 fallback_reason=None,
             )
-            return result, 0
+            return finish(result, 0)
         fallback_reason = FALLBACK_REASON_SCHEMA_VALIDATION_FAILED
         ai_warnings = all_warnings + [
             make_message("AI_LAYOUT_INVALID", "AI output could not pass validation without fallback.", "$.layout")
@@ -601,7 +624,7 @@ def process_image_layout_job(
             "",
             fallback_reason=fallback_reason,
         )
-        return result, 1
+        return finish(result, 1)
 
     fallback_layout, fallback_errors, fallback_warnings = build_fallback_layout(image_name)
     if fallback_layout is None:
@@ -619,7 +642,7 @@ def process_image_layout_job(
             "",
             fallback_reason=fallback_reason,
         )
-        return result, 1
+        return finish(result, 1)
 
     final_layout, errors, warnings, repaired = validate_or_repair_layout(fallback_layout, image_name)
     combined_warnings = ai_warnings + fallback_warnings + warnings
@@ -644,4 +667,4 @@ def process_image_layout_job(
         preview_html,
         fallback_reason=fallback_reason,
     )
-    return result, 0 if status == "SUCCESS" else 1
+    return finish(result, 0 if status == "SUCCESS" else 1)

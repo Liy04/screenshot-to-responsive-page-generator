@@ -27,6 +27,10 @@ class RealAIResponseError(RealAIError):
     pass
 
 
+def get_configured_model() -> str:
+    return os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL)
+
+
 def detect_image_mime_type(image_path: Path) -> str:
     suffix = image_path.suffix.lower()
     if suffix == ".png":
@@ -202,7 +206,7 @@ def extract_chat_completion_text(response: Any) -> str:
 
 def request_layout_intermediate(image_path: str | Path, job_id: str) -> dict[str, Any]:
     image_path = Path(image_path)
-    model = os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL)
+    model = get_configured_model()
     client = build_openai_client()
     response = client.chat.completions.create(
         model=model,

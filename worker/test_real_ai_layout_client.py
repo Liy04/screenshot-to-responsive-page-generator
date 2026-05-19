@@ -10,6 +10,7 @@ from worker.real_ai_layout_client import (
     RealAIUnavailableError,
     build_openai_client,
     extract_chat_completion_text,
+    get_configured_model,
     parse_json_payload,
     request_layout_intermediate,
 )
@@ -37,6 +38,14 @@ class RealAILayoutClientTest(unittest.TestCase):
         with patch.dict("os.environ", {}, clear=True):
             with self.assertRaises(RealAIUnavailableError):
                 build_openai_client()
+
+    def test_get_configured_model_uses_default_without_env_override(self):
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(get_configured_model(), "gpt-4.1-mini")
+
+    def test_get_configured_model_uses_env_override(self):
+        with patch.dict("os.environ", {"OPENAI_MODEL": "Qwen/Qwen3-VL-32B-Instruct"}, clear=False):
+            self.assertEqual(get_configured_model(), "Qwen/Qwen3-VL-32B-Instruct")
 
     def test_parse_json_payload_rejects_non_json_text(self):
         with self.assertRaises(RealAIResponseError):

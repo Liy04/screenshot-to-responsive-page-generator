@@ -10,6 +10,8 @@ public record ImagePageGenerateResponse(
         String fallbackReason,
         String sourceType,
         String promptVersion,
+        Integer durationMs,
+        String model,
         JsonNode layoutJson,
         String previewHtml,
         JsonNode validation,

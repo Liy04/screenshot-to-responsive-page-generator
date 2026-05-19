@@ -20,6 +20,8 @@ const realAiResult = {
   fallbackUsed: false,
   sourceType: 'REAL_AI',
   promptVersion: 'week10-v1',
+  model: 'gpt-4.1-mini',
+  durationMs: 1842,
   fallbackReason: '',
   warnings: [],
   errors: [],
@@ -182,9 +184,12 @@ describe('ImageToLayoutDev', () => {
     expect(wrapper.text()).toContain('REAL_AI 成功')
     expect(wrapper.text()).toContain('REAL_AI')
     expect(wrapper.text()).toContain('week10-v1')
+    expect(wrapper.text()).toContain('gpt-4.1-mini')
+    expect(wrapper.text()).toContain('1842 ms')
     expect(wrapper.text()).toContain('layout.json')
     expect(wrapper.text()).toContain('preview.html')
     expect(wrapper.text()).toContain('metadata.json')
+    expect(wrapper.text()).toContain('artifact.reused')
     expect(wrapper.text()).toContain('false')
     expect(wrapper.text()).toContain('/api/image-page/jobs/imgjob_real_001/source')
 
@@ -210,6 +215,8 @@ describe('ImageToLayoutDev', () => {
     expect(wrapper.text()).toContain('MODEL_NON_JSON_OUTPUT')
     expect(wrapper.text()).toContain('模型未返回合法 JSON')
     expect(wrapper.text()).toContain('模型输出不可解析，已启用 fallback')
+    expect(wrapper.text()).toContain('gpt-4.1-mini')
+    expect(wrapper.text()).toContain('1842 ms')
     expect(wrapper.text()).toContain('true')
     expect(wrapper.text()).toContain('FALLBACK_RULE')
     expect(wrapper.text()).toContain('artifact.reused')
@@ -238,6 +245,33 @@ describe('ImageToLayoutDev', () => {
     expect(wrapper.text()).toContain('LAYOUT_INVALID')
     expect(wrapper.text()).toContain('当前结果为 FAILED，不展示 iframe 预览。')
     expect(wrapper.find('iframe').exists()).toBe(false)
+  })
+
+  it('handles missing optional model and durationMs metadata without breaking artifact.reused', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue({
+      ...realAiResult,
+      model: undefined,
+      durationMs: undefined,
+      artifact: {
+        ...realAiResult.artifact,
+        reused: false,
+      },
+    })
+
+    const wrapper = mountPage()
+    const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
+
+    await selectFile(wrapper, file)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
+
+    expect(wrapper.text()).toContain('REAL_AI 成功')
+    expect(wrapper.text()).toContain('model')
+    expect(wrapper.text()).toContain('durationMs')
+    expect(wrapper.text()).toContain('artifact.reused')
+    expect(wrapper.text()).toContain('false')
+    expect(wrapper.find('iframe').attributes('sandbox')).toBe('')
   })
 
   it('shows TIMEOUT state when generate request times out', async () => {

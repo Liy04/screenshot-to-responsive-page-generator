@@ -45,6 +45,14 @@ const validationWarnings = computed(() => normalizeItems(generateResult.value?.v
 const artifactInfo = computed(() => generateResult.value?.artifact || null)
 const promptVersion = computed(() => generateResult.value?.promptVersion || '')
 const fallbackReason = computed(() => generateResult.value?.fallbackReason || '')
+const displayModel = computed(() => {
+  const value = generateResult.value?.model
+  return value === undefined || value === null || value === '' ? '-' : String(value)
+})
+const displayDurationMs = computed(() => {
+  const value = generateResult.value?.durationMs
+  return value === undefined || value === null || value === '' ? '-' : `${value} ms`
+})
 const sourcePreviewUrl = computed(() => uploadedSource.value?.sourceUrl || '')
 const canUpload = computed(() => {
   return !!selectedFile.value && uploadStage.value !== 'uploading' && generateStage.value !== 'generating'
@@ -393,6 +401,14 @@ async function handleGenerate() {
           <div>
             <dt>promptVersion</dt>
             <dd>{{ promptVersion || '-' }}</dd>
+          </div>
+          <div>
+            <dt>model</dt>
+            <dd>{{ displayModel }}</dd>
+          </div>
+          <div>
+            <dt>durationMs</dt>
+            <dd>{{ displayDurationMs }}</dd>
           </div>
           <div>
             <dt>fallbackReason</dt>
