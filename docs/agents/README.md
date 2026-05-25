@@ -30,6 +30,12 @@ Lead must check whether the current runtime supports explicit subagent spawning.
 
 Lead may directly handle small, low-risk tasks when the change is narrow and does not need role separation.
 
+### User Explicit Spawn Override
+
+When the user explicitly asks Lead to spawn a subagent, Lead must spawn that subagent even if the task looks small.
+
+Lead must not use the "small tasks may be handled directly" rule to override an explicit user spawn request.
+
 Lead must spawn:
 
 - `explorer-agent` for large, cross-module, boundary-unclear, high-risk, or context-heavy tasks.
@@ -39,6 +45,14 @@ Lead must spawn:
 - `docs-agent` when active docs, indexes, task cards, or stable entry docs need non-trivial updates.
 
 Tester and Reviewer default to reporting only. They do not fix business code by default. Fixes are assigned by Lead to the responsible implementation agent.
+
+## Explorer Agent and Context Scout
+
+For large, cross-module, boundary-unclear, high-risk, or context-heavy tasks, Lead defaults to spawning `explorer-agent` first.
+
+`context-scout` is only an optional read-only context compression playbook that `explorer-agent` may use when it needs a compact context pack. It does not replace `explorer-agent`, is not the default entry point, and is not a Claude Code agent mechanism.
+
+`context-scout` is not Claude Code Custom Subagents, not `.claude/agents/`, not `CLAUDE.md`, not Claude Code `/agents`, not Claude Code Agent Teams, and not an automatic parallel execution system.
 
 ## Available Subagents
 
@@ -59,11 +73,13 @@ Keep the default context small:
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/plan.md`
-4. Active task card in `docs/tasks/` if one exists
-5. Current role file under `docs/agents/`
-6. Current task related code or docs
-7. `docs/spec.md` only when necessary
+3. `docs/mvp-roadmap.md`
+4. `docs/plan.md`
+5. Active task card in `docs/tasks/` if one exists
+6. `docs/agents/README.md`
+7. Current role file under `docs/agents/`
+8. Current task related code or docs
+9. `docs/spec.md` only when necessary
 
 `docs/archive/` is not default context. Read it only when the task explicitly requires history lookup, audit, or acceptance evidence.
 

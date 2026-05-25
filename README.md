@@ -4,7 +4,7 @@
 
 本项目用于探索“截图 / Figma 设计信息 -> 响应式页面代码”的生成链路，并沉淀适合个人学习、Codex 执行和 MVP 推进的轻量协作方式。
 
-当前项目已完成 Week 10 收口，可进入 Week 11 规划阶段。Week 10 已把真实 AI 链路稳定化、artifact 复用、前端状态展示和可复现 smoke 收口完成。
+当前阶段为 Week 14 MVP 产品化交付闭环。Week 14 聚焦围绕 MVP 交付链路完成产品化补齐、验证和收口。
 
 项目协作采用 **Codex Lead + Short-lived Subagents Workflow**，仍然保持 Docs Lite 原则，不回到重文档体系。
 
@@ -26,9 +26,12 @@
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. 当前活跃 `docs/tasks/day-xx.md`，如存在
-4. 当前任务相关代码
-5. 必要时读取 `docs/spec.md`
+3. `docs/mvp-roadmap.md`
+4. `docs/plan.md`
+5. `docs/agents/README.md`
+6. 当前活跃 `docs/tasks/day-xx.md`，如存在
+7. 当前任务相关代码
+8. 必要时读取 `docs/spec.md`
 
 ## 当前文档入口
 
@@ -40,7 +43,7 @@
 | 当前规格 | `docs/spec.md` |
 | 文档索引 | `docs/INDEX.md` |
 | Codex 角色边界 | `docs/agents/README.md` |
-| 上下文侦察流程 | `docs/playbooks/context-scout.md` |
+| context-scout playbook | `docs/playbooks/context-scout.md` |
 | 历史归档 | `docs/archive/` |
 | smoke 验证说明 | `tests/smoke/README.md` |
 
@@ -61,7 +64,7 @@
 - 不接 MySQL 实际落库。
 - 不创建数据库表、Entity、Mapper。
 - 不接 Redis / RabbitMQ。
-- 不做真实截图解析。
+- 不做复杂截图解析系统 / 多页面截图理解 / 未批准新输入链路。
 - 不做 ZIP 导出、拖拽编辑器、在线编辑器。
 - 不要求 `vueCode` 真正可运行。
 - 不做 Playwright 视觉回归。
@@ -73,12 +76,15 @@
 ```text
 AGENTS.md
 docs/current.md
+docs/mvp-roadmap.md
+docs/plan.md
+docs/agents/README.md
 当前活跃 docs/tasks/day-xx.md，如存在
 当前任务相关代码
 必要时 docs/spec.md
 ```
 
-大任务、跨模块任务、阶段边界不清或敏感边界任务，先进入 `explorer-agent` 阶段；必要时可按 `docs/playbooks/context-scout.md` 生成临时 context-pack，Codex 必须验收后再计划、拆任务、编码或测试。
+大任务、跨模块任务、阶段边界不清或敏感边界任务，先 spawn `explorer-agent`；必要时由 `explorer-agent` 按 `docs/playbooks/context-scout.md` 生成临时 context-pack，并回到 Lead 验收后再计划、拆任务、编码或测试。
 
 ## Codex Lead + Short-lived Subagents
 
@@ -97,7 +103,7 @@ docs/current.md
 - `tester-agent`：测试、smoke、问题复现和结果记录
 - `reviewer-agent`：代码质量、安全、潜在 bug 和边界审查
 
-详细规则见 `docs/agents/README.md`。默认新任务仍优先读取 Docs Lite 文件，不默认读取 `docs/archive/`；小任务 Lead 可直接做，中大型开发任务必须 spawn 对应实现 agent；大任务、跨模块任务、边界不清任务先 spawn `explorer-agent`。如果当前运行环境没有 subagent 工具，Lead 必须明确说明降级原因并请求确认。
+详细规则见 `docs/agents/README.md`。默认新任务仍优先读取 Docs Lite 文件，不默认读取 `docs/archive/`；小任务 Lead 可直接做，但用户显式要求 spawn 时必须 spawn；中大型开发任务必须 spawn 对应实现 agent；大任务、跨模块任务、边界不清任务先 spawn `explorer-agent`。如果当前运行环境没有 subagent 工具，Lead 必须明确说明降级原因并请求确认。
 
 ## 本地运行
 

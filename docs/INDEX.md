@@ -17,6 +17,7 @@ docs/
   quality/
     week13-quality.md
   smoke/
+    week14-mvp-smoke.md
     week13-quality-smoke.md
     real-ai-smoke.md
   tasks/
@@ -34,8 +35,9 @@ docs/
 3. `docs/mvp-roadmap.md`
 4. `docs/plan.md`
 5. 当存在活跃日卡时，再读取当天对应的 `docs/tasks/day-xx.md`
-6. 当前任务相关代码
-7. 必要时读取 `docs/spec.md`
+6. 中大型任务执行前读取 `docs/agents/README.md` 的 spawn 规则
+7. 当前任务相关代码
+8. 必要时读取 `docs/spec.md`
 
 ## 活跃文档
 
@@ -46,10 +48,11 @@ docs/
 | 当前计划摘要 | `docs/plan.md` | Week 14 产品化目标、Day 计划和安全边界 |
 | 当前核心规格 | `docs/spec.md` | 当前有效口径、真实 AI 链路、artifact、前端预览等核心规格 |
 | 输出质量标准 | `docs/quality/week13-quality.md` | Week 13 质量标准、评分表和通过线 |
+| Week 14 MVP smoke | `docs/smoke/week14-mvp-smoke.md` | Week 14 MVP 上传、生成、预览、复制 / 下载链路 smoke |
 | 质量 smoke 记录 | `docs/smoke/week13-quality-smoke.md` | 三张 samples 的顺序 smoke 记录 |
 | Codex 角色边界 | `docs/agents/README.md` | Codex Lead + Short-lived Subagents Workflow |
 | 当前任务卡目录 | `docs/tasks/` | Week 14 day 卡生成后放在此处 |
-| context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
+| context-scout playbook | `docs/playbooks/context-scout.md` | explorer-agent 可选使用的只读上下文压缩方法 |
 | 历史归档 | `docs/archive/` | 历史计划、总结、smoke、验收报告和参考文档 |
 
 ## Codex Lead + Short-lived Subagents
@@ -72,8 +75,8 @@ docs/
 
 - 默认新任务仍优先读取 Docs Lite 文件。
 - `docs/archive/` 不是默认读取内容。
-- 小任务 Lead 可直接做；中大型开发任务必须 spawn 对应实现 agent。
-- 大任务 / 跨模块 / 边界不清时先 spawn `explorer-agent`，可按需使用 context-scout。
+- 小任务 Lead 可直接做；用户显式要求 spawn 时必须 spawn；中大型开发任务必须 spawn 对应实现 agent。
+- 大任务 / 跨模块 / 边界不清时先 spawn `explorer-agent`，再由 explorer-agent 按需使用 context-scout。
 - 代码实现后 spawn `tester-agent`；有代码变更后 spawn `reviewer-agent`。
 - 如果当前运行环境没有 subagent 工具，Lead 必须明确说明降级原因并请求确认，不能静默主线程自演。
 - Agent 文档只定义长期角色边界，不记录临时 Week 任务。
@@ -82,21 +85,16 @@ docs/
 
 当前任务卡：
 
-- Week 14 开始执行前，应重新生成 `docs/tasks/day-01.md` 到 `docs/tasks/day-07.md`。
+- Week 14 day 卡已生成，执行时以当前 day 卡为准。
 - 旧任务卡应在周收口后归档或清理，避免污染当前上下文。
 
 模板见 `docs/tasks/_template.md`。
 
-## Week 12 归档入口
+## 旧周归档入口
 
 | 类型 | 路径 |
 |---|---|
 | Week 12 原始严格验收报告 | `docs/archive/week/12-plan-strict-acceptance.md` |
-
-## 最近归档入口
-
-| 类型 | 路径 |
-|---|---|
 | Week 11 原始计划归档 | `docs/archive/week/11-plan.md` |
 | Week 11 Summary | `docs/archive/week/11-summary.md` |
 | Week 11 Dev Smoke | `docs/archive/week/11-dev-smoke.md` |

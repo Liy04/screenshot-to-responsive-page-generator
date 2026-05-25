@@ -99,12 +99,13 @@ Week 14 的目标是 MVP 产品化交付：
 - 当前规格：`docs/spec.md`
 - 输出质量标准：`docs/quality/week13-quality.md`
 - Week 13 smoke 记录：`docs/smoke/week13-quality-smoke.md`
+- Week 14 MVP smoke：`docs/smoke/week14-mvp-smoke.md`
 - 文档索引：`docs/INDEX.md`
 - Codex 角色边界：`docs/agents/README.md`
 - 历史归档：`docs/archive/`
 
 ## 下一步状态
 
-进入 Week 14 规划和 day 卡拆分。
+Week 14 day 卡已生成，当前按 `docs/tasks/day-xx.md` 执行 MVP 产品化交付任务。
 
-建议先由 docs-agent 根据 `docs/mvp-roadmap.md` 和 `docs/plan.md` 生成 Week 14 day 卡，再按 Codex Lead + Short-lived Subagents 流程逐日执行。
+执行时以当前 day 卡为准，并继续遵守 Codex Lead + Short-lived Subagents Workflow：中大型任务按需 spawn，代码实现后进行 tester / reviewer 验证与审查。

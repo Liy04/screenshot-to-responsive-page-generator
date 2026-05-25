@@ -37,15 +37,22 @@ Lead must spawn:
 
 Lead may directly perform only small, low-risk, narrow tasks.
 
+If the user explicitly asks to spawn a subagent, Lead must spawn the requested subagent even when the task appears small. Lead must not use the small-task direct-execution rule to override an explicit user spawn request.
+
+For large, cross-module, boundary-unclear, high-risk, or context-heavy tasks, Lead must spawn `explorer-agent` first. `context-scout` does not replace `explorer-agent`; it is only an optional read-only context compression method that `explorer-agent` may choose after it is spawned.
+
+When a task is large, cross-module, or boundary-unclear, Lead first spawns `explorer-agent`, then the `explorer-agent` decides whether `context-scout` is needed.
+
 ## Default Reading
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/plan.md`
-4. Active task card in `docs/tasks/` if one exists
-5. `docs/agents/README.md`
-6. `docs/agents/lead.md`
-7. `docs/spec.md` only when necessary
+3. `docs/mvp-roadmap.md`
+4. `docs/plan.md`
+5. Active task card in `docs/tasks/` if one exists
+6. `docs/agents/README.md`
+7. `docs/agents/lead.md`
+8. `docs/spec.md` only when necessary
 
 `docs/archive/` is not default context.
 

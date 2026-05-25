@@ -34,11 +34,13 @@
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/plan.md`
-4. `docs/tasks/day-xx.md` 或当前活跃任务卡
-5. `docs/agents/` 下对应角色文件
-6. 当前任务相关代码或文档
-7. 必要时读取 `docs/spec.md`
+3. `docs/mvp-roadmap.md`
+4. `docs/plan.md`
+5. `docs/tasks/day-xx.md` 或当前活跃任务卡
+6. `docs/agents/README.md`
+7. `docs/agents/` 下对应角色文件
+8. 当前任务相关代码或文档
+9. 必要时读取 `docs/spec.md`
 
 `docs/archive/` 不是默认上下文；只有明确要求历史追溯、审计、验收证据或归档整理时才读取。
 
@@ -53,6 +55,7 @@ Subagent 不是 Claude Code Custom Subagents，不是 `.claude/agents/`，不是
 默认由 Lead 先判断任务范围、角色边界、是否需要拆分和是否需要 spawn subagent。
 
 - 小任务 Lead 可直接做。
+- 用户显式要求 spawn subagent 时，即使是小任务也必须 spawn；不得用“小任务 Lead 可直接做”覆盖用户要求。
 - 中大型开发任务必须 spawn 对应实现 agent。
 - 大任务、跨模块、边界不清、风险较高或需要大量上下文的任务，先 spawn `explorer-agent`。
 - 代码实现后 spawn `tester-agent` 做最低必要验证。
@@ -89,7 +92,9 @@ Lead / project-manager 不承担中大型编码实现；需要实现时，应 sp
 
 完整规则见 `docs/playbooks/context-scout.md`。
 
-小任务不需要 Context Scout。大任务、跨模块任务、边界不清任务或需要先摸清现状的任务，可以先做 Context Scout，再进入实现。
+小任务不需要 Context Scout。大任务、跨模块任务、边界不清任务或需要先摸清现状的任务，默认先 spawn `explorer-agent`。
+
+Context Scout 只是 `explorer-agent` 可选使用的只读上下文压缩方法，不替代 `explorer-agent`，也不是当前工作流的默认入口。
 
 ## 禁止事项
 
