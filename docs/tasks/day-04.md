@@ -1,84 +1,98 @@
-# Week 13 Day 04
+# Week 14 Day 04
 
 ## 负责角色
 
-worker-agent -> tester-agent -> reviewer-agent -> lead
+frontend-agent -> tester-agent -> reviewer-agent -> Lead
 
 ## 任务目标
 
-增强 preview 的静态样式表达，让 card / button / input / text 更像实际 UI，同时保持严格安全边界。
+为 `/dev/image-to-layout` 增加最小下载能力，让用户能下载生成结果。
+
+优先方案：
+
+```text
+下载单个完整 HTML 文件
+```
+
+可选补充：
+
+```text
+下载 index.html
+下载 style.css
+```
+
+Week 14 不做复杂 ZIP 导出。
 
 ## 默认读取
 
 - `AGENTS.md`
 - `docs/current.md`
+- `docs/mvp-roadmap.md`
 - `docs/plan.md`
 - `docs/tasks/day-04.md`
-- `docs/agents/worker-agent.md`
+- `docs/agents/frontend-agent.md`
 - `docs/agents/tester-agent.md`
 - `docs/agents/reviewer-agent.md`
-- `docs/quality/week13-quality.md`
 - 必要时 `docs/spec.md`
-- `worker/` 当前相关代码
+- 当前前端页面、复制逻辑和 preview 相关组件代码
+
+说明：
+
+- 不读取 `docs/archive/`。
+- 不读取 backend / worker 全量代码。
 
 ## 允许修改
 
-- `worker/`
-- worker 相关测试
+- `frontend/` 中与 `/dev/image-to-layout`、下载按钮、文件内容组合、前端测试相关的文件。
 
 ## 禁止修改
 
 - `backend/`
-- `frontend/`
-- `schema/` 大升级
-- 模型原始 HTML 直出
-- CSS `url(`、`expression(`、`@import`
-- inline event
-- `javascript:` URL
+- `worker/`
+- `schema/`
+- `docs/archive/`
+- 复杂 ZIP 导出
+- Vue SFC 可运行化
+- 多文件项目模板导出
+- 后端文件下载接口
 
 ## 实施步骤
 
-1. worker-agent 找到 Layout JSON -> HTML/CSS 静态编译器。
-2. 增加或校准 style key 白名单映射。
-3. 增加 style value sanitizer。
-4. 优先提升 card / button / input / text 的视觉表达，不扩展复杂页面能力。
-5. tester-agent 覆盖 HTML escape、安全 CSS、危险 style 丢弃或 warning、valid / invalid 行为。
-6. reviewer-agent 审查 CSS 注入、HTML 注入和安全边界。
+1. 复用 Day 3 的 HTML / CSS / 完整 HTML 组合逻辑。
+2. 增加下载完整 HTML 文件入口。
+3. 如成本很低，可增加 `index.html` / `style.css` 分文件下载；否则只做单文件 HTML。
+4. 文件名使用安全、简单、可预测的名称。
+5. 没有可下载内容时展示禁用态或空状态。
+6. 不生成 ZIP，不新增后端接口。
+7. 补充前端测试或最低必要验证。
+8. reviewer-agent 检查下载内容、安全边界和是否越界。
+9. Lead 二次验收。
 
 ## 验收标准
 
-- [x] card 样式更清晰。
-- [x] button 样式更清晰。
-- [x] input 样式更清晰。
-- [x] text 样式更清晰。
-- [x] style key 必须白名单。
-- [x] style value 必须 sanitizer。
-- [x] CSS 禁止 `url(`。
-- [x] CSS 禁止 `expression(`。
-- [x] CSS 禁止 `@import`。
-- [x] HTML attribute 禁止 `on*`。
-- [x] href / src 禁止 `javascript:`。
-- [x] 所有 text content 必须 escape。
-- [x] Worker 测试通过。
-- [x] 未修改 backend / frontend。
+- [ ] 用户可以下载至少一个完整 HTML 文件。
+- [ ] 下载文件能在本地打开看到生成内容。
+- [ ] 下载内容不包含真实 API key 或敏感信息。
+- [ ] 没有实现复杂 ZIP。
+- [ ] 没有修改后端或 Worker。
+- [ ] iframe 安全策略没有被改动。
+- [ ] 前端测试或 build 通过；无法运行时说明原因。
 
 ## Lead 二次验收
 
-- [x] 对照任务目标和验收标准检查。
-- [x] 检查修改范围是否越界。
-- [x] 检查测试 / smoke / review 是否完成或说明原因。
-- [x] 检查安全边界和密钥风险。
-- [x] 检查是否需要同步文档。
-- [x] 结论：通过。
+- 检查下载功能是否满足“用户可拿走结果”的 MVP 缺口。
+- 检查是否没有扩大成导出系统。
+- 检查 tester-agent 与 reviewer-agent 结论。
+- 结论：通过 / 条件通过 / 不通过。
 
 ## 输出格式
 
 ```text
-任务结果：
-- 任务目标：
-- 改动文件：
-- 主要改动：
-- 验证步骤：
-- 验证结果：
-- 风险 / 待确认事项：
+## 修改摘要
+## 修改文件
+## 页面影响
+## 下载文件说明
+## 测试结果
+## Review 结果
+## 风险提示
 ```

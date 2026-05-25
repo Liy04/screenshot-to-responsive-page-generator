@@ -1,32 +1,38 @@
-# Week 13 Day 01
+# Week 14 Day 01
 
 ## 负责角色
 
-docs-agent -> reviewer-agent -> lead
+docs-agent -> reviewer-agent -> Lead
 
 ## 任务目标
 
-建立 Week 13 输出质量标准、评分表和顺序 smoke 模板，明确本周继续做输出质量增强，但不进入 MySQL、Figma、复杂编辑器或持久化主线。
+把 Week 14 MVP 产品化交付计划拆成可执行 day 卡，并建立 Week 14 MVP smoke 记录模板。
 
 ## 默认读取
 
 - `AGENTS.md`
 - `docs/current.md`
+- `docs/mvp-roadmap.md`
 - `docs/plan.md`
-- `docs/tasks/day-01.md`
+- `docs/tasks/_template.md`
 - `docs/agents/docs-agent.md`
 - `docs/agents/reviewer-agent.md`
-- `docs/quality/week13-quality.md`
-- `docs/smoke/week13-quality-smoke.md`
-- 必要时 `docs/spec.md`
+
+说明：
+
+- 不读取 `docs/archive/`。
+- 不读取 backend / frontend / worker 业务代码。
 
 ## 允许修改
 
-- `docs/quality/week13-quality.md`
-- `docs/smoke/week13-quality-smoke.md`
-- 必要时 `docs/current.md`
-- 必要时 `docs/plan.md`
-- 必要时 `docs/INDEX.md`
+- `docs/tasks/day-01.md`
+- `docs/tasks/day-02.md`
+- `docs/tasks/day-03.md`
+- `docs/tasks/day-04.md`
+- `docs/tasks/day-05.md`
+- `docs/tasks/day-06.md`
+- `docs/tasks/day-07.md`
+- `docs/smoke/week14-mvp-smoke.md`
 
 ## 禁止修改
 
@@ -34,41 +40,47 @@ docs-agent -> reviewer-agent -> lead
 - `frontend/`
 - `worker/`
 - `schema/`
-- 真实 API key
-- `docs/archive/` 历史内容，除非只做路径核对
+- `docs/archive/`
+- `docs/spec.md`
+- `docs/current.md`
+- `docs/plan.md`
+- `README.md`
+- `AGENTS.md`
 
 ## 实施步骤
 
-1. docs-agent 核对 Week 13 质量目标、评分表和顺序 smoke 口径是否完整。
-2. reviewer-agent 检查质量标准是否过宽，是否遗漏安全边界和顺序 smoke 要求。
-3. Lead 验收 Day 1 是否可以作为后续 Day 2 到 Day 6 的统一验收依据。
+1. 根据 `docs/plan.md` 生成 Week 14 Day 1 到 Day 7 任务卡。
+2. 每张任务卡明确负责角色、允许修改范围、禁止修改范围和验收标准。
+3. 新增 `docs/smoke/week14-mvp-smoke.md`，用于 Day 6 记录 MVP smoke。
+4. reviewer-agent 检查任务是否推动 MVP 主线，是否违反 Docs Lite 和 Agent 边界。
+5. Lead 做二次验收，确认 Week 14 可以逐日执行。
 
 ## 验收标准
 
-- [ ] `docs/quality/week13-quality.md` 包含 35 分评分表。
-- [ ] 包含视觉清单稳定性、Layout JSON 映射质量、preview 样式表达、顺序 smoke 可复现性和安全边界。
-- [ ] 包含三张 samples 的适用范围。
-- [ ] 包含顺序 smoke 记录模板。
-- [ ] 包含通过线和 Week 13 判断标准。
-- [ ] 明确不进入 MySQL、Figma、复杂编辑器和持久化主线。
-- [ ] 没有修改业务代码。
+- [ ] 7 张 day 卡全部存在。
+- [ ] `docs/smoke/week14-mvp-smoke.md` 已新增。
+- [ ] Day 2 到 Day 5 明确由 frontend-agent 执行。
+- [ ] Day 6 明确由 tester-agent 执行。
+- [ ] Day 7 明确由 docs-agent / reviewer-agent / Lead 收口。
+- [ ] 每张 day 卡都写明不读取或修改 `docs/archive/`。
+- [ ] 未修改业务代码。
+- [ ] 未新增 MySQL / Figma / 编辑器 / ZIP 复杂实现。
 
 ## Lead 二次验收
 
-- [ ] 对照任务目标和验收标准检查。
-- [ ] 检查修改范围是否越界。
-- [ ] 检查测试 / smoke / review 是否完成或说明原因。
-- [ ] 检查安全边界和密钥风险。
-- [ ] 检查是否需要同步文档。
-- [ ] 结论：通过 / 条件通过 / 不通过。
+- 对照 Week 14 MVP 目标检查 day 卡是否可执行。
+- 检查修改范围是否只限任务授权文档。
+- 检查是否把 Week 14 推向产品化交付，而不是继续质量优化。
+- 检查 smoke 模板是否覆盖上传、生成、预览、复制、下载和安全检查。
+- 结论：通过 / 条件通过 / 不通过。
+
 ## 输出格式
 
 ```text
-任务结果：
-- 任务目标：
-- 改动文件：
-- 主要改动：
-- 验证步骤：
-- 验证结果：
-- 风险 / 待确认事项：
+## 修改摘要
+## 新增文件
+## 修改文件
+## Review 结果
+## Lead 验收结论
+## 风险提示
 ```

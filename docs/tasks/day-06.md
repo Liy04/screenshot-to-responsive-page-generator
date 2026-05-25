@@ -1,101 +1,94 @@
-# Week 13 Day 06
+# Week 14 Day 06
 
 ## 负责角色
 
-tester-agent -> reviewer-agent -> docs-agent -> lead
+tester-agent -> reviewer-agent -> docs-agent -> Lead
 
 ## 任务目标
 
-按顺序执行三张 samples 的质量 smoke 和人工评分记录，确认 Week 13 的清单稳定性、映射质量和 preview 表达是否真的提升。
+执行 Week 14 MVP smoke，确认上传、生成、预览、复制、下载和安全检查形成可复现闭环，并记录到 `docs/smoke/week14-mvp-smoke.md`。
 
 ## 默认读取
 
 - `AGENTS.md`
 - `docs/current.md`
+- `docs/mvp-roadmap.md`
 - `docs/plan.md`
 - `docs/tasks/day-06.md`
+- `docs/smoke/week14-mvp-smoke.md`
 - `docs/agents/tester-agent.md`
 - `docs/agents/reviewer-agent.md`
 - `docs/agents/docs-agent.md`
-- `docs/quality/week13-quality.md`
-- `docs/smoke/week13-quality-smoke.md`
 - 必要时 `docs/spec.md`
-- 当前任务相关代码
+- 当前任务相关前端页面和测试代码
+
+说明：
+
+- 不读取 `docs/archive/`。
+- 不读取无关模块全量代码。
 
 ## 允许修改
 
-- `docs/smoke/week13-quality-smoke.md`
-- 必要时补充测试记录文档
+- `docs/smoke/week14-mvp-smoke.md`
+- 必要时仅更新 `docs/tasks/day-06.md` 的测试结果部分
 
 ## 禁止修改
 
-- 业务代码，除非 Lead 明确授权修复极小测试脚本问题。
-- 真实 API key。
-- `backend/storage/`
-- `frontend/dist/`
-- 私人截图或敏感图片。
+- `backend/`
+- `frontend/`
+- `worker/`
+- `schema/`
+- `docs/archive/`
+- `docs/current.md`
+- `docs/plan.md`
+- 业务代码
+- 测试代码
 
 ## 实施步骤
 
-1. tester-agent 按固定顺序执行三张 samples 的顺序 smoke。
-2. 记录 status、运行顺序、sourceType、fallbackUsed、promptVersion、artifact.reused、previewHtml、iframe。
-3. 按 `docs/quality/week13-quality.md` 人工评分。
-4. reviewer-agent 审查安全、密钥、iframe、运行副产物。
-5. docs-agent 将结果写入 `docs/smoke/week13-quality-smoke.md`。
-6. Lead 判断 Week 13 是否达到轻量验收口径。
+1. tester-agent 读取 smoke 模板和当前页面验收标准。
+2. 启动后端和前端，使用真实或公开安全样例图执行 MVP smoke。
+3. 验证上传和生成。
+4. 验证原图 / iframe 对比。
+5. 验证 HTML / CSS / 完整 HTML 复制。
+6. 验证最小下载文件。
+7. 验证 REAL_AI / FALLBACK / FAILED 状态展示。
+8. 验证 iframe `sandbox=""` 且无 `allow-scripts`。
+9. 验证不泄漏真实 API key。
+10. reviewer-agent 审查 smoke 结果和安全风险。
+11. docs-agent 将结果记录到 smoke 文档。
+12. Lead 二次验收。
 
 ## 验收标准
 
-- [x] 三张 samples 都有记录。
-- [x] 每张 sample 记录评分人。
-- [x] 每张 sample 记录评分日期。
-- [x] 每张 sample 记录运行顺序。
-- [x] 每张 sample 记录模型。
-- [x] 每张 sample 记录 promptVersion。
-- [x] 每张 sample 记录 artifact.reused。
-- [x] 每张 sample 记录 fallbackUsed。
-- [x] 每张 sample 记录总分和主要缺陷。
-- [x] 记录平均分和最低分。
-- [x] 无真实 key 泄漏。
-- [x] `backend/storage/`、`frontend/dist/` 未进入可提交变更。
+- [ ] 上传成功。
+- [ ] 生成成功或失败状态可解释。
+- [ ] 原图展示正常。
+- [ ] iframe 预览正常或失败时有清晰说明。
+- [ ] HTML 复制可用。
+- [ ] CSS 或完整 HTML 复制可用。
+- [ ] 下载文件可用。
+- [ ] iframe 为 `sandbox=""`。
+- [ ] 无 `allow-scripts`。
+- [ ] 未发现真实 API key 泄漏。
+- [ ] 本轮服务已清理，无残留监听。
+- [ ] smoke 结果已记录到 `docs/smoke/week14-mvp-smoke.md`。
 
 ## Lead 二次验收
 
-- [x] 对照任务目标和验收标准检查。
-- [x] 检查修改范围是否越界。
-- [x] 检查测试 / smoke / review 是否完成或说明原因。
-- [x] 检查安全边界和密钥风险。
-- [x] 检查是否需要同步文档。
-- [x] 结论：通过。
-
-## 验收结果
-
-Day 06 通过。
-
-验证摘要：
-
-- 三张 samples 均按固定顺序完成真实 AI generate。
-- 三张 samples 均 `status=SUCCESS`、`sourceType=REAL_AI`、`fallbackUsed=false`。
-- 三张 samples 首次 generate 后二次 generate 均命中 `artifact.reused=true`。
-- 三张 samples 的 `previewHtml` 均非空。
-- iframe 安全检查通过：`sandbox=""`，无 `allow-scripts`。
-- 未发现真实 API key 泄漏。
-- 平均分 27.0 / 35，最低分 26 / 35，达到 Week 13 稳定通过线。
-
-详细记录见：
-
-```text
-docs/smoke/week13-quality-smoke.md
-```
+- 检查 smoke 是否覆盖 Week 14 MVP 交付闭环。
+- 检查 tester-agent 是否只测试和记录，没有直接修业务代码。
+- 检查 reviewer-agent 是否完成安全和边界审查。
+- 结论：通过 / 条件通过 / 不通过。
 
 ## 输出格式
 
 ```text
-任务结果：
-- 任务目标：
-- 改动文件：
-- 主要改动：
-- 验证步骤：
-- 验证结果：
-- 风险 / 待确认事项：
+## 测试范围
+## 执行命令
+## 测试结果
+## Smoke 记录
+## Review 结果
+## 风险提示
+## 是否通过验收
 ```

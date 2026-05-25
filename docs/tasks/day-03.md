@@ -1,76 +1,88 @@
-# Week 13 Day 03
+# Week 14 Day 03
 
 ## 负责角色
 
-worker-agent -> tester-agent -> reviewer-agent -> lead
+frontend-agent -> tester-agent -> reviewer-agent -> Lead
 
 ## 任务目标
 
-提升 Layout JSON v0.1 的映射质量和 deterministic repair，让页面、section、card、form、button、input、text 的语义更准确。
+为 `/dev/image-to-layout` 增加最小代码复制能力，让用户能复制生成结果。
+
+必须提供：
+
+- 复制 HTML。
+- 复制 CSS。
+- 复制完整 HTML 文档。
 
 ## 默认读取
 
 - `AGENTS.md`
 - `docs/current.md`
+- `docs/mvp-roadmap.md`
 - `docs/plan.md`
 - `docs/tasks/day-03.md`
-- `docs/agents/worker-agent.md`
+- `docs/agents/frontend-agent.md`
 - `docs/agents/tester-agent.md`
 - `docs/agents/reviewer-agent.md`
-- `docs/quality/week13-quality.md`
 - 必要时 `docs/spec.md`
-- `worker/` 当前相关代码
+- 当前前端页面、API 和 preview 相关组件代码
+
+说明：
+
+- 不读取 `docs/archive/`。
+- 不读取 backend / worker 全量代码。
 
 ## 允许修改
 
-- `worker/`
-- worker 相关测试
+- `frontend/` 中与 `/dev/image-to-layout`、生成结果展示、复制按钮、前端测试相关的文件。
 
 ## 禁止修改
 
 - `backend/`
-- `frontend/`
-- `schema/` 大升级
-- Layout JSON v0.2
-- 真实 API key
-- 不可信 style 直通 CSS
+- `worker/`
+- `schema/`
+- `docs/archive/`
+- 后端 API 契约
+- 模型 prompt
+- Worker 编译逻辑
 
 ## 实施步骤
 
-1. worker-agent 梳理当前 intermediate -> Layout JSON 映射和 repair 流程。
-2. 在 v0.1 兼容范围内补齐 page / section / card / button / input / form / text 的基础默认值。
-3. 让 repair 仅基于 node role / type / safety 规则补默认值，不调用模型自由发挥。
-4. tester-agent 运行 worker 测试。
-5. reviewer-agent 审查 sanitizer、validator、fallback 边界。
+1. 读取当前前端生成结果字段来源，确认可复制内容来自 Worker 静态编译结果。
+2. 增加复制 HTML、复制 CSS、复制完整 HTML 文档入口。
+3. 复制成功和失败都要有用户可读反馈。
+4. 不复制模型原始输出。
+5. 如果当前结果没有可复制内容，展示禁用态或清晰空状态。
+6. 补充前端组件测试或最低必要测试。
+7. reviewer-agent 检查复制内容来源、安全边界和未越界修改。
+8. Lead 二次验收。
 
 ## 验收标准
 
-- [ ] 不升级 Layout JSON schema v0.2。
-- [ ] repair 是 deterministic rule，不再调用模型自由发挥。
-- [ ] repair 只能基于 node role / type 补默认值。
-- [ ] repair 不保留危险 style value。
-- [ ] repair 不绕过 validator。
-- [ ] 未知 style key 进入 warnings 或被拒绝，不静默编译。
-- [ ] Worker 测试通过。
-- [ ] 未修改 backend / frontend。
+- [ ] 用户可以复制 HTML。
+- [ ] 用户可以复制 CSS。
+- [ ] 用户可以复制完整 HTML 文档。
+- [ ] 复制内容来自静态编译结果或前端安全组合结果。
+- [ ] 复制失败有提示。
+- [ ] 没有真实 API key、环境变量或敏感信息进入复制内容。
+- [ ] 不修改 backend / worker。
+- [ ] 前端测试或 build 通过；无法运行时说明原因。
 
 ## Lead 二次验收
 
-- [ ] 对照任务目标和验收标准检查。
-- [ ] 检查修改范围是否越界。
-- [ ] 检查测试 / smoke / review 是否完成或说明原因。
-- [ ] 检查安全边界和密钥风险。
-- [ ] 检查是否需要同步文档。
-- [ ] 结论：通过 / 条件通过 / 不通过。
+- 检查复制功能是否满足 MVP 交付缺口。
+- 检查是否没有扩大到下载、ZIP 或项目模板导出。
+- 检查 tester-agent 与 reviewer-agent 结论。
+- 结论：通过 / 条件通过 / 不通过。
 
 ## 输出格式
 
 ```text
-任务结果：
-- 任务目标：
-- 改动文件：
-- 主要改动：
-- 验证步骤：
-- 验证结果：
-- 风险 / 待确认事项：
+## 修改摘要
+## 修改文件
+## 页面影响
+## 复制内容说明
+## 测试结果
+## Review 结果
+## 风险提示
 ```
