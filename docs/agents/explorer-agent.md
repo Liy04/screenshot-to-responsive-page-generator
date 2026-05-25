@@ -2,7 +2,7 @@
 
 ## Role
 
-Explorer is Codex's context scouting stage.
+Explorer is a short-lived subagent for context scouting.
 
 Explorer reads enough context to make a safe plan, but does not implement business changes.
 
@@ -46,6 +46,16 @@ Explorer reads enough context to make a safe plan, but does not implement busine
 - Do not update current docs unless the task explicitly assigns docs work.
 - Do not run tests unless the task explicitly asks for validation-only exploration.
 - Do not introduce dependencies or configuration.
+- Do not introduce Claude Code agent files or configuration.
+
+## Stop Rules
+
+Stop and report to Lead when:
+
+- Required context would require reading `docs/archive/` without explicit authorization.
+- The task needs implementation instead of exploration.
+- The likely fix spans multiple modules and needs Lead splitting.
+- Current facts contradict the task card or acceptance criteria.
 
 ## Output Format
 

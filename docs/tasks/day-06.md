@@ -4,6 +4,13 @@
 
 tester-agent -> reviewer-agent -> docs-agent -> Lead
 
+## 执行方式
+
+- 是否需要 spawn subagent：是
+- Lead 是否可直接执行：否，除非当前运行环境没有 subagent 工具且用户确认降级
+- 必须 spawn 的 agent：tester-agent、reviewer-agent、docs-agent
+- 是否允许并行：否，默认顺序执行
+
 ## 任务目标
 
 执行 Week 14 MVP smoke，确认上传、生成、预览、复制、下载和安全检查形成可复现闭环，并记录到 `docs/smoke/week14-mvp-smoke.md`。

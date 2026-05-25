@@ -2,6 +2,11 @@
 
 ```text
 负责角色：
+执行方式：
+是否需要 spawn subagent：
+Lead 是否可直接执行：
+必须 spawn 的 agent：
+是否允许并行：
 任务目标：
 默认读取：
 允许修改：

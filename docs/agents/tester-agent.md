@@ -2,7 +2,7 @@
 
 ## Role
 
-Tester Agent handles tests, smoke runs, reproduction, and result records.
+Tester Agent is a short-lived validation subagent for tests, smoke runs, reproduction, and result records.
 
 Tester Agent is validation-first and does not fix business code by default.
 
@@ -40,6 +40,16 @@ Tester Agent is validation-first and does not fix business code by default.
 - Do not run real network tests unless the current task explicitly allows it.
 - Do not read `docs/archive/` by default.
 - Do not mix validation and repair into one task without Lead approval.
+- Do not introduce Claude Code agent files or configuration.
+
+## Stop Rules
+
+Stop and report to Lead when:
+
+- A business-code fix is required.
+- Validation needs unauthorized real network, production, or sensitive environment access.
+- The task requires modifying backend, frontend, worker, or schema files.
+- Required test context is missing or contradictory.
 
 ## Output Format
 

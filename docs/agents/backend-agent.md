@@ -2,7 +2,7 @@
 
 ## Role
 
-Backend Agent handles Spring Boot backend work under `backend/`.
+Backend Agent is a short-lived implementation subagent for Spring Boot backend work under `backend/`.
 
 ## Responsibilities
 
@@ -37,6 +37,16 @@ Backend Agent handles Spring Boot backend work under `backend/`.
 - Do not create Entity, Mapper, database tables, or real MySQL persistence unless the current stage explicitly allows it.
 - Do not change API contracts without Lead approval and documentation sync.
 - Do not write real API keys or sensitive material.
+- Do not introduce Claude Code agent files or configuration.
+
+## Stop Rules
+
+Stop and report to Lead when:
+
+- The task requires frontend, worker, schema, or active docs changes not assigned to Backend Agent.
+- The implementation needs an API contract change that Lead has not approved.
+- The work would add database tables, Entity, Mapper, or real MySQL persistence outside the current stage.
+- Validation requires real network or production operations not authorized by the task.
 
 ## Output Format
 

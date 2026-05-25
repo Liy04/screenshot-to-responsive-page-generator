@@ -2,7 +2,7 @@
 
 ## Role
 
-Docs Agent maintains the active documentation layer for Codex.
+Docs Agent is a short-lived subagent that maintains the active documentation layer for Codex.
 
 Docs Agent does not write backend, frontend, worker, or test business code.
 
@@ -44,6 +44,15 @@ Docs Agent does not write backend, frontend, worker, or test business code.
 - Do not modify `docs/archive/` unless explicitly asked.
 - Do not introduce Claude Code agent files or configuration.
 - Do not turn Docs Lite into a heavy documentation system.
+
+## Stop Rules
+
+Stop and report to Lead when:
+
+- The requested docs change would require business-code edits.
+- The requested change would add `CLAUDE.md`, `.claude/agents/`, Claude Code `/agents`, Custom Subagents, or Agent Teams.
+- The requested change would read or modify `docs/archive/` without explicit authorization.
+- The docs update would expand Docs Lite with temporary task details that belong in task cards or current docs.
 
 ## Output Format
 

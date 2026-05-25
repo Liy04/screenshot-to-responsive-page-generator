@@ -42,28 +42,35 @@
 
 `docs/archive/` 不是默认上下文；只有明确要求历史追溯、审计、验收证据或归档整理时才读取。
 
-## Codex Lead + Lightweight Agents
+## Codex Lead + Short-lived Subagents
 
-本项目使用 **Codex Lead + Lightweight Agents Workflow**。
+本项目使用 **Codex Lead + Short-lived Subagents Workflow**。
 
-Agents 是 Codex 的角色阶段和边界规则，不是 Claude Code Custom Subagents，不是自动并发执行系统，也不是独立长期运行的子代理。详细规则见 `docs/agents/README.md`。
+Subagent 指 Codex 当前运行环境支持 subagent 工具时，由 Lead 显式创建的短生命周期子智能体。详细规则见 `docs/agents/README.md`。
 
-默认由 Lead 先判断任务范围、角色边界、是否需要拆分和是否需要 Explorer。
+Subagent 不是 Claude Code Custom Subagents，不是 `.claude/agents/`，不是 `CLAUDE.md`，不是 Claude Code `/agents`，不是 Claude Code Agent Teams，不是自动并发系统，也不是长期常驻代理。
 
-- 复杂、跨模块、边界不清、风险较高或需要大量上下文的任务，先进入 `explorer-agent`。
-- 实现后进入 `tester-agent` 做最低必要验证。
-- 代码变更通常建议进入 `reviewer-agent` 做质量、安全、潜在 bug 和边界检查。
-- 每个角色阶段完成后，Lead 必须按任务卡做二次验收；验收通过后才能进入下一阶段。
+默认由 Lead 先判断任务范围、角色边界、是否需要拆分和是否需要 spawn subagent。
+
+- 小任务 Lead 可直接做。
+- 中大型开发任务必须 spawn 对应实现 agent。
+- 大任务、跨模块、边界不清、风险较高或需要大量上下文的任务，先 spawn `explorer-agent`。
+- 代码实现后 spawn `tester-agent` 做最低必要验证。
+- 有代码变更后 spawn `reviewer-agent` 做质量、安全、潜在 bug 和边界检查。
+- Tester 和 Reviewer 默认不修业务代码，只报告问题；修复由 Lead 再分派给对应实现 agent。
+- 默认顺序执行，不允许多个 agent 同时修改同一目录。
+- 如果当前运行环境没有 subagent 工具，Lead 必须明确说明降级原因并请求确认，不能静默主线程自演。
+- 每个 subagent 完成后，Lead 必须按任务卡做二次验收；验收通过后才能进入下一阶段。
 
 ## Lead / Project Manager 边界
 
 Lead / project-manager 负责拆分任务、控制范围、验收标准、风险识别、文档同步和 Git 收口。
 
-Lead / project-manager 不承担中大型编码实现；需要实现时，应拆给对应实现类角色，并保持修改范围清晰。
+Lead / project-manager 不承担中大型编码实现；需要实现时，应 spawn 对应实现类 subagent，并保持修改范围清晰。
 
 ## 多角色边界
 
-- 不让多个角色同时修改同一目录。
+- 不让多个 agent 同时修改同一目录。
 - 实现类角色默认不跨模块修改。
 - Backend / Frontend / Worker / Tester / Reviewer / Docs Agent 应遵守各自角色文件的允许修改范围。
 - Tester 和 Reviewer 默认先读后评估，不默认直接修业务代码。

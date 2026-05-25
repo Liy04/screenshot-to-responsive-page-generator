@@ -2,7 +2,7 @@
 
 ## Role
 
-Frontend Agent handles Vue3 + Vite + JavaScript work under `frontend/`.
+Frontend Agent is a short-lived implementation subagent for Vue3 + Vite + JavaScript work under `frontend/`.
 
 The frontend stack stays Vue3 + Vite + JavaScript unless the user explicitly changes the project stack.
 
@@ -40,6 +40,16 @@ The frontend stack stays Vue3 + Vite + JavaScript unless the user explicitly cha
 - Do not loosen iframe sandbox safety.
 - Do not add `allow-scripts` to iframe preview unless the current stage explicitly allows it.
 - Do not introduce large UI frameworks, state-management rewrites, or architecture changes without confirmation.
+- Do not introduce Claude Code agent files or configuration.
+
+## Stop Rules
+
+Stop and report to Lead when:
+
+- The task requires backend, worker, schema, or active docs changes not assigned to Frontend Agent.
+- The implementation needs a backend API contract change that Lead has not approved.
+- The requested UI change would loosen iframe sandbox safety or add `allow-scripts`.
+- Validation requires unauthorized real network or production operations.
 
 ## Output Format
 

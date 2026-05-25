@@ -107,4 +107,4 @@ Week 14 的目标是 MVP 产品化交付：
 
 进入 Week 14 规划和 day 卡拆分。
 
-建议先由 docs-agent 根据 `docs/mvp-roadmap.md` 和 `docs/plan.md` 生成 Week 14 day 卡，再按 Lead + Lightweight Agents 流程逐日执行。
+建议先由 docs-agent 根据 `docs/mvp-roadmap.md` 和 `docs/plan.md` 生成 Week 14 day 卡，再按 Codex Lead + Short-lived Subagents 流程逐日执行。

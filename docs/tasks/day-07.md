@@ -4,6 +4,13 @@
 
 Lead -> docs-agent -> reviewer-agent -> Lead
 
+## 执行方式
+
+- 是否需要 spawn subagent：是
+- Lead 是否可直接执行：仅可做范围判断和最终验收，docs / review 工作需 spawn
+- 必须 spawn 的 agent：docs-agent、reviewer-agent
+- 是否允许并行：否，默认顺序执行
+
 ## 任务目标
 
 完成 Week 14 收口，判断 MVP 产品化交付闭环是否通过，并给出下一周建议。

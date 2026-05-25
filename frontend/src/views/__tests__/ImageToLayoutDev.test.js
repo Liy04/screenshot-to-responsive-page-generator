@@ -54,7 +54,7 @@ const realAiResult = {
     assumptions: [],
     warnings: [],
   },
-  previewHtml: '<!doctype html><html><body><main>REAL_AI</main></body></html>',
+  previewHtml: '<!doctype html><html><head><style>.page{color:#111827;}</style></head><body><main class="page">REAL_AI</main></body></html>',
 }
 
 const fallbackResult = {
@@ -159,6 +159,12 @@ beforeAll(() => {
     createObjectURL: vi.fn(() => 'blob:preview'),
     revokeObjectURL: vi.fn(),
   })
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: {
+      writeText: vi.fn(),
+    },
+  })
 })
 
 describe('ImageToLayoutDev', () => {
@@ -192,11 +198,24 @@ describe('ImageToLayoutDev', () => {
     expect(wrapper.text()).toContain('artifact.reused')
     expect(wrapper.text()).toContain('false')
     expect(wrapper.text()).toContain('/api/image-page/jobs/imgjob_real_001/source')
-    expect(wrapper.text()).toContain('原图 / iframe 对比')
+    expect(wrapper.text()).toContain('原图 / 生成预览')
     expect(wrapper.text()).toContain('上传原图')
     expect(wrapper.text()).toContain('生成预览')
+    expect(wrapper.text()).toContain('交付操作')
+    expect(wrapper.text()).toContain('复制 HTML')
+    expect(wrapper.text()).toContain('复制 CSS')
+    expect(wrapper.text()).toContain('复制完整 HTML')
+    expect(wrapper.text()).toContain('下载 HTML')
+    expect(wrapper.text()).toContain('调试详情')
     expect(wrapper.find('.image-compare-grid').exists()).toBe(true)
     expect(wrapper.find('.compare-image-frame img').attributes('src')).toBe(uploadResult.sourceUrl)
+
+    const deliveryButtons = wrapper.findAll('.delivery-action-grid button')
+    expect(deliveryButtons).toHaveLength(4)
+    expect(deliveryButtons[0].attributes('disabled')).toBeUndefined()
+    expect(deliveryButtons[1].attributes('disabled')).toBeUndefined()
+    expect(deliveryButtons[2].attributes('disabled')).toBeUndefined()
+    expect(deliveryButtons[3].attributes('disabled')).toBeUndefined()
 
     const iframe = wrapper.find('iframe')
     expect(iframe.exists()).toBe(true)
@@ -205,7 +224,87 @@ describe('ImageToLayoutDev', () => {
     expect(iframe.html()).not.toContain('allow-scripts')
   })
 
-  it('shows Smoke 验收摘要 required by Week 13', async () => {
+  it('copies HTML, CSS, and full HTML document from previewHtml', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue(realAiResult)
+    navigator.clipboard.writeText.mockResolvedValue()
+
+    const wrapper = mountPage()
+    const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
+
+    await selectFile(wrapper, file)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
+
+    const deliveryButtons = wrapper.findAll('.delivery-action-grid button')
+
+    await deliveryButtons[0].trigger('click')
+    await flushPromises()
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
+      expect.stringContaining('<main class="page">REAL_AI</main>'),
+    )
+    expect(navigator.clipboard.writeText.mock.calls.at(-1)[0]).not.toContain('<style>')
+    expect(wrapper.text()).toContain('HTML 已复制')
+
+    await deliveryButtons[1].trigger('click')
+    await flushPromises()
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith('.page{color:#111827;}')
+    expect(wrapper.text()).toContain('CSS 已复制')
+
+    await deliveryButtons[2].trigger('click')
+    await flushPromises()
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(realAiResult.previewHtml)
+    expect(wrapper.text()).toContain('完整 HTML 已复制')
+  })
+
+  it('downloads full HTML document as a single html file', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue(realAiResult)
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+    const wrapper = mountPage()
+    const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
+
+    await selectFile(wrapper, file)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
+
+    await wrapper.findAll('.delivery-action-grid button')[3].trigger('click')
+    await flushPromises()
+
+    const blob = URL.createObjectURL.mock.calls.at(-1)[0]
+    expect(blob).toBeInstanceOf(Blob)
+    expect(blob.type).toBe('text/html;charset=utf-8')
+    expect(clickSpy).toHaveBeenCalledTimes(1)
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:preview')
+    expect(wrapper.text()).toContain('完整 HTML 已开始下载')
+
+    clickSpy.mockRestore()
+  })
+
+  it('shows readable copy failure message without changing generated result', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue(realAiResult)
+    navigator.clipboard.writeText.mockRejectedValue(new Error('clipboard denied'))
+
+    const wrapper = mountPage()
+    const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
+
+    await selectFile(wrapper, file)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
+
+    await wrapper.findAll('.delivery-action-grid button')[0].trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('HTML 复制失败，请检查浏览器剪贴板权限')
+    expect(wrapper.text()).toContain('REAL_AI 成功：可交付')
+    expect(wrapper.text()).toContain('当前结果由真实 AI 直接生成，未触发 fallback。')
+    expect(wrapper.text()).toContain('使用下方按钮复制 HTML / CSS，或下载完整 HTML。')
+    expect(wrapper.find('iframe').attributes('sandbox')).toBe('')
+  })
+
+  it('shows MVP result flow before debug details', async () => {
     uploadImagePageSource.mockResolvedValue(uploadResult)
     generateImagePage.mockResolvedValue(realAiResult)
 
@@ -217,13 +316,21 @@ describe('ImageToLayoutDev', () => {
     await generateForUploadedFile(wrapper)
 
     const summaryText = wrapper.text()
-    expect(summaryText).toContain('Smoke 验收摘要')
-    expect(summaryText).toContain('模型: gpt-4.1-mini')
-    expect(summaryText).toContain('promptVersion: week10-v1')
-    expect(summaryText).toContain('sourceType: REAL_AI')
-    expect(summaryText).toContain('fallbackUsed: false')
-    expect(summaryText).toContain('artifact.reused: false')
-    expect(summaryText).toContain('previewHtml 状态: 非空')
+    expect(summaryText).toContain('生成状态')
+    expect(summaryText).toContain('下一步')
+    expect(summaryText).toContain('原图 / 生成预览')
+    expect(summaryText).toContain('交付操作')
+    expect(summaryText).toContain('调试详情')
+    expect(summaryText.indexOf('生成状态')).toBeLessThan(summaryText.indexOf('原图 / 生成预览'))
+    expect(summaryText.indexOf('原图 / 生成预览')).toBeLessThan(summaryText.indexOf('交付操作'))
+    expect(summaryText.indexOf('交付操作')).toBeLessThan(summaryText.indexOf('调试详情'))
+    expect(summaryText).toContain('model')
+    expect(summaryText).toContain('gpt-4.1-mini')
+    expect(summaryText).toContain('promptVersion')
+    expect(summaryText).toContain('week10-v1')
+    expect(summaryText).toContain('sourceType')
+    expect(summaryText).toContain('REAL_AI')
+    expect(summaryText).toContain('artifact.reused')
   })
 
   it('shows FALLBACK state and fallbackReason with visible warnings and errors', async () => {
@@ -237,7 +344,10 @@ describe('ImageToLayoutDev', () => {
     await uploadSelectedFile(wrapper)
     await generateForUploadedFile(wrapper)
 
-    expect(wrapper.text()).toContain('FALLBACK')
+    expect(wrapper.text()).toContain('FALLBACK：保底结果可预览')
+    expect(wrapper.text()).toContain('当前结果来自 fallback 保底规则')
+    expect(wrapper.text()).toContain('不要当作真实 AI 命中结果')
+    expect(wrapper.text()).toContain('重新生成或检查输入图')
     expect(wrapper.text()).toContain('MODEL_NON_JSON_OUTPUT')
     expect(wrapper.text()).toContain('模型未返回合法 JSON')
     expect(wrapper.text()).toContain('模型输出不可解析，已启用 fallback')
@@ -265,12 +375,17 @@ describe('ImageToLayoutDev', () => {
     await uploadSelectedFile(wrapper)
     await generateForUploadedFile(wrapper)
 
-    expect(wrapper.text()).toContain('FAILED')
+    expect(wrapper.text()).toContain('FAILED：暂无可交付结果')
+    expect(wrapper.text()).toContain('当前生成失败，暂时没有可预览或可下载的页面。')
+    expect(wrapper.text()).toContain('查看 errors / validation.errors 定位失败原因。')
+    expect(wrapper.text()).toContain('修正输入图片或稍后重试。')
     expect(wrapper.text()).toContain('preview 编译失败')
     expect(wrapper.text()).toContain('PARTIAL_LAYOUT')
     expect(wrapper.text()).toContain('LAYOUT_INVALID')
     expect(wrapper.text()).toContain('当前结果为 FAILED，不展示 iframe 预览。')
-    expect(wrapper.find('.image-compare-grid').exists()).toBe(false)
+    expect(wrapper.find('.image-compare-grid').exists()).toBe(true)
+    expect(wrapper.text()).toContain('暂无 iframe')
+    expect(wrapper.text()).toContain('生成成功且存在 previewHtml 后，这里会展示安全 iframe 预览。')
     expect(wrapper.find('iframe').exists()).toBe(false)
   })
 
@@ -293,7 +408,7 @@ describe('ImageToLayoutDev', () => {
     await uploadSelectedFile(wrapper)
     await generateForUploadedFile(wrapper)
 
-    expect(wrapper.text()).toContain('REAL_AI 成功')
+    expect(wrapper.text()).toContain('REAL_AI 成功：可交付')
     expect(wrapper.text()).toContain('model')
     expect(wrapper.text()).toContain('durationMs')
     expect(wrapper.text()).toContain('artifact.reused')
@@ -314,6 +429,8 @@ describe('ImageToLayoutDev', () => {
 
     expect(wrapper.text()).toContain('生成超时')
     expect(wrapper.text()).toContain('Worker timeout after 120 seconds')
+    expect(wrapper.text()).toContain('TIMEOUT：生成超时')
+    expect(wrapper.text()).toContain('稍后重试，或换一张内容更少、更清晰的截图。')
     expect(wrapper.find('iframe').exists()).toBe(false)
   })
 

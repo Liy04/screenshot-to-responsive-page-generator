@@ -6,7 +6,7 @@
 
 当前项目已完成 Week 10 收口，可进入 Week 11 规划阶段。Week 10 已把真实 AI 链路稳定化、artifact 复用、前端状态展示和可复现 smoke 收口完成。
 
-Week 11 开始试运行 **Codex Lead + Lightweight Agents Workflow**，仍然保持 Docs Lite 原则，不回到重文档体系。
+项目协作采用 **Codex Lead + Short-lived Subagents Workflow**，仍然保持 Docs Lite 原则，不回到重文档体系。
 
 当前核心链路：
 
@@ -80,11 +80,13 @@ docs/current.md
 
 大任务、跨模块任务、阶段边界不清或敏感边界任务，先进入 `explorer-agent` 阶段；必要时可按 `docs/playbooks/context-scout.md` 生成临时 context-pack，Codex 必须验收后再计划、拆任务、编码或测试。
 
-## Codex Lead + Lightweight Agents
+## Codex Lead + Short-lived Subagents
 
-本项目的 agents 是 Codex 执行任务时使用的角色阶段和边界规则，不是 Claude Code Custom Subagents，不是 Claude Code `/agents`，也不是自动并发系统。
+本项目的 subagent 指 Codex 当前运行环境支持 subagent 工具时，由 Lead 显式创建的短生命周期子智能体。
 
-Week 11 开始试运行以下轻量角色：
+它不是 Claude Code Custom Subagents，不是 `.claude/agents/`，不是 `CLAUDE.md`，不是 Claude Code `/agents`，不是 Claude Code Agent Teams，也不是自动并发或长期常驻代理。
+
+当前角色：
 
 - `lead`：范围判断、任务拆分、顺序控制、验收收口
 - `explorer-agent`：大任务、跨模块、边界不清任务的上下文侦察
@@ -95,7 +97,7 @@ Week 11 开始试运行以下轻量角色：
 - `tester-agent`：测试、smoke、问题复现和结果记录
 - `reviewer-agent`：代码质量、安全、潜在 bug 和边界审查
 
-详细规则见 `docs/agents/README.md`。默认新任务仍优先读取 Docs Lite 文件，不默认读取 `docs/archive/`；大任务、跨模块任务、边界不清任务先进入 `explorer-agent` 阶段。
+详细规则见 `docs/agents/README.md`。默认新任务仍优先读取 Docs Lite 文件，不默认读取 `docs/archive/`；小任务 Lead 可直接做，中大型开发任务必须 spawn 对应实现 agent；大任务、跨模块任务、边界不清任务先 spawn `explorer-agent`。如果当前运行环境没有 subagent 工具，Lead 必须明确说明降级原因并请求确认。
 
 ## 本地运行
 

@@ -726,6 +726,78 @@ h2 {
   font-weight: 700;
 }
 
+.next-action-panel {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #eff6ff;
+}
+
+.next-action-title {
+  margin: 0;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.next-action-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+.mvp-result-card,
+.delivery-actions-card,
+.debug-details-card {
+  display: grid;
+  gap: 18px;
+}
+
+.delivery-action-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.delivery-action-grid .primary-button:disabled {
+  cursor: not-allowed;
+}
+
+.copy-feedback {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.copy-feedback-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.copy-feedback-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.preview-empty-state {
+  display: grid;
+  min-height: 460px;
+  place-items: center;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #64748b;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .source-image-preview {
   margin-top: 22px;
   overflow: hidden;

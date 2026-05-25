@@ -4,6 +4,13 @@
 
 frontend-agent -> tester-agent -> reviewer-agent -> Lead
 
+## 执行方式
+
+- 是否需要 spawn subagent：是
+- Lead 是否可直接执行：否，除非当前运行环境没有 subagent 工具且用户确认降级
+- 必须 spawn 的 agent：frontend-agent、tester-agent、reviewer-agent
+- 是否允许并行：否，默认顺序执行
+
 ## 任务目标
 
 重组 `/dev/image-to-layout` 的生成结果区，使页面从调试信息堆叠变成更清晰的 MVP 演示路径。

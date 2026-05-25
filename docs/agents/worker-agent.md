@@ -2,7 +2,7 @@
 
 ## Role
 
-Worker Agent handles Python Worker work under `worker/`.
+Worker Agent is a short-lived implementation subagent for Python Worker work under `worker/`.
 
 ## Responsibilities
 
@@ -40,6 +40,16 @@ Worker Agent handles Python Worker work under `worker/`.
 - Do not run real network tests unless the current task explicitly allows it.
 - Do not change schema or API contracts without Lead approval and documentation sync.
 - Do not handle Figma input, Figma API, Figma MCP, or Playwright rendering unless the current stage and active task explicitly allow that work.
+- Do not introduce Claude Code agent files or configuration.
+
+## Stop Rules
+
+Stop and report to Lead when:
+
+- The task requires backend, frontend, schema, or active docs changes not assigned to Worker Agent.
+- The implementation needs schema or API contract changes that Lead has not approved.
+- The task would call real external services without explicit authorization.
+- The task would write API keys, environment values, tokens, or sensitive materials.
 
 ## Output Format
 

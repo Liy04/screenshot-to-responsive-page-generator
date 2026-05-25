@@ -47,14 +47,16 @@ docs/
 | 当前核心规格 | `docs/spec.md` | 当前有效口径、真实 AI 链路、artifact、前端预览等核心规格 |
 | 输出质量标准 | `docs/quality/week13-quality.md` | Week 13 质量标准、评分表和通过线 |
 | 质量 smoke 记录 | `docs/smoke/week13-quality-smoke.md` | 三张 samples 的顺序 smoke 记录 |
-| Codex 角色边界 | `docs/agents/README.md` | Codex Lead + Lightweight Agents Workflow |
+| Codex 角色边界 | `docs/agents/README.md` | Codex Lead + Short-lived Subagents Workflow |
 | 当前任务卡目录 | `docs/tasks/` | Week 14 day 卡生成后放在此处 |
 | context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
 | 历史归档 | `docs/archive/` | 历史计划、总结、smoke、验收报告和参考文档 |
 
-## Codex Lead + Lightweight Agents
+## Codex Lead + Short-lived Subagents
 
-`docs/agents/` 定义 Codex 执行任务时的角色阶段和边界规则。这不是 Claude Code Custom Subagents，不是 Claude Code `/agents`，也不是自动并发系统。
+`docs/agents/` 定义 Codex Lead + Short-lived Subagents Workflow。Subagent 指 Codex 当前运行环境支持 subagent 工具时，由 Lead 显式创建的短生命周期子智能体。
+
+这不是 Claude Code Custom Subagents，不是 `.claude/agents/`，不是 `CLAUDE.md`，不是 Claude Code `/agents`，不是 Claude Code Agent Teams，不是自动并发系统，也不是长期常驻代理。
 
 - `docs/agents/README.md`：工作流总说明
 - `docs/agents/lead.md`：Lead 角色
@@ -70,7 +72,10 @@ docs/
 
 - 默认新任务仍优先读取 Docs Lite 文件。
 - `docs/archive/` 不是默认读取内容。
-- 大任务 / 跨模块 / 边界不清时先进入 `explorer-agent` 阶段，可按需使用 context-scout。
+- 小任务 Lead 可直接做；中大型开发任务必须 spawn 对应实现 agent。
+- 大任务 / 跨模块 / 边界不清时先 spawn `explorer-agent`，可按需使用 context-scout。
+- 代码实现后 spawn `tester-agent`；有代码变更后 spawn `reviewer-agent`。
+- 如果当前运行环境没有 subagent 工具，Lead 必须明确说明降级原因并请求确认，不能静默主线程自演。
 - Agent 文档只定义长期角色边界，不记录临时 Week 任务。
 
 ## Day 卡

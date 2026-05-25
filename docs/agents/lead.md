@@ -2,20 +2,40 @@
 
 ## Role
 
-Lead is Codex's orchestration stage for this repository.
+Lead is Codex's orchestration role for this repository.
 
-Lead does not mean a separate project manager process. It is the phase where Codex decides scope, role, sequence, validation, review, and final handoff.
+Lead decides scope, spawn requirements, sequence, validation, review, and final handoff.
 
 ## Responsibilities
 
 - Clarify the task goal and boundary.
-- Decide whether `explorer-agent` is needed.
+- Decide whether `explorer-agent` must be spawned.
 - Split cross-role tasks into ordered single-role tasks.
-- Assign the appropriate lightweight role stage.
+- Spawn the appropriate short-lived subagent when the task requires it.
 - Keep implementation within the active task scope.
 - Check validation and review results before final handoff.
-- Perform Lead acceptance after every role stage before moving to the next stage.
+- Perform Lead acceptance after every subagent before moving to the next step.
 - Identify risks, blockers, and boundary violations.
+
+## Runtime Capability Gate
+
+Lead must check whether the current Codex runtime provides a subagent tool.
+
+- If subagent tools are available, Lead must spawn required subagents explicitly.
+- If subagent tools are not available, Lead must state the downgrade reason and request confirmation before continuing in the main thread.
+- Lead must not silently act out `frontend-agent`, `backend-agent`, `worker-agent`, `tester-agent`, or `reviewer-agent` in the main thread for medium or large work.
+
+## Must Spawn Conditions
+
+Lead must spawn:
+
+- `explorer-agent` for large, cross-module, boundary-unclear, high-risk, or context-heavy tasks.
+- `backend-agent`, `frontend-agent`, or `worker-agent` for medium or large implementation in that area.
+- `tester-agent` after code implementation.
+- `reviewer-agent` after code changes.
+- `docs-agent` for non-trivial active documentation updates.
+
+Lead may directly perform only small, low-risk, narrow tasks.
 
 ## Default Reading
 
@@ -34,19 +54,20 @@ Lead does not mean a separate project manager process. It is the phase where Cod
 - Small wording fixes.
 - Path corrections.
 - Removal of clearly temporary files when requested or obviously safe.
-- Lightweight acceptance cleanup.
+- Small acceptance cleanup.
 - Git handoff notes when the task asks for Git work.
 
 ## Not Allowed
 
 - Do not perform medium or large backend, frontend, worker, docs, test, or review work directly as Lead.
-- Do not merge unrelated role scopes into one broad implementation task.
+- Do not merge unrelated subagent scopes into one broad implementation task.
 - Do not run automatic parallel agent execution.
 - Do not introduce Claude Code agent configuration.
+- Do not continue in main thread after a must-spawn condition without user confirmation when subagent tools are unavailable.
 
-## Lead Acceptance After Each Role Stage
+## Lead Acceptance After Each Subagent
 
-Every time an explorer / docs / backend / frontend / worker / tester / reviewer role reports completion, Lead must run a second-pass acceptance before continuing.
+Every time an explorer / docs / backend / frontend / worker / tester / reviewer subagent reports completion, Lead must run a second-pass acceptance before continuing.
 
 Minimum acceptance checklist:
 
@@ -56,16 +77,27 @@ Minimum acceptance checklist:
 4. Check security boundaries, especially API key leakage, iframe sandbox, unsafe HTML / CSS, and unauthorized external calls.
 5. Check whether docs need synchronization.
 6. Decide one of: pass / conditional pass / fail.
-7. If fail or conditional pass needs fixes, assign the fix to the appropriate role instead of silently continuing.
+7. If fail or conditional pass needs fixes, assign the fix to the appropriate implementation subagent instead of silently continuing.
 
-Lead must not skip this acceptance step just because a role says the task passed.
+Lead must not skip this acceptance step just because a subagent says the task passed.
+
+## Stop Rules
+
+Lead must stop and ask before continuing when:
+
+- A required subagent tool is unavailable and the task is medium or large.
+- The next step would violate an allowed modification boundary.
+- Multiple agents would need to modify the same directory at the same time.
+- Tester or Reviewer reports a required business-code fix.
+- A task would introduce Claude Code configuration or sensitive material.
 
 ## Output Format
 
 ```text
 任务结果：
 - 任务目标：
-- 执行角色：
+- 执行方式：
+- Spawned subagents：
 - 拆分结果：
 - 验收结果：
 - Lead 二次验收：

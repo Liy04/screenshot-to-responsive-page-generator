@@ -1,29 +1,50 @@
-# Codex Lead + Lightweight Agents Workflow
+# Codex Lead + Short-lived Subagents Workflow
 
 ## Purpose
 
-This directory defines role stages and boundary rules for Codex when working in this repository.
+This directory defines how Codex coordinates project work through Lead and short-lived subagents.
 
-These agents are not real long-running subagents, not an automatic spawn system, and not a Claude Code mechanism. They are lightweight execution modes used by Codex to keep context, ownership, edits, validation, and review small enough to reason about.
+Subagent means a short-lived child agent explicitly spawned by Lead when the current Codex runtime provides a subagent tool. A subagent receives a scoped task, reads only the needed context, works within its allowed files, returns a compact handoff, then stops.
 
-Do not introduce:
+Subagent is not:
 
-- `CLAUDE.md`
-- `.claude/agents/`
-- Claude Code Custom Subagents
-- Claude Code `/agents`
-- Claude Code Agent Teams
-- Automatic parallel agent execution
+- Claude Code Custom Subagents.
+- `.claude/agents/`.
+- `CLAUDE.md`.
+- Claude Code `/agents`.
+- Claude Code Agent Teams.
+- An automatic parallel execution system.
+- A long-running resident agent.
 
-## Core Model
+Do not introduce Claude Code configuration or files for this workflow.
 
-Codex normally acts as **Lead** first. Lead decides whether the task is small enough to execute directly or should move through a specialized role stage.
+## Runtime Capability Gate
 
-Available role stages:
+Lead must check whether the current runtime supports explicit subagent spawning.
 
-| Role | File | Main responsibility |
+- If subagent tools are available, Lead uses them for tasks that require spawn.
+- If subagent tools are not available, Lead must state the downgrade reason and request confirmation before continuing in the main thread.
+- Lead must not silently role-play `frontend-agent`, `tester-agent`, `reviewer-agent`, or any other required subagent in the main thread for medium or large work.
+
+## Direct Work vs Spawn Rules
+
+Lead may directly handle small, low-risk tasks when the change is narrow and does not need role separation.
+
+Lead must spawn:
+
+- `explorer-agent` for large, cross-module, boundary-unclear, high-risk, or context-heavy tasks.
+- The matching implementation agent for medium or large development work.
+- `tester-agent` after code implementation to run minimum necessary validation.
+- `reviewer-agent` after code changes to check quality, security, potential bugs, and boundaries.
+- `docs-agent` when active docs, indexes, task cards, or stable entry docs need non-trivial updates.
+
+Tester and Reviewer default to reporting only. They do not fix business code by default. Fixes are assigned by Lead to the responsible implementation agent.
+
+## Available Subagents
+
+| Subagent | File | Main responsibility |
 |---|---|---|
-| Lead | `docs/agents/lead.md` | Scope, split, sequencing, acceptance, final handoff |
+| Lead | `docs/agents/lead.md` | Scope, split, spawn decisions, acceptance, final handoff |
 | Explorer | `docs/agents/explorer-agent.md` | Context scouting for large, cross-module, or unclear tasks |
 | Docs Agent | `docs/agents/docs-agent.md` | Current docs, indexes, task cards, summaries |
 | Backend Agent | `docs/agents/backend-agent.md` | Spring Boot backend work |
@@ -31,31 +52,6 @@ Available role stages:
 | Worker Agent | `docs/agents/worker-agent.md` | Python Worker, validator, fallback, repair |
 | Tester Agent | `docs/agents/tester-agent.md` | Tests, smoke, reproduction, result records |
 | Reviewer Agent | `docs/agents/reviewer-agent.md` | Code quality, security, potential bug, and boundary review |
-
-## Runtime Adapter Policy
-
-`docs/agents/` defines project roles, responsibilities, boundaries, and acceptance flow. These rules are shared by Codex and Cursor.
-
-Model assignment is not part of the role contract. It is a runtime capability:
-
-- Codex: do not require, specify, or simulate model assignment. Run the role stages with the current Codex session capability.
-- Cursor: when Lead calls a real Cursor Subagent, Lead may apply the Cursor-only model policy below.
-- If the current runtime cannot choose a model, ignore the model policy and keep the role flow unchanged.
-
-## Cursor-only Model Policy
-
-This policy applies only when Cursor Lead calls a real Cursor Subagent. Codex should ignore model assignment and keep only the role, scope, and acceptance rules.
-
-| Role | Cursor default model | Fallback | Reason |
-|---|---|---|---|
-| Lead | `gpt-5.5-medium` | - | Global reasoning, task splitting, and acceptance |
-| Explorer | `gpt-5.5-medium` | `gemini-3.1-pro` | Context understanding and dependency tracing |
-| Docs Agent | `gpt-5.4-mini-medium` | `gpt-5.5-medium` | Cost-effective documentation work |
-| Backend Agent | `gpt-5.3-codex` | `gpt-5.5-medium` | Multi-file Spring Boot implementation |
-| Frontend Agent | `gemini-3.1-pro` | `gpt-5.5-medium` | Vue, UI, and visual judgment |
-| Worker Agent | `gpt-5.3-codex` | `gpt-5.5-medium` | Python and AI pipeline implementation |
-| Tester Agent | `gpt-5.4-mini-medium` | `gpt-5.5-medium` | Smoke, test, and check tasks |
-| Reviewer Agent | `gpt-5.5-medium` | `gpt-5.3-codex` | Review, boundary, and security analysis |
 
 ## Default Reading
 
@@ -71,54 +67,62 @@ Keep the default context small:
 
 `docs/archive/` is not default context. Read it only when the task explicitly requires history lookup, audit, or acceptance evidence.
 
-## When To Use Explorer
+## Standard Flow
 
-Enter `explorer-agent` before implementation when a task is:
+1. Lead confirms the goal, scope, active task card, and spawn requirements.
+2. Lead spawns `explorer-agent` when context scouting is required.
+3. Lead reviews Explorer output and narrows the task.
+4. Lead spawns one implementation agent for the scoped work.
+5. Lead performs second-pass acceptance of the implementation result.
+6. Lead spawns `tester-agent` for minimum necessary validation after code implementation.
+7. Lead reviews Tester output and decides whether fixes are needed.
+8. Lead spawns `reviewer-agent` after code changes.
+9. Lead assigns any fixes to the responsible implementation agent, then repeats validation or review as needed.
+10. Lead closes with changed files, validation, review result, residual risk, and next recommendation.
 
-- Large or cross-module.
-- Boundary-unclear.
-- Sensitive to current stage constraints.
-- Likely to require reading many files.
-- Related to acceptance, migration, or architectural direction.
+## Parallelism Policy
 
-Explorer produces a compact context pack or findings summary. Lead must check that summary before planning implementation.
+Default execution is sequential.
 
-## Execution Flow
+- Do not allow multiple agents to modify the same directory at the same time.
+- Do not run parallel implementation agents unless Lead explicitly proves the directories and contracts do not overlap.
+- Tester and Reviewer may read after implementation, but they should not race with implementation edits.
+- If a parallel read-only check is useful, Lead must state that it is read-only and non-overlapping.
 
-1. **Lead** confirms goal, scope, role, and whether Explorer is needed.
-2. **Explorer** runs only when the task needs context scouting.
-3. One specialized role executes the scoped task.
-4. **Tester** validates implemented behavior when execution changes runnable code or testable behavior.
-5. **Reviewer** reviews code changes when quality, security, bug risk, or boundary risk matters.
-6. **Lead** closes with changed files, validation result, residual risk, and next recommendation.
+## Subagent Handoff Contract
 
-Do not merge multiple role scopes into one broad prompt when the task clearly crosses role boundaries. Split into ordered tasks instead.
+Every spawned subagent task must include:
 
-## Editing Boundaries
+- Task goal.
+- Default reading.
+- Allowed changes.
+- Forbidden changes.
+- Expected validation or review.
+- Stop rules.
+- Required return format.
 
-- A role may only modify files listed in its role document unless the active task explicitly allows more.
-- Do not let multiple role stages modify the same directory at the same time.
-- Tester and Reviewer are read-first roles and default to no business-code fixes.
-- Docs Agent may update `AGENTS.md` only for stable long-term entry rules.
-- Business directories are `backend/`, `frontend/`, `worker/`, and `tests/`.
-- `docs/archive/` is not touched unless the task explicitly asks for archive work.
+Every subagent must return:
 
-## Task Cards
+- Files read or changed.
+- Main result.
+- Validation or review performed.
+- Problems found.
+- Suggested next responsible agent when fixes are needed.
+- Risks or open questions.
 
-Task cards should name the active role and scope. Do not create fake current day cards. If a template is needed, use `docs/tasks/_template.md`.
+Lead must perform second-pass acceptance before spawning the next agent.
 
-Recommended fields:
+## Stop Rules
 
-```text
-负责角色：
-任务目标：
-默认读取：
-允许修改：
-禁止修改：
-实施步骤：
-验收标准：
-输出格式：
-```
+A subagent must stop and report instead of continuing when:
+
+- The task requires files outside its allowed scope.
+- The task would modify `docs/archive/` without explicit authorization.
+- The task would introduce Claude Code configuration.
+- The task would write API keys, credentials, tokens, or sensitive material.
+- The task would change backend / frontend / worker contracts without Lead approval.
+- Tester or Reviewer finds business-code fixes are needed.
+- Required context is contradictory or insufficient.
 
 ## Stable Forbidden Items
 
@@ -126,7 +130,6 @@ Unless the current stage and task explicitly allow it, do not:
 
 - Connect a real Figma API or Figma MCP.
 - Add Redis or RabbitMQ as a runtime prerequisite.
-- Implement real screenshot parsing and AI code generation beyond the approved stage.
 - Implement a multi-page editor.
 - Implement a drag-and-drop editor.
 - Implement ZIP export.
@@ -141,4 +144,5 @@ A task is complete only when:
 2. Changed files are clear.
 3. No unrelated refactor was introduced.
 4. Minimum validation is completed, or the reason for not validating is stated.
-5. The final report includes changes, validation, and risks.
+5. Tester and Reviewer were spawned when required, or Lead explains the confirmed exception.
+6. The final report includes changes, validation, review status, and risks.
