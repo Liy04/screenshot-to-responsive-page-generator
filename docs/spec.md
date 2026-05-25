@@ -4,7 +4,30 @@
 
 本文档记录当前 generated-page MVP 闭环仍有效的核心契约，并补充 Week 07 / Week 08 mock 协议与 Week 09 真实 AI 最小接入契约，供 Worker、后端 mock / 真实链路和前端预览共用。
 
-当前 Week 09 已允许真实 AI 生成布局中间结果；但对外仍以 Layout JSON v0.1 为契约，`previewHtml` 仍由 Worker 的确定性静态编译器生成，不直接把模型原始输出当页面代码使用。
+## 当前有效口径
+
+当前主线以 Week 09+ 真实 AI 链路为准：
+
+```text
+真实图片上传
+-> 后端保存 source
+-> Python Worker 调用真实多模态模型
+-> 视觉清单 / 中间结果
+-> Layout JSON v0.1
+-> Worker 确定性编译 previewHtml
+-> 前端 sandbox iframe 预览
+-> Week 14 复制 / 下载交付
+```
+
+Week 04 / Week 05 的 `generated-page` artifact、Week 07 / Week 08 的 image-layout / image-page mock 协议仍可作为历史参考和兼容背景，但不是 Week 14 的产品主线。
+
+当前仍坚持：
+
+- 对外中间契约是 Layout JSON v0.1。
+- 模型原始 HTML 不直接作为最终页面代码。
+- `previewHtml` 由 Worker 静态编译器确定性生成。
+- iframe 仍为 `sandbox=""`，不得添加 `allow-scripts`。
+- API key 只通过环境变量读取，不写入代码、文档、日志或 artifact。
 
 ## Layout JSON v0.1 核心结构摘要
 

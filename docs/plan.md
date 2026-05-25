@@ -2,143 +2,186 @@
 
 ## 当前阶段
 
-Week 12 已完成，Week 13 已完成输出质量增强阶段。
+Week 14：MVP 产品化交付闭环。
 
-当前项目已经从“真实 AI 链路能跑通”推进到：
+Week 09~13 已证明：
 
 ```text
-三张简单 samples
+真实图片
 -> 真实 AI 识别视觉清单
 -> Worker 映射 Layout JSON v0.1
 -> static generator 编译 previewHtml
--> 前端 iframe 预览
+-> 前端 sandbox iframe 预览
 ```
 
-## Week 12 结果
+Week 14 不继续做单纯输出质量增强，而是让这条链路更像一个用户可操作、可演示、可交付的 MVP。
 
-Week 12 的三张样例：
-
-- `samples/01-simple-card-page.png`
-- `samples/02-simple-form-page.png`
-- `samples/03-dashboard-cards-page.png`
-
-最终 smoke：
-
-- 三张样例均 `sourceType=REAL_AI`。
-- 三张样例均 `fallbackUsed=false`。
-- 三张样例均输出非空 `previewHtml`。
-- 三张样例二次 generate 均 `artifact.reused=true`。
-- sample 01 前端页面级 iframe smoke 通过。
-- iframe 保持 `sandbox=""`，无 `allow-scripts`。
-
-质量粗评：
-
-| sample | 分数 |
-|---|---:|
-| 01 simple card | 约 24 / 35 |
-| 02 simple form | 约 24 / 35 |
-| 03 dashboard cards | 约 25 / 35 |
-| 平均 | 约 24.3 / 35 |
-
-结论：
+## Week 14 类型
 
 ```text
-Week 12 达到“简单截图还原雏形”通过线。
+产品化周 / MVP 交付周
 ```
 
-## Week 13 目标
+不是：
 
-Week 13 不进入 MySQL、Figma、复杂编辑器或持久化主线，而是继续围绕输出质量推进。
+```text
+质量增强周
+数据库周
+Figma 周
+编辑器周
+复杂导出周
+```
 
-重点目标：
+## Week 14 总目标
 
-1. 让视觉清单提取更稳定，减少同图多次生成的结构漂移。
-2. 让 Layout JSON v0.1 映射更准确、更可解释。
-3. 让 preview 样式表达更接近原图，而不是规则化裸 HTML。
-4. 让顺序 smoke 可复现、可记录、可回溯。
-5. 让验收口径保持轻量，不引入重型视觉回归系统。
+把当前 dev 链路升级为最小产品交付闭环：
 
-## Week 13 Day 计划
+1. 用户上传截图。
+2. 用户触发生成。
+3. 用户看到生成状态。
+4. 用户看到原图 / 生成结果对比。
+5. 用户看到 Layout JSON 和 previewHtml。
+6. 用户可以复制 HTML / CSS。
+7. 用户可以下载最小生成文件。
+8. 用户能理解 REAL_AI / FALLBACK / FAILED。
+9. 项目有一条可复现的 MVP smoke。
+
+## Week 14 P0
+
+### P0-1：产品化生成结果区
+
+将 `/dev/image-to-layout` 的生成结果区域从“调试信息堆叠”调整为更清晰的 MVP 展示结构：
+
+```text
+生成状态
+-> 原图 / 生成预览
+-> 交付操作
+-> Layout JSON / previewHtml 调试信息
+```
+
+要求：
+
+- 保留现有真实 AI 信息。
+- 保留 fallback / failed 可读说明。
+- 保留 iframe `sandbox=""`。
+- 不加入 `allow-scripts`。
+
+### P0-2：HTML / CSS 复制
+
+提供最小复制入口：
+
+- 复制 HTML。
+- 复制 CSS。
+- 复制完整 HTML 文档。
+
+说明：
+
+- 复制内容来自 Worker 静态编译结果。
+- 不复制模型原始输出。
+- 复制失败要有用户可读提示。
+
+### P0-3：最小下载能力
+
+提供最小下载能力：
+
+- 下载 `index.html`。
+- 可选下载 `style.css`。
+- 或优先下载单个完整 HTML 文件。
+
+说明：
+
+- Week 14 不做复杂 ZIP。
+- 不做项目模板导出。
+- 不做 Vue SFC 可运行化。
+
+### P0-4：MVP smoke
+
+形成一条 Week 14 MVP smoke：
+
+```text
+上传 sample
+-> generate
+-> REAL_AI 或 FALLBACK 状态可读
+-> iframe 可预览
+-> 复制 HTML / CSS
+-> 下载文件
+-> 检查 sandbox
+-> 检查无真实 key 泄漏
+```
+
+## Week 14 P1
+
+### P1-1：结果页文案收口
+
+让页面说明更适合演示：
+
+- 当前生成是否来自 REAL_AI。
+- 是否使用 fallback。
+- 生成结果能做什么。
+- 用户下一步可以复制或下载。
+
+### P1-2：交付 artifact 口径整理
+
+必要时在 `docs/spec.md` 补充 Week 14 交付口径：
+
+- previewHtml。
+- htmlCode / cssCode 当前如何获得。
+- download artifact 当前是否只在前端组合。
+- 哪些字段是调试字段。
+
+## Week 14 暂不做
+
+- 不接 MySQL。
+- 不创建 Entity / Mapper。
+- 不接 Figma API / Figma MCP。
+- 不接 Redis / RabbitMQ。
+- 不做拖拽编辑器。
+- 不做在线编辑器。
+- 不做复杂 ZIP 导出。
+- 不做 Vue SFC 可运行化。
+- 不做多页面生成。
+- 不做登录注册 / 权限。
+- 不做 Playwright 视觉回归系统。
+- 不升级 Layout JSON v0.2。
+
+## Week 14 Day 建议
 
 | Day | 角色 | 目标 |
 |---|---|---|
-| Day 1 | docs-agent -> reviewer-agent -> lead | 定义 Week 13 质量标准、评分表和顺序 smoke 模板 |
-| Day 2 | worker-agent -> tester-agent -> reviewer-agent -> lead | 稳定视觉清单输出，降低 prompt 和结构漂移 |
-| Day 3 | worker-agent -> tester-agent -> reviewer-agent -> lead | 提升 Layout JSON v0.1 映射质量和 deterministic repair |
-| Day 4 | worker-agent -> tester-agent -> reviewer-agent -> lead | 增强 preview 静态样式表达，但保持安全边界 |
-| Day 5 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 让预览和对照更适合顺序 smoke 与人工检查 |
-| Day 6 | tester-agent -> reviewer-agent -> docs-agent -> lead | 顺序 smoke、人工评分和结果记录 |
-| Day 7 | lead -> docs-agent -> reviewer-agent | 汇总 Week 13 结果，判断下一步方向 |
+| Day 1 | docs-agent -> reviewer-agent -> lead | 生成 Week 14 day 卡，明确 MVP 产品化范围和验收标准 |
+| Day 2 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 重组 `/dev/image-to-layout` 结果区，使演示路径更清晰 |
+| Day 3 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 增加 HTML / CSS / 完整 HTML 复制入口 |
+| Day 4 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 增加最小下载能力，优先单文件 HTML |
+| Day 5 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 优化 REAL_AI / FALLBACK / FAILED 用户可读状态和交付提示 |
+| Day 6 | tester-agent -> reviewer-agent -> docs-agent -> lead | 执行 Week 14 MVP smoke，记录复制、下载、iframe、安全检查 |
+| Day 7 | lead -> docs-agent -> reviewer-agent | Week 14 收口，判断 MVP 产品化闭环是否通过 |
 
-## Week 13 结果
+## Week 14 验收标准
 
-Week 13 已完成：
-
-- Day 1：质量标准、评分表和顺序 smoke 模板。
-- Day 2：真实 AI 视觉清单稳定性增强。
-- Day 3：Layout JSON v0.1 映射和 deterministic repair 增强。
-- Day 4：静态 preview 样式增强。
-- Day 5：前端原图 / iframe 对比和 smoke 摘要。
-- Day 6：三张 samples 顺序 smoke、artifact 复用检查、iframe 检查和人工评分。
-- Day 7：当前文档收口和 Lead 二次验收。
-
-Day 6 最终结果：
-
-| sample | sourceType | fallbackUsed | previewHtml | artifact.reused | score |
-|---|---|---:|---|---|---:|
-| `01-simple-card-page.png` | `REAL_AI` | `false` | 非空 | 二次 generate `true` | 27 / 35 |
-| `02-simple-form-page.png` | `REAL_AI` | `false` | 非空 | 二次 generate `true` | 26 / 35 |
-| `03-dashboard-cards-page.png` | `REAL_AI` | `false` | 非空 | 二次 generate `true` | 28 / 35 |
-
-汇总：
-
-- 平均分：27.0 / 35。
-- 最低分：26 / 35。
-- 三张样例全部命中 `REAL_AI`。
-- 三张样例全部未触发 fallback。
-- 三张样例全部通过 sandbox iframe 渲染检查。
-- 未发现真实 API key 泄漏。
-
-结论：
-
-```text
-Week 13 达到稳定通过线，建议通过。
-```
-
-## Week 13 质量重点
-
-- 视觉清单稳定性：`texts / regions / components` 的结构输出尽量一致。
-- Layout JSON 映射质量：结构层级、默认样式和语义角色更准确。
-- preview 样式表达：card / button / input / text 更像实际 UI。
-- 顺序 smoke：三张 samples 按固定顺序执行，避免并发压测模型服务。
-- 轻量验收：重点看可复现性、安全性和简单样例的质量提升。
-
-## Week 13 验收口径
-
-- 三张 simple samples 顺序 smoke 全部通过。
-- 每张记录都包含 sample、顺序、模型、`promptVersion`、`sourceType`、`fallbackUsed`、`artifact.reused`、`previewHtml`、iframe 和主要缺陷。
-- 平均分目标保持在 `25 / 35` 左右或更高；如果仍在 `24` 附近，必须由 Lead 给出条件通过说明。
-- 不允许为了提高分数而放宽安全边界。
-- 不允许引入 MySQL、Figma、复杂编辑器、拖拽编辑器、多页面生成、ZIP 导出或持久化主线。
-- 不升级 Layout JSON schema v0.2，除非 Week 13 后续专门立项。
-
-## 安全边界
-
-继续保持：
-
+- 用户能完成上传和生成。
+- 用户能看到原图 / iframe 对比。
+- 用户能复制 HTML。
+- 用户能复制 CSS 或完整 HTML。
+- 用户能下载最小生成文件。
+- REAL_AI / FALLBACK / FAILED 状态清楚。
+- iframe 仍为 `sandbox=""`。
+- 不出现 `allow-scripts`。
 - 不提交真实 API key。
-- 不把模型原始 HTML 直接作为最终页面代码。
-- 不放宽 iframe sandbox。
-- 不允许 `<script>`、inline event、`javascript:`、CSS `url()`、`expression()`、`@import`。
-- 不提交 `backend/storage/`、`frontend/dist/` 或其他运行副产物。
+- 不提交 `backend/storage/`、`frontend/dist/` 或下载副产物。
+- 不新增 MySQL / Figma / 编辑器 / ZIP 复杂实现。
+
+## PRD 对齐检查
+
+Week 14 推动 MVP 主线。
+
+原因：
+
+- 过去几周已经证明真实 AI 和质量增强可行。
+- 当前 MVP 缺口是用户交付动作，而不是继续模型细节优化。
+- 复制 / 下载 / 演示页能让项目从“能生成”变成“能交付”。
 
 ## 下一步
 
-Week 13 下一步不建议立刻扩展到 MySQL、Figma、复杂编辑器或多页面。
+由 docs-agent 生成 Week 14 Day 1~Day 7 任务卡。
 
-建议优先：
-
-1. 做 Git diff 审查，确认 worktree 改动边界清晰。
-2. 必要时补一次关键测试复核。
-3. 将 `.worktrees/week13-quality` 的成果合并回 `main`。
-4. 后续如果继续质量主线，优先减少 warnings、提升文本和组件清单准确度，再考虑扩大 samples 覆盖。
+Day 卡生成后，由 Lead 验收任务拆分，再进入 Day 2 前端产品化实现。

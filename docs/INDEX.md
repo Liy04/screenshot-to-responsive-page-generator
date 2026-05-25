@@ -9,6 +9,7 @@
 ```text
 docs/
   current.md
+  mvp-roadmap.md
   plan.md
   spec.md
   INDEX.md
@@ -30,22 +31,24 @@ docs/
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/plan.md`
-4. 当存在活跃日卡时，再读取当天对应的 `docs/tasks/day-xx.md`
-5. 当前任务相关代码
-6. 必要时读取 `docs/spec.md`
+3. `docs/mvp-roadmap.md`
+4. `docs/plan.md`
+5. 当存在活跃日卡时，再读取当天对应的 `docs/tasks/day-xx.md`
+6. 当前任务相关代码
+7. 必要时读取 `docs/spec.md`
 
 ## 活跃文档
 
 | 类型 | 路径 | 说明 |
 |---|---|---|
-| 当前阶段事实源 | `docs/current.md` | Week 13：输出质量增强进行中 |
-| 当前计划摘要 | `docs/plan.md` | Week 13 目标、优先级、Day 计划和安全边界 |
-| 当前核心规格 | `docs/spec.md` | 真实 AI 链路、artifact、前端预览等核心规格 |
+| 当前阶段事实源 | `docs/current.md` | Week 14：MVP 产品化交付闭环 |
+| MVP 路线锚点 | `docs/mvp-roadmap.md` | PRD / MVP 对齐、当前缺口、暂缓事项和周计划验收规则 |
+| 当前计划摘要 | `docs/plan.md` | Week 14 产品化目标、Day 计划和安全边界 |
+| 当前核心规格 | `docs/spec.md` | 当前有效口径、真实 AI 链路、artifact、前端预览等核心规格 |
 | 输出质量标准 | `docs/quality/week13-quality.md` | Week 13 质量标准、评分表和通过线 |
-| 质量 smoke 记录 | `docs/smoke/week13-quality-smoke.md` | 三张 samples 的顺序 smoke 记录模板 |
+| 质量 smoke 记录 | `docs/smoke/week13-quality-smoke.md` | 三张 samples 的顺序 smoke 记录 |
 | Codex 角色边界 | `docs/agents/README.md` | Codex Lead + Lightweight Agents Workflow |
-| 当前任务卡目录 | `docs/tasks/` | Week 13 Day 1 到 Day 7 任务卡 |
+| 当前任务卡目录 | `docs/tasks/` | Week 14 day 卡生成后放在此处 |
 | context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
 | 历史归档 | `docs/archive/` | 历史计划、总结、smoke、验收报告和参考文档 |
 
@@ -72,15 +75,10 @@ docs/
 
 ## Day 卡
 
-Week 12 当前任务卡：
+当前任务卡：
 
-- `docs/tasks/day-01.md`
-- `docs/tasks/day-02.md`
-- `docs/tasks/day-03.md`
-- `docs/tasks/day-04.md`
-- `docs/tasks/day-05.md`
-- `docs/tasks/day-06.md`
-- `docs/tasks/day-07.md`
+- Week 14 开始执行前，应重新生成 `docs/tasks/day-01.md` 到 `docs/tasks/day-07.md`。
+- 旧任务卡应在周收口后归档或清理，避免污染当前上下文。
 
 模板见 `docs/tasks/_template.md`。
 
