@@ -1,12 +1,12 @@
-# Week 11 Day 03
+# Week 13 Day 03
 
 ## 负责角色
 
-docs-agent -> tester-agent
+worker-agent -> tester-agent -> reviewer-agent -> lead
 
 ## 任务目标
 
-整理真实 AI 链路 smoke 的可复现执行方式，让新人能按文档理解和复跑。
+提升 Layout JSON v0.1 的映射质量和 deterministic repair，让页面、section、card、form、button、input、text 的语义更准确。
 
 ## 默认读取
 
@@ -14,61 +14,61 @@ docs-agent -> tester-agent
 - `docs/current.md`
 - `docs/plan.md`
 - `docs/tasks/day-03.md`
-- `docs/agents/docs-agent.md`
+- `docs/agents/worker-agent.md`
 - `docs/agents/tester-agent.md`
+- `docs/agents/reviewer-agent.md`
+- `docs/quality/week13-quality.md`
 - 必要时 `docs/spec.md`
-- 必要时 `samples/README.md`
-
-不默认读取 `docs/archive/`。
+- `worker/` 当前相关代码
 
 ## 允许修改
 
-- `docs/smoke/real-ai-smoke.md`
-- 可选：`scripts/smoke-real-ai.example.ps1`
-- 必要时更新 `docs/tasks/day-03.md` 的执行记录
+- `worker/`
+- worker 相关测试
 
 ## 禁止修改
 
 - `backend/`
 - `frontend/`
-- `worker/`
-- `tests/`
+- `schema/` 大升级
+- Layout JSON v0.2
 - 真实 API key
-- 自动提交脚本
-- 默认真实联网执行脚本
+- 不可信 style 直通 CSS
 
 ## 实施步骤
 
-1. docs-agent 编写真实 AI smoke 文档。
-2. 可选创建 example PowerShell 脚本，只允许使用占位符。
-3. tester-agent 验证命令口径、安全边界和可读性。
-4. 明确 `REAL_AI` / `FALLBACK` / `FAILED` 的判断标准。
-5. 明确 artifact 和 `jobId` 复用检查方式。
+1. worker-agent 梳理当前 intermediate -> Layout JSON 映射和 repair 流程。
+2. 在 v0.1 兼容范围内补齐 page / section / card / button / input / form / text 的基础默认值。
+3. 让 repair 仅基于 node role / type / safety 规则补默认值，不调用模型自由发挥。
+4. tester-agent 运行 worker 测试。
+5. reviewer-agent 审查 sanitizer、validator、fallback 边界。
 
 ## 验收标准
 
-- [x] 文档说明 Python 推荐版本 3.11.9。
-- [x] 文档说明 `OPENAI_BASE_URL=https://api.siliconflow.cn/v1`。
-- [x] 文档说明 `OPENAI_MODEL=Qwen/Qwen3-VL-32B-Instruct`。
-- [x] 文档说明 `OPENAI_API_KEY` 必须通过环境变量设置。
-- [x] 文档说明 `IMAGEPAGE_WORKER_PYTHON_COMMAND` 示例。
-- [x] 文档说明后端 timeout 推荐 120 秒。
-- [x] 文档说明 `REAL_AI` / `FALLBACK` / `FAILED` 判断口径。
-- [x] 文档说明 artifact 文件检查和 `jobId` 复用检查。
-- [x] 未写入真实 API key。
+- [ ] 不升级 Layout JSON schema v0.2。
+- [ ] repair 是 deterministic rule，不再调用模型自由发挥。
+- [ ] repair 只能基于 node role / type 补默认值。
+- [ ] repair 不保留危险 style value。
+- [ ] repair 不绕过 validator。
+- [ ] 未知 style key 进入 warnings 或被拒绝，不静默编译。
+- [ ] Worker 测试通过。
+- [ ] 未修改 backend / frontend。
 
-## 执行记录
+## Lead 二次验收
 
-- docs-agent 新增 `docs/smoke/real-ai-smoke.md`，整理真实 AI smoke 环境变量、推荐样例、执行流程、结果判断、artifact 检查、`jobId` 复用检查和失败排查分类。
-- docs-agent 新增 `scripts/smoke-real-ai.example.ps1`，作为可选示例脚本；脚本默认 dry-run，需要 `-Run` 和用户确认后才会调用本地后端，不打印真实 key。
-- 本任务未执行真实联网 smoke，未安装依赖，未修改 `backend/`、`frontend/`、`worker/`、`tests/`。
+- [ ] 对照任务目标和验收标准检查。
+- [ ] 检查修改范围是否越界。
+- [ ] 检查测试 / smoke / review 是否完成或说明原因。
+- [ ] 检查安全边界和密钥风险。
+- [ ] 检查是否需要同步文档。
+- [ ] 结论：通过 / 条件通过 / 不通过。
 
 ## 输出格式
 
 ```text
 任务结果：
 - 任务目标：
-- 修改文件：
+- 改动文件：
 - 主要改动：
 - 验证步骤：
 - 验证结果：

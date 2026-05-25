@@ -13,9 +13,14 @@ docs/
   spec.md
   INDEX.md
   agents/
+  quality/
+    week13-quality.md
+  smoke/
+    week13-quality-smoke.md
+    real-ai-smoke.md
   tasks/
     _template.md
-    day-xx.md  # only when an active task exists
+    day-xx.md
   playbooks/
     context-scout.md
   archive/
@@ -34,11 +39,13 @@ docs/
 
 | 类型 | 路径 | 说明 |
 |---|---|---|
-| 当前阶段事实源 | `docs/current.md` | Week 10 已完成收口，可进入 Week 11 规划 |
-| 当前计划摘要 | `docs/plan.md` | Week 10 完成摘要和后续建议 |
-| 当前核心规格 | `docs/spec.md` | Week 09 真实链路契约 + Week 10 稳定化与验收补充契约 |
+| 当前阶段事实源 | `docs/current.md` | Week 13：输出质量增强进行中 |
+| 当前计划摘要 | `docs/plan.md` | Week 13 目标、优先级、Day 计划和安全边界 |
+| 当前核心规格 | `docs/spec.md` | 真实 AI 链路、artifact、前端预览等核心规格 |
+| 输出质量标准 | `docs/quality/week13-quality.md` | Week 13 质量标准、评分表和通过线 |
+| 质量 smoke 记录 | `docs/smoke/week13-quality-smoke.md` | 三张 samples 的顺序 smoke 记录模板 |
 | Codex 角色边界 | `docs/agents/README.md` | Codex Lead + Lightweight Agents Workflow |
-| 当前任务卡目录 | `docs/tasks/` | 当前不创建假 day 卡；模板见 `docs/tasks/_template.md` |
+| 当前任务卡目录 | `docs/tasks/` | Week 13 Day 1 到 Day 7 任务卡 |
 | context-scout 流程 | `docs/playbooks/context-scout.md` | 大任务上下文侦察流程 |
 | 历史归档 | `docs/archive/` | 历史计划、总结、smoke、验收报告和参考文档 |
 
@@ -63,21 +70,35 @@ docs/
 - 大任务 / 跨模块 / 边界不清时先进入 `explorer-agent` 阶段，可按需使用 context-scout。
 - Agent 文档只定义长期角色边界，不记录临时 Week 任务。
 
-## Day 卡建议模板
+## Day 卡
 
-模板见 `docs/tasks/_template.md`。不要创建假的当前 `day-xx.md`；只有真实计划任务需要日卡时再创建。
+Week 12 当前任务卡：
 
-## Week 10 归档入口
+- `docs/tasks/day-01.md`
+- `docs/tasks/day-02.md`
+- `docs/tasks/day-03.md`
+- `docs/tasks/day-04.md`
+- `docs/tasks/day-05.md`
+- `docs/tasks/day-06.md`
+- `docs/tasks/day-07.md`
+
+模板见 `docs/tasks/_template.md`。
+
+## Week 12 归档入口
 
 | 类型 | 路径 |
 |---|---|
-| Week 10 原始计划归档 | `docs/archive/week/10-acceptance-plan.md` |
-| Week 10 Summary | `docs/archive/week/10-summary.md` |
-| Week 10 Dev Smoke | `docs/archive/week/10-dev-smoke.md` |
-| Week 10 Acceptance Report | `docs/archive/week/10-acceptance-report.md` |
+| Week 12 原始严格验收报告 | `docs/archive/week/12-plan-strict-acceptance.md` |
+
+## 最近归档入口
+
+| 类型 | 路径 |
+|---|---|
+| Week 11 原始计划归档 | `docs/archive/week/11-plan.md` |
+| Week 11 Summary | `docs/archive/week/11-summary.md` |
+| Week 11 Dev Smoke | `docs/archive/week/11-dev-smoke.md` |
+| Week 11 Acceptance Report | `docs/archive/week/11-acceptance-report.md` |
 
 ## 归档说明
 
 `docs/archive/` 只用于历史追溯，不参与默认上下文。
-
-Week 10 已完成收口，当前不再有正在执行中的 `docs/tasks/day-xx.md`；下一周开始时再由 docs-agent 按真实计划重新生成。

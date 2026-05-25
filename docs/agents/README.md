@@ -32,6 +32,31 @@ Available role stages:
 | Tester Agent | `docs/agents/tester-agent.md` | Tests, smoke, reproduction, result records |
 | Reviewer Agent | `docs/agents/reviewer-agent.md` | Code quality, security, potential bug, and boundary review |
 
+## Runtime Adapter Policy
+
+`docs/agents/` defines project roles, responsibilities, boundaries, and acceptance flow. These rules are shared by Codex and Cursor.
+
+Model assignment is not part of the role contract. It is a runtime capability:
+
+- Codex: do not require, specify, or simulate model assignment. Run the role stages with the current Codex session capability.
+- Cursor: when Lead calls a real Cursor Subagent, Lead may apply the Cursor-only model policy below.
+- If the current runtime cannot choose a model, ignore the model policy and keep the role flow unchanged.
+
+## Cursor-only Model Policy
+
+This policy applies only when Cursor Lead calls a real Cursor Subagent. Codex should ignore model assignment and keep only the role, scope, and acceptance rules.
+
+| Role | Cursor default model | Fallback | Reason |
+|---|---|---|---|
+| Lead | `gpt-5.5-medium` | - | Global reasoning, task splitting, and acceptance |
+| Explorer | `gpt-5.5-medium` | `gemini-3.1-pro` | Context understanding and dependency tracing |
+| Docs Agent | `gpt-5.4-mini-medium` | `gpt-5.5-medium` | Cost-effective documentation work |
+| Backend Agent | `gpt-5.3-codex` | `gpt-5.5-medium` | Multi-file Spring Boot implementation |
+| Frontend Agent | `gemini-3.1-pro` | `gpt-5.5-medium` | Vue, UI, and visual judgment |
+| Worker Agent | `gpt-5.3-codex` | `gpt-5.5-medium` | Python and AI pipeline implementation |
+| Tester Agent | `gpt-5.4-mini-medium` | `gpt-5.5-medium` | Smoke, test, and check tasks |
+| Reviewer Agent | `gpt-5.5-medium` | `gpt-5.3-codex` | Review, boundary, and security analysis |
+
 ## Default Reading
 
 Keep the default context small:

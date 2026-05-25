@@ -12,7 +12,7 @@ except ImportError:  # pragma: no cover - environment dependent
 
 
 DEFAULT_OPENAI_MODEL = "gpt-4.1-mini"
-PROMPT_VERSION = "week10-v1"
+PROMPT_VERSION = "week12-v1"
 
 
 class RealAIError(RuntimeError):
@@ -45,29 +45,29 @@ def detect_image_mime_type(image_path: Path) -> str:
 def build_prompt(job_id: str, image_name: str) -> str:
     return "\n".join(
         [
-            "You are a layout extraction assistant.",
-            "Look at the provided webpage screenshot and return JSON only.",
-            "Do not return markdown or prose.",
+            "You are a screenshot visual inventory extractor.",
             f"Prompt version: {PROMPT_VERSION}",
-            "Target schema for your JSON output:",
-            "{",
-            '  "pageName": "string",',
-            '  "pageType": "marketing|dashboard|auth|profile|mobile-list|generic",',
-            '  "sections": [',
-            "    {",
-            '      "role": "hero|header|content|footer|summary|form|list",',
-            '      "elements": [',
-            "        {",
-            '          "type": "text|button|image|container|card|list|listItem|input",',
-            '          "role": "string",',
-            '          "content": "optional string"',
-            "        }",
-            "      ]",
-            "    }",
-            "  ]",
-            "}",
-            f"Job ID: {job_id}",
-            f"Image name: {image_name}",
+            "Return JSON only. Do not return markdown, prose, HTML, CSS, or code fences.",
+            "Return exactly one JSON object.",
+            "Allowed top-level keys in this exact order: pageName, pageType, texts, regions.",
+            "Do not include extra top-level keys.",
+            "Do not include metadata keys such as jobId, imageName, filename, debug, confidence, or notes.",
+            "Never output a complete HTML page; the Worker maps this inventory into Layout JSON.",
+            "Read the screenshot visually and preserve readable text. Do not use image file names, job ids, or generic placeholder content.",
+            "Your job is OCR plus coarse structure, not pixel-perfect layout and not UI code generation.",
+            "Use this compact JSON shape:",
+            '{"pageName":"visible main title or brand","pageType":"marketing|dashboard|auth|profile|mobile-list|generic","texts":["all important visible text"],"regions":[{"role":"sidebar|header|nav|hero|content|cards|form|dashboard|metrics|table|chart|status|footer","texts":["visible text in this region"],"components":[{"type":"text|button|input|card|image|listItem","role":"heading|body|nav|primary-action|secondary-action|field|label|card|metric","content":"visible text"}]}]}',
+            "- Prefer copying visible text accurately over inventing layout details.",
+            "- Include 3 to 8 regions when visible.",
+            "- Include readable nav labels, headings, body text, button labels, form labels, metric labels, metric values and card titles.",
+            "- Include at least 8 visible texts for ordinary simple pages when they exist.",
+            "- If the screenshot contains metric cards, preserve label/value pairs such as Items/128 or Rate/7.4.",
+            "- If the screenshot contains cards, preserve each card title.",
+            "- If the screenshot contains a form, preserve labels, fields and buttons separately.",
+            "- pageName must come from visible screenshot text, never from the file name.",
+            "- Do not invent product names, lorem ipsum, Demo, Input, or Mock content unless visible.",
+            "- Keep content concise. Omit unreadable tiny text rather than guessing.",
+            "- Do not include style unless it is very obvious and safe.",
         ]
     )
 
@@ -84,6 +84,14 @@ def parse_json_object(candidate: str) -> dict[str, Any]:
     if not isinstance(parsed, dict):
         raise RealAIResponseError("Model output JSON must be an object")
     return parsed
+
+
+def repair_common_json_text(text: str) -> str:
+    repaired = text.strip()
+    repaired = re.sub(r",\s*\"\s*\{", ",{", repaired)
+    repaired = re.sub(r"\}\s*\"\s*,", "},", repaired)
+    repaired = re.sub(r"\}\s*\"\s*\]", "}]", repaired)
+    return repaired
 
 
 def find_first_json_object(text: str) -> dict[str, Any] | None:
@@ -120,7 +128,11 @@ def find_first_json_object(text: str) -> dict[str, Any] | None:
                     try:
                         return parse_json_object(candidate)
                     except (json.JSONDecodeError, RealAIResponseError):
-                        break
+                        repaired = repair_common_json_text(candidate)
+                        try:
+                            return parse_json_object(repaired)
+                        except (json.JSONDecodeError, RealAIResponseError):
+                            break
     return None
 
 
@@ -132,7 +144,12 @@ def parse_json_payload(text: str) -> dict[str, Any]:
     try:
         return parse_json_object(stripped)
     except json.JSONDecodeError:
-        pass
+        repaired = repair_common_json_text(stripped)
+        if repaired != stripped:
+            try:
+                return parse_json_object(repaired)
+            except json.JSONDecodeError:
+                pass
 
     fenced_blocks = re.findall(r"```(?:json)?\s*(.*?)\s*```", stripped, re.DOTALL | re.IGNORECASE)
     for block in fenced_blocks:
@@ -210,6 +227,8 @@ def request_layout_intermediate(image_path: str | Path, job_id: str) -> dict[str
     client = build_openai_client()
     response = client.chat.completions.create(
         model=model,
+        temperature=0.0,
+        max_tokens=1200,
         messages=[
             {
                 "role": "user",

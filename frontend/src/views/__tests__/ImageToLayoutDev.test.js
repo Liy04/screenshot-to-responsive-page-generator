@@ -192,12 +192,38 @@ describe('ImageToLayoutDev', () => {
     expect(wrapper.text()).toContain('artifact.reused')
     expect(wrapper.text()).toContain('false')
     expect(wrapper.text()).toContain('/api/image-page/jobs/imgjob_real_001/source')
+    expect(wrapper.text()).toContain('原图 / iframe 对比')
+    expect(wrapper.text()).toContain('上传原图')
+    expect(wrapper.text()).toContain('生成预览')
+    expect(wrapper.find('.image-compare-grid').exists()).toBe(true)
+    expect(wrapper.find('.compare-image-frame img').attributes('src')).toBe(uploadResult.sourceUrl)
 
     const iframe = wrapper.find('iframe')
     expect(iframe.exists()).toBe(true)
     expect(iframe.attributes('sandbox')).toBe('')
     expect(iframe.attributes('allow')).toBeUndefined()
     expect(iframe.html()).not.toContain('allow-scripts')
+  })
+
+  it('shows Smoke 验收摘要 required by Week 13', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResult)
+    generateImagePage.mockResolvedValue(realAiResult)
+
+    const wrapper = mountPage()
+    const file = new File(['fake-image'], 'demo.png', { type: 'image/png' })
+
+    await selectFile(wrapper, file)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
+
+    const summaryText = wrapper.text()
+    expect(summaryText).toContain('Smoke 验收摘要')
+    expect(summaryText).toContain('模型: gpt-4.1-mini')
+    expect(summaryText).toContain('promptVersion: week10-v1')
+    expect(summaryText).toContain('sourceType: REAL_AI')
+    expect(summaryText).toContain('fallbackUsed: false')
+    expect(summaryText).toContain('artifact.reused: false')
+    expect(summaryText).toContain('previewHtml 状态: 非空')
   })
 
   it('shows FALLBACK state and fallbackReason with visible warnings and errors', async () => {
@@ -244,6 +270,7 @@ describe('ImageToLayoutDev', () => {
     expect(wrapper.text()).toContain('PARTIAL_LAYOUT')
     expect(wrapper.text()).toContain('LAYOUT_INVALID')
     expect(wrapper.text()).toContain('当前结果为 FAILED，不展示 iframe 预览。')
+    expect(wrapper.find('.image-compare-grid').exists()).toBe(false)
     expect(wrapper.find('iframe').exists()).toBe(false)
   })
 

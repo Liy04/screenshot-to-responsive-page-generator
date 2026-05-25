@@ -38,6 +38,8 @@ STYLE_PROPERTIES = {
     "lineHeight": "line-height",
     "fontWeight": "font-weight",
     "borderRadius": "border-radius",
+    "border": "border",
+    "boxShadow": "box-shadow",
     "padding": "padding",
     "margin": "margin",
     "textAlign": "text-align",
@@ -89,6 +91,19 @@ SAFE_ALIGN_VALUES = {
     "baseline",
 }
 FORBIDDEN_HTML_SNIPPETS = ("<script", "onclick=", "onload=", "onerror=", "<iframe", "<object", "<embed", "javascript:")
+FORBIDDEN_CSS_VALUE_FRAGMENTS = (
+    "url(",
+    "expression(",
+    "javascript:",
+    "data:text/html",
+    "@import",
+    "onerror=",
+    "onclick=",
+    "position: fixed",
+    "position:fixed",
+    "position: absolute",
+    "position:absolute",
+)
 
 
 def message_to_dict(message: ValidationMessage) -> dict[str, str]:
@@ -210,6 +225,17 @@ def compile_preview_document(
     return preview_html, warnings, unsupported_nodes, html_code, css_code
 
 
+def role_modifier_class(node: dict[str, Any]) -> str:
+    role = str(node.get("role", "")).strip().lower()
+    node_type = str(node.get("type", "")).strip().lower()
+    if not role or not node_type:
+        return ""
+    safe_role = re.sub(r"[^a-z0-9-]+", "-", role).strip("-")
+    if not safe_role:
+        return ""
+    return f" lg-{node_type}-{safe_role}"
+
+
 def compile_node(
     node: dict[str, Any],
     path: str,
@@ -233,7 +259,7 @@ def compile_node(
         return ""
 
     node_class = make_node_class(str(node.get("id", "")))
-    class_attr = html.escape(f"{base_class} {node_class}", quote=True)
+    class_attr = html.escape(f"{base_class} {node_class}{role_modifier_class(node)}", quote=True)
     style_css = compile_style(node.get("style", {}), f"{path}.style", warnings)
     if style_css:
         css_blocks.append(f".{node_class} {{\n{style_css}\n}}")
@@ -256,6 +282,14 @@ def compile_node(
         return f'<img class="{class_attr}"{src_attr} alt="" />'
 
     if node_type == "input":
+        placeholder = node.get("placeholder")
+        if not isinstance(placeholder, str) or not placeholder.strip():
+            content_placeholder = node.get("content")
+            if isinstance(content_placeholder, str):
+                placeholder = content_placeholder
+        if isinstance(placeholder, str) and placeholder.strip():
+            escaped_placeholder = html.escape(placeholder.strip(), quote=True)
+            return f'<input class="{class_attr}" type="text" placeholder="{escaped_placeholder}" />'
         return f'<input class="{class_attr}" type="text" />'
 
     if tag in VOID_TAGS:
@@ -361,7 +395,7 @@ def safe_css_value(key: str, value: Any) -> str | None:
     lowered = stripped.lower()
     if not stripped:
         return None
-    if any(token in lowered for token in ["url(", "expression(", "javascript:"]):
+    if any(token in lowered for token in FORBIDDEN_CSS_VALUE_FRAGMENTS):
         return None
     if "<" in stripped or ">" in stripped:
         return None
@@ -370,6 +404,10 @@ def safe_css_value(key: str, value: Any) -> str | None:
         return stripped if is_safe_color(stripped) else None
     if key in {"width", "height", "maxWidth", "fontSize", "borderRadius", "padding", "margin", "gap"}:
         return stripped if is_safe_length(stripped) else None
+    if key == "border":
+        return stripped if is_safe_border(stripped) else None
+    if key == "boxShadow":
+        return stripped if is_safe_box_shadow(stripped) else None
     if key == "lineHeight":
         return stripped if is_safe_line_height(stripped) else None
     if key == "fontWeight":
@@ -399,6 +437,22 @@ def is_safe_color(value: str) -> bool:
 
 def is_safe_length(value: str) -> bool:
     return bool(re.fullmatch(r"-?\d+(\.\d+)?(px|rem|em|%)", value))
+
+
+def is_safe_border(value: str) -> bool:
+    return bool(
+        re.fullmatch(
+            r"\d+px\s+solid\s+(#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?|rgba?\([^)]+\)|[a-zA-Z]+)",
+            value.strip(),
+        )
+    )
+
+
+def is_safe_box_shadow(value: str) -> bool:
+    lowered = value.strip().lower()
+    if any(fragment in lowered for fragment in FORBIDDEN_CSS_VALUE_FRAGMENTS):
+        return False
+    return bool(re.fullmatch(r"0\s+\d+px\s+\d+px\s+rgba?\([^)]+\)", value.strip()))
 
 
 def is_safe_font_weight(value: str) -> bool:
@@ -431,9 +485,91 @@ def base_css_blocks() -> list[str]:
                 ".lg-section, .lg-container, .lg-card, .lg-form {",
                 "  display: flex;",
                 "  flex-direction: column;",
+                "  gap: 16px;",
+                "}",
+                ".lg-section-metrics, .lg-section-dashboard {",
+                "  flex-direction: row;",
+                "  flex-wrap: wrap;",
+                "  align-items: stretch;",
+                "}",
+                ".lg-section {",
+                "  padding: 32px;",
+                "}",
+                ".lg-form {",
+                "  padding: 16px;",
+                "  border: 1px solid #e5e7eb;",
+                "  border-radius: 12px;",
+                "  background: #f9fafb;",
+                "}",
+                ".lg-card {",
+                "  padding: 20px;",
+                "  border: 1px solid #e5e7eb;",
+                "  border-radius: 12px;",
+                "  background: #ffffff;",
+                "  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);",
+                "}",
+                ".lg-card-metric {",
+                "  min-width: 180px;",
+                "  flex: 1 1 180px;",
+                "  gap: 8px;",
                 "}",
                 ".lg-button {",
+                "  display: inline-flex;",
+                "  align-items: center;",
+                "  justify-content: center;",
+                "  border: 0;",
+                "  border-radius: 8px;",
+                "  padding: 10px 16px;",
+                "  background: #2563eb;",
+                "  color: #ffffff;",
+                "  font-weight: 700;",
                 "  cursor: pointer;",
+                "  transition: background-color 0.15s ease, box-shadow 0.15s ease;",
+                "}",
+                ".lg-button:hover {",
+                "  background: #1d4ed8;",
+                "}",
+                ".lg-button:focus-visible {",
+                "  outline: 2px solid #93c5fd;",
+                "  outline-offset: 2px;",
+                "}",
+                ".lg-input {",
+                "  width: 100%;",
+                "  border: 1px solid #d1d5db;",
+                "  border-radius: 8px;",
+                "  padding: 10px 12px;",
+                "  font: inherit;",
+                "  background: #ffffff;",
+                "  transition: border-color 0.15s ease, box-shadow 0.15s ease;",
+                "}",
+                ".lg-input::placeholder {",
+                "  color: #9ca3af;",
+                "}",
+                ".lg-input:focus {",
+                "  outline: 2px solid #93c5fd;",
+                "  outline-offset: 0;",
+                "  border-color: #60a5fa;",
+                "}",
+                ".lg-form .lg-button {",
+                "  align-self: flex-start;",
+                "}",
+                ".lg-text {",
+                "  margin: 0;",
+                "  color: #111827;",
+                "  line-height: 1.5;",
+                "}",
+                ".lg-text-heading, .lg-text-title {",
+                "  font-size: 28px;",
+                "  font-weight: 700;",
+                "}",
+                ".lg-text-label {",
+                "  font-size: 14px;",
+                "  color: #64748b;",
+                "  font-weight: 600;",
+                "}",
+                ".lg-text-metric {",
+                "  font-size: 32px;",
+                "  font-weight: 700;",
                 "}",
                 ".lg-image {",
                 "  max-width: 100%;",

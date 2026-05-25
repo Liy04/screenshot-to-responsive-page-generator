@@ -364,6 +364,32 @@ async function handleGenerate() {
 
       <section
         v-else-if="generateResult"
+        class="detail-card smoke-summary-card"
+        aria-labelledby="smoke-summary-title"
+      >
+        <div class="section-title-row">
+          <h2 id="smoke-summary-title">Smoke 验收摘要</h2>
+        </div>
+        <div class="info-grid" style="margin-top: 16px; min-height: auto;">
+          <article style="min-height: auto; padding: 16px;">
+            <p><strong>模型:</strong> {{ displayModel }}</p>
+            <p><strong>promptVersion:</strong> {{ promptVersion || '-' }}</p>
+            <p><strong>sourceType:</strong> {{ displaySourceType || '-' }}</p>
+          </article>
+          <article style="min-height: auto; padding: 16px;">
+            <p><strong>fallbackUsed:</strong> {{ generateResult.fallbackUsed === undefined ? '-' : String(generateResult.fallbackUsed) }}</p>
+            <p><strong>artifact.reused:</strong> {{ artifactReused }}</p>
+            <p><strong>previewHtml 状态:</strong> {{ previewHtml ? '非空' : '为空' }}</p>
+          </article>
+          <article style="min-height: auto; padding: 16px;">
+            <p><strong>iframe 状态:</strong> {{ showPreviewIframe ? '正常渲染' : '未渲染' }}</p>
+            <p><strong>任务状态:</strong> {{ generateResult.status || '-' }}</p>
+          </article>
+        </div>
+      </section>
+
+      <section
+        v-if="generateResult"
         class="detail-card"
         aria-labelledby="generate-result-title"
       >
@@ -482,11 +508,11 @@ async function handleGenerate() {
 
       <section
         v-if="generateResult"
-        class="detail-card generated-page-section"
+        class="detail-card generated-page-section image-compare-section"
         aria-labelledby="preview-html-title"
       >
         <div class="section-title-row">
-          <h2 id="preview-html-title">iframe 预览</h2>
+          <h2 id="preview-html-title">原图 / iframe 对比</h2>
           <StatusTag :status="resultState || generateResult.status || 'unknown'" />
         </div>
 
@@ -509,10 +535,29 @@ async function handleGenerate() {
           当前结果暂无可预览的 previewHtml。
         </p>
 
-        <GeneratedPagePreview
+        <div
           v-if="showPreviewIframe"
-          :srcdoc-html="previewHtml"
-        />
+          class="image-compare-grid"
+          aria-label="原图与生成结果对比"
+        >
+          <section class="compare-pane" aria-labelledby="source-compare-title">
+            <div class="compare-pane-header">
+              <h3 id="source-compare-title">上传原图</h3>
+              <span>source</span>
+            </div>
+            <div class="compare-image-frame">
+              <img :src="sourcePreviewUrl" alt="用于生成的上传原图" />
+            </div>
+          </section>
+
+          <section class="compare-pane" aria-labelledby="generated-compare-title">
+            <div class="compare-pane-header">
+              <h3 id="generated-compare-title">生成预览</h3>
+              <span>sandbox iframe</span>
+            </div>
+            <GeneratedPagePreview :srcdoc-html="previewHtml" />
+          </section>
+        </div>
       </section>
     </template>
   </main>

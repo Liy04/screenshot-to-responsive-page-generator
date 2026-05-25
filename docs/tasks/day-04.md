@@ -1,12 +1,12 @@
-# Week 11 Day 04
+# Week 13 Day 04
 
 ## 负责角色
 
-explorer-agent -> worker-agent -> backend-agent -> frontend-agent -> tester-agent -> reviewer-agent
+worker-agent -> tester-agent -> reviewer-agent -> lead
 
 ## 任务目标
 
-可选执行轻量 metadata 可解释性增强。只有 Day 2 / Day 3 完成后才执行。
+增强 preview 的静态样式表达，让 card / button / input / text 更像实际 UI，同时保持严格安全边界。
 
 ## 默认读取
 
@@ -14,66 +14,69 @@ explorer-agent -> worker-agent -> backend-agent -> frontend-agent -> tester-agen
 - `docs/current.md`
 - `docs/plan.md`
 - `docs/tasks/day-04.md`
-- `docs/agents/explorer-agent.md`
-- 当前阶段对应角色文件
+- `docs/agents/worker-agent.md`
+- `docs/agents/tester-agent.md`
+- `docs/agents/reviewer-agent.md`
+- `docs/quality/week13-quality.md`
 - 必要时 `docs/spec.md`
-- 当前任务相关模块代码
-
-不默认读取 `docs/archive/`。
+- `worker/` 当前相关代码
 
 ## 允许修改
 
-按阶段顺序分别允许：
-
-- worker-agent：`worker/`
-- backend-agent：`backend/`
-- frontend-agent：`frontend/`
-- tester-agent：测试和 smoke 记录
-- reviewer-agent：review 结果记录
-
-同一时间只允许一个实现类角色修改对应目录。
+- `worker/`
+- worker 相关测试
 
 ## 禁止修改
 
-- 不接 MySQL。
-- 不设计数据库表。
-- 不创建 Entity / Mapper。
-- 不改 API 主结构。
-- 不做复杂 tracing。
-- 不新增复杂 metadata 表。
-- 不泄漏 `OPENAI_API_KEY`。
-- 默认不做 `sourceImageName`。
-- 默认不做 `baseUrlHost`。
+- `backend/`
+- `frontend/`
+- `schema/` 大升级
+- 模型原始 HTML 直出
+- CSS `url(`、`expression(`、`@import`
+- inline event
+- `javascript:` URL
 
 ## 实施步骤
 
-1. 4A explorer-agent：确认 Worker / Backend / Frontend metadata 影响范围。
-2. 4B worker-agent：最小字段输出。
-3. 4C backend-agent：透传 / 保存字段。
-4. 4D frontend-agent：展示字段。
-5. 4E tester-agent：测试和 smoke。
-6. 4F reviewer-agent：安全、契约和边界审查。
+1. worker-agent 找到 Layout JSON -> HTML/CSS 静态编译器。
+2. 增加或校准 style key 白名单映射。
+3. 增加 style value sanitizer。
+4. 优先提升 card / button / input / text 的视觉表达，不扩展复杂页面能力。
+5. tester-agent 覆盖 HTML escape、安全 CSS、危险 style 丢弃或 warning、valid / invalid 行为。
+6. reviewer-agent 审查 CSS 注入、HTML 注入和安全边界。
 
 ## 验收标准
 
-- [ ] 只增强 `durationMs`、`model`、`artifact.reused`。
-- [ ] 不改变现有 API 主结构。
-- [ ] 不引入 MySQL。
-- [ ] 不破坏 Week 10 测试。
-- [ ] 不泄漏 `OPENAI_API_KEY`。
-- [ ] 前端展示 `durationMs` / `model` / `artifact.reused`。
-- [ ] `REAL_AI` / `FALLBACK` / `FAILED` 展示仍正常。
-- [ ] Worker 测试通过。
-- [ ] Backend 测试通过。
-- [ ] Frontend 测试通过。
-- [ ] reviewer-agent 未发现阻塞问题。
+- [x] card 样式更清晰。
+- [x] button 样式更清晰。
+- [x] input 样式更清晰。
+- [x] text 样式更清晰。
+- [x] style key 必须白名单。
+- [x] style value 必须 sanitizer。
+- [x] CSS 禁止 `url(`。
+- [x] CSS 禁止 `expression(`。
+- [x] CSS 禁止 `@import`。
+- [x] HTML attribute 禁止 `on*`。
+- [x] href / src 禁止 `javascript:`。
+- [x] 所有 text content 必须 escape。
+- [x] Worker 测试通过。
+- [x] 未修改 backend / frontend。
+
+## Lead 二次验收
+
+- [x] 对照任务目标和验收标准检查。
+- [x] 检查修改范围是否越界。
+- [x] 检查测试 / smoke / review 是否完成或说明原因。
+- [x] 检查安全边界和密钥风险。
+- [x] 检查是否需要同步文档。
+- [x] 结论：通过。
 
 ## 输出格式
 
 ```text
 任务结果：
 - 任务目标：
-- 修改文件：
+- 改动文件：
 - 主要改动：
 - 验证步骤：
 - 验证结果：

@@ -158,6 +158,58 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
         self.assertNotIn("url(javascript", artifact["cssCode"])
 
+    def test_week12_forbidden_css_fragments_are_skipped_and_warned(self):
+        forbidden_values = [
+            "@import url(https://example.com/x.css)",
+            "data:text/html,<script>alert(1)</script>",
+            "position:absolute",
+            "position: fixed",
+            "onclick=alert(1)",
+        ]
+
+        for unsafe_value in forbidden_values:
+            with self.subTest(unsafe_value=unsafe_value):
+                document = self.document_with_safe_style_subset()
+                document["layout"]["style"]["backgroundColor"] = unsafe_value
+
+                artifact = self.generate_from_document(document)
+
+                self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
+                self.assertNotIn(unsafe_value, artifact["cssCode"])
+
+    def test_card_button_input_and_text_base_styles_are_visible(self):
+        document = self.document_with_form_node()
+
+        artifact = self.generate_from_document(document)
+        css_code = artifact["cssCode"]
+
+        self.assertIn(".lg-card {", css_code)
+        self.assertIn("box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);", css_code)
+        self.assertIn(".lg-button {", css_code)
+        self.assertIn("background: #2563eb;", css_code)
+        self.assertIn(".lg-input {", css_code)
+        self.assertIn("border: 1px solid #d1d5db;", css_code)
+        self.assertIn(".lg-text {", css_code)
+        self.assertIn("line-height: 1.5;", css_code)
+
+    def test_form_preview_styles_include_focus_placeholder_and_keep_css_sanitized(self):
+        document = self.document_with_form_node()
+        button_node = document["layout"]["children"][0]["children"][0]["children"][1]
+        button_node["style"]["backgroundColor"] = "url(javascript:alert(1))"
+
+        artifact = self.generate_from_document(document)
+        css_code = artifact["cssCode"]
+
+        self.assertIn(".lg-form {", css_code)
+        self.assertIn("padding: 16px;", css_code)
+        self.assertIn("border: 1px solid #e5e7eb;", css_code)
+        self.assertIn(".lg-input::placeholder {", css_code)
+        self.assertIn("color: #9ca3af;", css_code)
+        self.assertIn(".lg-input:focus {", css_code)
+        self.assertIn("outline: 2px solid #93c5fd;", css_code)
+        self.assert_warning_code(artifact, "UNSAFE_CSS_VALUE")
+        self.assertNotIn("url(javascript:alert(1))", css_code)
+
     def test_width_and_height_are_compiled(self):
         document = self.document_with_safe_style_subset()
         document["layout"]["style"]["width"] = "320px"
@@ -340,6 +392,36 @@ class LayoutStaticGeneratorTest(unittest.TestCase):
         self.replace_styles(document["layout"])
         image_node = document["layout"]["children"][0]["children"][1]
         image_node["src"] = "https://example.com/image.png"
+        return document
+
+    def document_with_form_node(self):
+        document = self.document_with_safe_style_subset()
+        card_node = document["layout"]["children"][0]["children"][0]
+        card_node["type"] = "card"
+        card_node["role"] = "card"
+        card_node["children"].append(
+            {
+                "id": "landing-form",
+                "type": "form",
+                "role": "form",
+                "bounds": {"x": 0, "y": 0, "width": 320, "height": 48},
+                "style": {},
+                "constraints": {"horizontal": "fill", "vertical": "hug"},
+                "interactions": [],
+                "children": [
+                    {
+                        "id": "landing-input",
+                        "type": "input",
+                        "role": "input",
+                        "bounds": {"x": 0, "y": 0, "width": 240, "height": 40},
+                        "style": {},
+                        "constraints": {"horizontal": "fill", "vertical": "hug"},
+                        "interactions": [],
+                        "children": [],
+                    }
+                ],
+            }
+        )
         return document
 
     def replace_styles(self, node):

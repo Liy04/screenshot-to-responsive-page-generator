@@ -53,6 +53,7 @@ Agents 是 Codex 的角色阶段和边界规则，不是 Claude Code Custom Suba
 - 复杂、跨模块、边界不清、风险较高或需要大量上下文的任务，先进入 `explorer-agent`。
 - 实现后进入 `tester-agent` 做最低必要验证。
 - 代码变更通常建议进入 `reviewer-agent` 做质量、安全、潜在 bug 和边界检查。
+- 每个角色阶段完成后，Lead 必须按任务卡做二次验收；验收通过后才能进入下一阶段。
 
 ## Lead / Project Manager 边界
 
