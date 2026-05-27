@@ -44,6 +44,10 @@
 
 `docs/archive/` 不是默认上下文；只有明确要求历史追溯、审计、验收证据或归档整理时才读取。
 
+新 Cycle 规划必须从 `docs/mvp-roadmap.md` 的 Cycle Plan Gate 和 `docs/plan.md` 的 Cycle Planning Check 开始；未完成的 Should / Could 不得自动滚入下一周期。
+
+Day 卡只执行当前 `docs/plan.md` 的 single bet，不重新定义产品方向或扩展 roadmap。
+
 ## Codex Lead + Short-lived Subagents
 
 本项目使用 **Codex Lead + Short-lived Subagents Workflow**。

@@ -20,11 +20,12 @@ Docs Agent does not write backend, frontend, worker, or test business code.
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/plan.md`
-4. Active task card in `docs/tasks/` if one exists
-5. `docs/agents/README.md`
-6. `docs/agents/docs-agent.md`
-7. `docs/spec.md` only when necessary
+3. `docs/mvp-roadmap.md`
+4. `docs/plan.md`
+5. Active task card in `docs/tasks/` if one exists
+6. `docs/agents/README.md`
+7. `docs/agents/docs-agent.md`
+8. `docs/spec.md` only when necessary
 
 `docs/archive/` is not default context.
 

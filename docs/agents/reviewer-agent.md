@@ -19,12 +19,13 @@ Reviewer Agent is review-first and does not fix business code by default.
 
 1. `AGENTS.md`
 2. `docs/current.md`
-3. `docs/plan.md`
-4. Active task card in `docs/tasks/` if one exists
-5. `docs/agents/README.md`
-6. `docs/agents/reviewer-agent.md`
-7. `docs/spec.md` when contracts matter
-8. Changed files and directly related code
+3. `docs/mvp-roadmap.md`
+4. `docs/plan.md`
+5. Active task card in `docs/tasks/` if one exists
+6. `docs/agents/README.md`
+7. `docs/agents/reviewer-agent.md`
+8. `docs/spec.md` when contracts matter
+9. Changed files and directly related code
 
 `docs/archive/` is not default context.
 

@@ -1,31 +1,67 @@
 # Task Card Template
 
+Day cards execute the current single bet in `docs/plan.md`. They do not redefine product direction, expand the roadmap, or promote Should / Could items into Must work.
+
+If a task discovers a new idea, record it as a Candidate Bet or Later item through the appropriate docs flow. Do not implement it directly from the day card.
+
 ```text
-负责角色：
-执行方式：
-  - 当前运行环境支持 subagent 工具时，Lead 必须显式 spawn 上述 agent。
-  - 用户显式要求 spawn subagent 时，即使是小任务也必须 spawn，不得用“小任务 Lead 可直接做”覆盖用户要求。
-  - 如不支持，Lead 必须说明降级原因并请求用户确认，不得静默主线程自演。
-  - 默认顺序执行。
-  - 不允许多个 agent 同时修改同一目录。
-  - tester-agent / reviewer-agent 默认不修业务代码，只报告问题；修复由 Lead 分派给对应实现 agent。
-是否需要 spawn subagent：
-Lead 是否可直接执行：
-必须 spawn 的 agent：
-是否允许并行：
-任务目标：
-默认读取：
-  - 默认不读取 docs/archive/。
-允许修改：
-禁止修改：
-实施步骤：
-验收标准：
-Lead 二次验收：
-  - 对照任务目标和验收标准检查
-  - 检查修改范围是否越界
-  - 检查测试 / smoke / review 是否完成或说明原因
-  - 检查安全边界和密钥风险
-  - 检查是否需要同步文档
-  - 结论：通过 / 条件通过 / 不通过
-输出格式：
+Source Bet:
+  - Current single bet from docs/plan.md:
+
+Related MVP Gap:
+  - Gap from docs/mvp-roadmap.md:
+
+Task Goal:
+
+Read Scope:
+  - AGENTS.md
+  - docs/INDEX.md
+  - docs/current.md
+  - docs/mvp-roadmap.md
+  - docs/plan.md
+  - current task card
+  - docs/agents/README.md
+  - matching docs/agents/<role>.md
+  - current task-related files only
+  - do not read docs/archive/ by default
+
+Write Scope:
+
+Spawn Decision:
+  - Lead decides whether the task requires subagent spawn.
+  - If the user explicitly requests spawn, Lead must spawn when the environment supports it.
+  - If subagent tools are unavailable, Lead must state the downgrade reason and ask for confirmation.
+  - Day cards execute the current plan; they do not redefine product direction.
+  - Day cards do not expand the roadmap.
+  - Day cards do not promote Should / Could items into Must work.
+  - Multiple agents must not modify the same directory at the same time.
+
+Required Agents:
+  - Lead:
+  - Explorer:
+  - Implementation:
+  - Tester:
+  - Reviewer:
+
+Acceptance:
+
+Test / Smoke:
+
+Stop Conditions:
+  - Requested work no longer maps to the Source Bet.
+  - Required read / write scope would touch unauthorized files.
+  - Multiple agents would modify the same directory at the same time.
+  - The task requires reading docs/archive/ without explicit approval.
+  - The task requires secrets, real API keys, or sensitive materials.
+  - The task would add Claude Code config, CLAUDE.md, or .claude/agents.
+  - The task would redefine product direction or expand the roadmap.
+  - The task would auto-upgrade Should / Could items into Must work.
+  - tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
+
+Handoff Output:
+  - Files changed
+  - Acceptance result
+  - Test / smoke result
+  - Blockers or risks
+  - Suggested next handoff
 ```

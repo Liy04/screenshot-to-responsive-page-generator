@@ -1,187 +1,113 @@
 # Plan
 
-## 当前阶段
+## Current Cycle / Week
 
-Week 14：MVP 产品化交付闭环。
+Week 14 / Cycle 14.
 
-Week 09~13 已证明：
+This file is the current Cycle / Week single-bet plan. It is not the long-term roadmap, candidate backlog, or next-cycle plan.
 
-```text
-真实图片
--> 真实 AI 识别视觉清单
--> Worker 映射 Layout JSON v0.1
--> static generator 编译 previewHtml
--> 前端 sandbox iframe 预览
-```
+## Cycle Planning Check
 
-Week 14 不继续做单纯输出质量增强，而是让这条链路更像一个用户可操作、可演示、可交付的 MVP。
+Week 14 was selected from `docs/mvp-roadmap.md`:
 
-## Week 14 类型
+- Current MVP Goal: screenshot -> layout recognition -> safe generated preview -> user-takeable output.
+- Most blocking MVP gap: the working screenshot-to-preview path still needs a clear copy / download delivery loop.
+- Cycle size: one single bet.
+- Still-Must from prior work: preserve the working MVP demo path and make result state readable.
+- Inertia leftovers: broad output-quality tuning and extra artifact polish are not Week 14 Must work unless they directly block copy / download.
+- Later / Won’t This Time: persistence, Figma API / MCP, multi-page, editor workflows, auth, and complex visual regression stay outside this cycle.
+- User gain after this cycle: a user can preview, copy, and download the generated result from the MVP flow.
+- Reason not to continue prior leftovers: delivery closes the MVP loop more directly than another open-ended quality pass.
 
-```text
-产品化周 / MVP 交付周
-```
+## Current Single Bet
 
-不是：
+Productized MVP delivery loop for screenshot -> generated preview -> copy / download.
 
-```text
-质量增强周
-数据库周
-Figma 周
-编辑器周
-复杂导出周
-```
+## Why This Bet
 
-## Week 14 总目标
+The project already has a working real-AI screenshot-to-preview path. The current product gap is that users need a clear, demonstrable way to understand, preview, copy, and download the generated result.
 
-把当前 dev 链路升级为最小产品交付闭环：
+This bet keeps Week 14 focused on delivery rather than continuing an open-ended output-quality track.
 
-1. 用户上传截图。
-2. 用户触发生成。
-3. 用户看到生成状态。
-4. 用户看到原图 / 生成结果对比。
-5. 用户看到 Layout JSON 和 previewHtml。
-6. 用户可以复制 HTML / CSS。
-7. 用户可以下载最小生成文件。
-8. 用户能理解 REAL_AI / FALLBACK / FAILED。
-9. 项目有一条可复现的 MVP smoke。
+## Must / Should / Could / Won’t This Time
 
-## Week 14 P0
+Must:
 
-### P0-1：产品化生成结果区
+- Keep `/dev/image-to-layout` as the active MVP demonstration path.
+- Show original screenshot and generated preview in a user-readable result flow.
+- Preserve Layout JSON and previewHtml visibility for debugging.
+- Show REAL_AI / FALLBACK / FAILED state clearly.
+- Provide minimal copy action for generated output.
+- Provide minimal download action for generated output.
+- Keep iframe preview sandboxed without `allow-scripts`.
+- Run and record a minimum MVP smoke.
 
-将 `/dev/image-to-layout` 的生成结果区域从“调试信息堆叠”调整为更清晰的 MVP 展示结构：
+Should:
 
-```text
-生成状态
--> 原图 / 生成预览
--> 交付操作
--> Layout JSON / previewHtml 调试信息
-```
+- Provide separate HTML / CSS copy actions if current artifacts support it cleanly.
+- Add concise user-facing delivery hints after generation succeeds.
+- Clarify generated artifact fields in docs if implementation changes the contract.
 
-要求：
+Could:
 
-- 保留现有真实 AI 信息。
-- 保留 fallback / failed 可读说明。
-- 保留 iframe `sandbox=""`。
-- 不加入 `allow-scripts`。
+- Improve small result-page labels or grouping if it reduces user confusion.
+- Add lightweight failure guidance if the existing error state is unclear.
 
-### P0-2：HTML / CSS 复制
+Won’t This Time:
 
-提供最小复制入口：
+- MySQL persistence.
+- Entity / Mapper / MyBatis-Plus tables.
+- Figma API / Figma MCP.
+- Redis / RabbitMQ.
+- Drag-and-drop editor.
+- Online editor.
+- Complex ZIP export.
+- Vue SFC or full project export.
+- Multi-page generation.
+- Login / registration.
+- Permission system.
+- Playwright visual regression system.
+- Layout JSON v0.2 upgrade.
 
-- 复制 HTML。
-- 复制 CSS。
-- 复制完整 HTML 文档。
+## Acceptance Criteria
 
-说明：
+- A user can upload a screenshot and trigger generation.
+- A user can see the original image and generated preview.
+- A user can identify REAL_AI / FALLBACK / FAILED state.
+- A user can copy generated output.
+- A user can download a minimal generated file.
+- Debug information remains available without dominating the result flow.
+- The iframe remains `sandbox=""` and does not use `allow-scripts`.
+- No real API key, secret, private screenshot, or generated sensitive artifact is committed.
+- No backend storage, frontend build output, or downloaded file artifact is committed.
+- No out-of-scope infrastructure or stack change is introduced.
 
-- 复制内容来自 Worker 静态编译结果。
-- 不复制模型原始输出。
-- 复制失败要有用户可读提示。
+## Smoke Plan
 
-### P0-3：最小下载能力
-
-提供最小下载能力：
-
-- 下载 `index.html`。
-- 可选下载 `style.css`。
-- 或优先下载单个完整 HTML 文件。
-
-说明：
-
-- Week 14 不做复杂 ZIP。
-- 不做项目模板导出。
-- 不做 Vue SFC 可运行化。
-
-### P0-4：MVP smoke
-
-形成一条 Week 14 MVP smoke：
+Run one minimum MVP smoke after implementation:
 
 ```text
-上传 sample
+upload sample
 -> generate
--> REAL_AI 或 FALLBACK 状态可读
--> iframe 可预览
--> 复制 HTML / CSS
--> 下载文件
--> 检查 sandbox
--> 检查无真实 key 泄漏
+-> verify REAL_AI / FALLBACK / FAILED state is readable
+-> verify iframe preview renders
+-> verify copy action works or reports a readable failure
+-> verify download action creates the expected minimal file
+-> verify iframe sandbox remains strict
+-> verify no secret or generated runtime artifact is staged
 ```
 
-## Week 14 P1
+## Exit Criteria
 
-### P1-1：结果页文案收口
+- Must items are complete or explicitly rejected by Lead.
+- Acceptance Criteria are checked.
+- Smoke Plan is executed, or the exact blocker is recorded.
+- Tester and reviewer reports are addressed or accepted as known risk.
+- `docs/current.md` points to the active day card or next handoff without planning the next cycle.
 
-让页面说明更适合演示：
+## Next Cycle Rule
 
-- 当前生成是否来自 REAL_AI。
-- 是否使用 fallback。
-- 生成结果能做什么。
-- 用户下一步可以复制或下载。
-
-### P1-2：交付 artifact 口径整理
-
-必要时在 `docs/spec.md` 补充 Week 14 交付口径：
-
-- previewHtml。
-- htmlCode / cssCode 当前如何获得。
-- download artifact 当前是否只在前端组合。
-- 哪些字段是调试字段。
-
-## Week 14 暂不做
-
-- 不接 MySQL。
-- 不创建 Entity / Mapper。
-- 不接 Figma API / Figma MCP。
-- 不接 Redis / RabbitMQ。
-- 不做拖拽编辑器。
-- 不做在线编辑器。
-- 不做复杂 ZIP 导出。
-- 不做 Vue SFC 可运行化。
-- 不做多页面生成。
-- 不做登录注册 / 权限。
-- 不做 Playwright 视觉回归系统。
-- 不升级 Layout JSON v0.2。
-
-## Week 14 Day 建议
-
-| Day | 角色 | 目标 |
-|---|---|---|
-| Day 1 | docs-agent -> reviewer-agent -> lead | 生成 Week 14 day 卡，明确 MVP 产品化范围和验收标准 |
-| Day 2 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 重组 `/dev/image-to-layout` 结果区，使演示路径更清晰 |
-| Day 3 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 增加 HTML / CSS / 完整 HTML 复制入口 |
-| Day 4 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 增加最小下载能力，优先单文件 HTML |
-| Day 5 | frontend-agent -> tester-agent -> reviewer-agent -> lead | 优化 REAL_AI / FALLBACK / FAILED 用户可读状态和交付提示 |
-| Day 6 | tester-agent -> reviewer-agent -> docs-agent -> lead | 执行 Week 14 MVP smoke，记录复制、下载、iframe、安全检查 |
-| Day 7 | lead -> docs-agent -> reviewer-agent | Week 14 收口，判断 MVP 产品化闭环是否通过 |
-
-## Week 14 验收标准
-
-- 用户能完成上传和生成。
-- 用户能看到原图 / iframe 对比。
-- 用户能复制 HTML。
-- 用户能复制 CSS 或完整 HTML。
-- 用户能下载最小生成文件。
-- REAL_AI / FALLBACK / FAILED 状态清楚。
-- iframe 仍为 `sandbox=""`。
-- 不出现 `allow-scripts`。
-- 不提交真实 API key。
-- 不提交 `backend/storage/`、`frontend/dist/` 或下载副产物。
-- 不新增 MySQL / Figma / 编辑器 / ZIP 复杂实现。
-
-## PRD 对齐检查
-
-Week 14 推动 MVP 主线。
-
-原因：
-
-- 过去几周已经证明真实 AI 和质量增强可行。
-- 当前 MVP 缺口是用户交付动作，而不是继续模型细节优化。
-- 复制 / 下载 / 演示页能让项目从“能生成”变成“能交付”。
-
-## 下一步
-
-由 docs-agent 生成 Week 14 Day 1~Day 7 任务卡。
-
-Day 卡生成后，由 Lead 验收任务拆分，再进入 Day 2 前端产品化实现。
+- The next cycle must not be generated directly from unfinished Week 14 items.
+- Unfinished Should / Could items return to the candidate pool by default and do not automatically roll into the next cycle.
+- An unfinished Must may enter the next cycle candidate set only if it still blocks the MVP loop.
+- Before writing the next cycle plan, Lead must rerun the Cycle Plan Gate in `docs/mvp-roadmap.md` and choose one single bet again.
