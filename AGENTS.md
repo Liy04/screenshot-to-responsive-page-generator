@@ -85,11 +85,11 @@ Lead / project-manager 不承担中大型编码实现；需要实现时，应 sp
 
 ## 文档同步简版
 
-- 当前阶段、进展和阻塞变化：更新 `docs/current.md`。
-- 路线、阶段计划或里程碑变化：更新 `docs/plan.md`。
+- 长期 Product Goal、MVP Gap、Now / Next / Later、Candidate Bets 变化：更新 `docs/mvp-roadmap.md`。
+- 当前 Cycle / Week single bet、验收标准、smoke 计划变化：更新 `docs/plan.md`。
+- 当前事实、进展、阻塞和下一 handoff：更新 `docs/current.md`。
 - 具体执行任务：更新 `docs/tasks/` 下对应任务卡。
 - 产品规格、接口契约或验收口径变化：必要时更新 `docs/spec.md`。
-- 文档索引或入口变化：更新对应索引文件。
 - 历史总结、验收证据和过期上下文：归档到 `docs/archive/`，但不要默认读取或修改归档。
 
 ## Context Scout
