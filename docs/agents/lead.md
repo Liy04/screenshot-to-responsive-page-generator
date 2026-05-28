@@ -52,7 +52,8 @@ When a task is large, cross-module, or boundary-unclear, Lead first spawns `expl
 5. Active task card in `docs/tasks/` if one exists
 6. `docs/agents/README.md`
 7. `docs/agents/lead.md`
-8. `docs/spec.md` only when necessary
+8. `docs/engineering-baseline.md` when accepting implementation, test, or review results
+9. `docs/spec.md` only when necessary
 
 `docs/archive/` is not default context.
 
@@ -83,10 +84,29 @@ Minimum acceptance checklist:
 3. Check whether required validation was run, or whether missing validation is clearly explained.
 4. Check security boundaries, especially API key leakage, iframe sandbox, unsafe HTML / CSS, and unauthorized external calls.
 5. Check whether docs need synchronization.
-6. Decide one of: pass / conditional pass / fail.
-7. If fail or conditional pass needs fixes, assign the fix to the appropriate implementation subagent instead of silently continuing.
+6. Run Engineering Baseline Acceptance when implementation, test, or review work changed code or engineering docs.
+7. Decide one of: pass / conditional pass / fail.
+8. If fail or conditional pass needs fixes, assign the fix to the appropriate implementation subagent instead of silently continuing.
 
 Lead must not skip this acceptance step just because a subagent says the task passed.
+
+### Engineering Baseline Acceptance
+
+For implementation, test, review, or engineering-docs work, Lead final acceptance must recheck `docs/engineering-baseline.md`. Lead must confirm:
+
+- Pre-write search evidence.
+- Implementation placement decision.
+- Existing-debt touch decision when an over-threshold file was touched.
+- Reuse / extraction / keep-separate decision when similar code exists.
+- Split rationale for large files, large functions, or new responsibility boundaries.
+- Test, smoke, build, fixture, or unable-to-validate evidence.
+- Dependency-file and relevant docs synchronization.
+- Reviewer severity result.
+- Unresolved Blocker or Major items.
+
+Lead must not accept work by checking only that the feature appears to pass. Engineering baseline evidence is part of acceptance.
+
+Blocker findings must not pass unless fixed and reviewed again. Major findings require an explicit Lead decision to fix now, accept the risk, downgrade to recorded tech debt, or pause the task.
 
 ## Stop Rules
 

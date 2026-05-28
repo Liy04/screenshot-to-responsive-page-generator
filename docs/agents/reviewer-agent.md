@@ -71,12 +71,60 @@ Stop and report to Lead when:
 - Check whether `docs/archive/`, `CLAUDE.md`, `.claude/agents/`, or other Claude Code configuration was touched.
 - Reviewer Agent does not fix business code by default; report issue severity, likely owner, and whether it blocks the task.
 
+## Review Severity Policy
+
+Reviewer output must group findings by severity: Blocker, Major, Minor, and Note.
+
+Blocker findings require Verdict: Fail. They include at least:
+
+- Secret, API key, credential, token, or sensitive material leakage.
+- Unauthorized `docs/archive/` access or modification.
+- Introduction of Claude Code config, `CLAUDE.md`, `.claude/agents/`, Claude Code `/agents`, Custom Subagents, or Agent Teams.
+- Sandbox, iframe safety, security boundary, or permission violation.
+- API contract break without `docs/spec.md`, active task, or Lead approval.
+- Scope drift, roadmap expansion, or unapproved Should / Could upgrade into Must work.
+- Non-trivial behavior added without an Implementation Placement Check.
+- Non-trivial behavior added to an over-threshold file without Lead approval under Existing Debt Touch Policy.
+- Large duplicated or copy-pasted logic without a reuse / extraction / keep-separate decision.
+- Changed behavior missing required validation, smoke, build evidence, or an explicit unable-to-validate decision.
+
+Major findings make the Verdict at most Conditional Pass unless Lead explicitly accepts the risk. They include at least:
+
+- Responsibility boundary is unclear and likely to grow a large file.
+- New Controller, Service, or Worker behavior lacks a test plan, fixture, smoke, or validation note.
+- Dependency change is not synchronized to dependency files or relevant docs.
+- Controller-local exception handling bypasses the unified handling pattern.
+- Similar implementation exists but no reuse / extraction decision was recorded.
+- File or function exceeds a baseline trigger and the split rationale is weak.
+
+Minor findings include at least:
+
+- Naming, docs sync, or small split-rationale gaps.
+- Small duplication with a short-term reason.
+- Non-blocking test naming, fixture organization, or review-note clarity issues.
+
+Note findings include at least:
+
+- Optional improvement.
+- Future refactor suggestion.
+- Non-blocking technical debt.
+
+Verdict rules:
+
+- Any Blocker means Verdict: Fail until fixed and reviewed again.
+- Any Major means Verdict: Conditional Pass at best, unless Lead explicitly accepts the risk.
+- Minor and Note findings may still pass when they do not block the task.
+- Reviewer Agent reports issues and default owners; it does not fix business code by default.
+
 ## Output Format
 
 ```text
 Review 范围：
-总体结论：
-发现的问题（高 / 中 / 低风险）：
+Verdict：Pass / Conditional Pass / Fail
+Blocker：
+Major：
+Minor：
+Note：
 安全检查：
 潜在 bug：
 边界检查：

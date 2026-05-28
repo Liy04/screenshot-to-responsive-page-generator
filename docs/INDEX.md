@@ -16,7 +16,8 @@
 8. `docs/agents/<role>.md`
 9. 代码实现任务读取 `docs/engineering-baseline.md`
 10. reviewer-agent 必须读取 `docs/engineering-baseline.md`
-11. 必要时 `docs/spec.md`
+11. Lead acceptance 回查 `docs/engineering-baseline.md`
+12. 必要时 `docs/spec.md`
 
 `docs/archive/` 默认不读；只有明确要求历史追溯、审计、验收证据或归档整理时才读取。
 

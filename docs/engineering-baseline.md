@@ -14,6 +14,26 @@ Before creating any new Controller, Service, DTO, util, component, composable, p
 - Do not copy large similar blocks without explanation.
 - Before adding a new file, the output must state the search keywords or paths, similar files found, and why the task creates a new file or reuses existing code.
 
+## Reuse and Extraction Decision
+
+After similar implementations are found, an agent must not stop at "found similar file" and continue copying. The handoff must classify the similarity and state the reuse decision.
+
+Similarity classifications:
+
+1. Same workflow, different names only: prefer reuse or extract a focused shared helper / service.
+2. Same orchestration shape but different domain rules: keep domain logic separate and extract only stable shared utilities.
+3. Same error handling / mapping / validation: extract a mapper, validator, exception helper, or unified handling path.
+4. Superficial similarity only: do not abstract; explain why keeping the code separate is acceptable.
+
+Do not create an abstract base class, vague common util, or `common/` bucket only to reduce repeated lines. Shared code must have a clear name, stable responsibility, and at least one current real call site, unless Lead explicitly approves it as a reuse point.
+
+The handoff must include:
+
+- Searched files or keywords.
+- Similarity classification.
+- Decision: reuse, extract, or keep separate.
+- Reason for the decision.
+
 ## 2. Implementation Placement and Responsibility-based Splitting
 
 Before adding any non-trivial behavior, run an Implementation Placement Check.
@@ -40,6 +60,25 @@ Secondary size triggers:
 - Single function or method over 80 lines.
 
 When a touched file or new code crosses a secondary trigger, reconsider the placement and split rationale. If it is not split now, explain why the current responsibility boundary is still acceptable and where any follow-up tech debt is recorded.
+
+## Existing Debt Touch Policy
+
+Historical large files, historical duplicated code, and historical technical debt are not automatically refactored during ordinary tasks. Record them as tech debt unless the active task, current single bet, or Lead explicitly asks for refactoring.
+
+If the current task touches a target file that already exceeds a size trigger, an implementation agent must not default to adding non-trivial behavior to that file. Before writing, the agent must output a placement decision that states one of:
+
+- The new behavior still belongs in the current file, with the responsibility and change reason explained.
+- The task should first extract or split specific responsibilities.
+- The change is a small local modification that does not add responsibility.
+
+Lead must decide before implementation continues. Lead may:
+
+- Allow the small local modification.
+- Spawn a separate refactor task first.
+- Defer the requested feature.
+- Record the debt and explicitly approve continuing in the current file.
+
+Without explicit Lead approval, do not add a new workflow, API call, UI section, pipeline stage, or side effect to an already over-threshold file.
 
 ## 3. Backend Baseline
 
@@ -86,7 +125,9 @@ When a touched file or new code crosses a secondary trigger, reconsider the plac
 
 - Whether the implementation searched before writing.
 - Whether non-trivial new behavior had an Implementation Placement Check.
+- Whether touched over-threshold files had an Existing Debt Touch Policy decision before non-trivial behavior was added.
 - Whether new behavior was placed by responsibility, cohesion, reuse, change reason, and testability rather than by line count.
+- Whether similar implementations were classified and resolved with a reuse / extraction / keep-separate decision.
 - Obvious duplication or copy-paste.
 - Giant files or functions and missing split rationale.
 - Missing tests, build checks, smoke, or validation notes.

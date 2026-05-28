@@ -50,6 +50,8 @@ Engineering Baseline:
   - Implementation placement check required：是 / 否
   - Existing file to be extended：
   - Why this belongs in existing file：
+  - Existing-debt touch decision：
+  - Reuse / extraction / keep-separate decision：
   - If extracted, proposed new file：
   - Responsibility boundary：
   - File size risk：低 / 中 / 高
@@ -62,24 +64,42 @@ Acceptance:
 Test / Smoke:
 
 Stop Conditions:
-  - Requested work no longer maps to the Source Bet.
-  - Required read / write scope would touch unauthorized files.
-  - Multiple agents would modify the same directory at the same time.
-  - The task requires reading docs/archive/ without explicit approval.
-  - The task requires secrets, real API keys, or sensitive materials.
-  - The task would add Claude Code config, CLAUDE.md, or .claude/agents.
-  - The task would redefine product direction or expand the roadmap.
-  - The task would auto-upgrade Should / Could items into Must work.
-  - tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
-  - New files are required but similar implementations were not searched first.
-  - New code clearly copies an existing structure without explaining reuse or extraction.
-  - New non-trivial behavior would be added before an implementation placement check.
-  - New behavior introduces an independent responsibility but is still directly stuffed into an existing file.
+
+## Hard Stop
+  - Secrets, real API keys, credentials, tokens, or sensitive material are required or exposed.
+  - Unauthorized docs/archive/ access or modification would be required.
+  - Claude Code config, CLAUDE.md, .claude/agents, Claude Code /agents, Custom Subagents, or Agent Teams would be introduced.
+  - Requested work no longer maps to the Source Bet, redefines product direction, expands the roadmap, or auto-upgrades Should / Could items into Must work.
+  - Required read / write scope exceeds allowed files.
+  - Sandbox, iframe safety, or security boundaries would be weakened.
+  - API contract would change without docs/spec.md, active task, or Lead approval.
+
+## Lead Decision Required
+  - Non-trivial behavior lacks an Implementation Placement Check.
+  - Target file already exceeds a size trigger and new non-trivial behavior would be added.
+  - Obvious duplication or copy-paste is found.
+  - Similar implementation exists but the reuse / extraction / keep-separate decision is unclear.
+  - New files are required but similar implementations or nearby structures were not searched first.
+  - New behavior introduces an independent responsibility but would still be placed in an existing file.
   - Code would be mechanically split into Part1 / Part2 only to reduce line count.
-  - A new file would be created without checking nearby existing structure.
-  - A file exceeds the baseline threshold without split rationale or a reason to defer.
-  - A dependency is added without synchronizing the dependency file.
+  - File or function exceeds a baseline trigger without split rationale or a reason to defer.
+  - Dependency change requires dependency-file or docs sync.
+  - Required tests / smoke cannot be run.
+  - Multiple agents would touch the same directory.
+  - tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
+  - New Controller / Service / Worker behavior lacks a test plan, fixture, smoke, or validation note.
   - New business behavior has no test, smoke, or unable-to-validate explanation.
+
+## Report in Handoff
+  - Pre-write search result.
+  - Implementation placement decision.
+  - Existing-debt touch decision.
+  - Reuse / extraction decision.
+  - Split rationale.
+  - Test gaps.
+  - Validation not run and why.
+  - Dependency changes.
+  - Tech debt recorded.
 
 Handoff Output:
   - Files changed
