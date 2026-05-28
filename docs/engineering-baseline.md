@@ -14,16 +14,32 @@ Before creating any new Controller, Service, DTO, util, component, composable, p
 - Do not copy large similar blocks without explanation.
 - Before adding a new file, the output must state the search keywords or paths, similar files found, and why the task creates a new file or reuses existing code.
 
-## 2. File Size and Split Thresholds
+## 2. Implementation Placement and Responsibility-based Splitting
 
-These thresholds trigger consideration and explanation, not automatic failure:
+Before adding any non-trivial behavior, run an Implementation Placement Check.
+
+The check must decide whether the behavior belongs in an existing file or should become a new component, composable, service, helper, pipeline stage, test fixture, or equivalent focused structure.
+
+Use these primary criteria:
+
+- Responsibility: does the behavior belong to the same responsibility as the existing file?
+- Cohesion: will the existing file remain easier to understand with this behavior included?
+- Reuse: is the behavior likely to be reused by another view, service, pipeline, or test?
+- Change reason: will this behavior usually change for the same reason as the existing file?
+- Testability: can the behavior be tested clearly where it is placed?
+
+Do not wait for a file to exceed a size threshold before considering extraction. Do not mechanically split code by line count into `Part1`, `Part2`, or similar fragments. A split should create a clearer responsibility boundary, not only reduce line count.
+
+Line count is a smell detector and review trigger, not the main splitting rule.
+
+Secondary size triggers:
 
 - Vue view over 300 lines.
 - Java Controller or Service over 300 lines.
 - Python pipeline over 500 lines.
 - Single function or method over 80 lines.
 
-When a touched file or new code crosses a threshold, consider splitting. If it is not split now, explain why and where the follow-up tech debt is recorded.
+When a touched file or new code crosses a secondary trigger, reconsider the placement and split rationale. If it is not split now, explain why the current responsibility boundary is still acceptable and where any follow-up tech debt is recorded.
 
 ## 3. Backend Baseline
 
@@ -69,6 +85,8 @@ When a touched file or new code crosses a threshold, consider splitting. If it i
 `reviewer-agent` must check:
 
 - Whether the implementation searched before writing.
+- Whether non-trivial new behavior had an Implementation Placement Check.
+- Whether new behavior was placed by responsibility, cohesion, reuse, change reason, and testability rather than by line count.
 - Obvious duplication or copy-paste.
 - Giant files or functions and missing split rationale.
 - Missing tests, build checks, smoke, or validation notes.

@@ -57,7 +57,11 @@ Stop and report to Lead when:
 ## Engineering Review Checklist
 
 - Check whether the implementation searched before writing new structures.
+- Check whether non-trivial new behavior completed an Implementation Placement Check before being added.
+- Check whether behavior placement follows responsibility, cohesion, reuse, change reason, and testability instead of only file size.
+- Check whether independent responsibilities were extracted to an appropriate component, composable, service, helper, pipeline stage, or test fixture.
 - Check obvious copy-paste, duplicated logic, giant files, giant functions, and split rationale.
+- Check whether line-count thresholds were treated as secondary review triggers, not mechanical Part1 / Part2 split rules.
 - Check whether new behavior has tests, smoke, build evidence, or an explicit validation-gap note.
 - Check whether new dependencies are synchronized to dependency files.
 - Check for Controller-local exception handling that should use unified handling instead.

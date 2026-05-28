@@ -47,6 +47,11 @@ Engineering Baseline:
   - 是否涉及新文件：
   - 是否涉及新 Controller / Service / component / pipeline：
   - Pre-write search required：是 / 否
+  - Implementation placement check required：是 / 否
+  - Existing file to be extended：
+  - Why this belongs in existing file：
+  - If extracted, proposed new file：
+  - Responsibility boundary：
   - File size risk：低 / 中 / 高
   - Test required：是 / 否
   - Dependency change：是 / 否
@@ -68,6 +73,10 @@ Stop Conditions:
   - tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
   - New files are required but similar implementations were not searched first.
   - New code clearly copies an existing structure without explaining reuse or extraction.
+  - New non-trivial behavior would be added before an implementation placement check.
+  - New behavior introduces an independent responsibility but is still directly stuffed into an existing file.
+  - Code would be mechanically split into Part1 / Part2 only to reduce line count.
+  - A new file would be created without checking nearby existing structure.
   - A file exceeds the baseline threshold without split rationale or a reason to defer.
   - A dependency is added without synchronizing the dependency file.
   - New business behavior has no test, smoke, or unable-to-validate explanation.
