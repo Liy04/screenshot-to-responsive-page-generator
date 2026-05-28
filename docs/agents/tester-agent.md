@@ -22,8 +22,9 @@ Tester Agent is validation-first and does not fix business code by default.
 4. Active task card in `docs/tasks/` if one exists
 5. `docs/agents/README.md`
 6. `docs/agents/tester-agent.md`
-7. `docs/spec.md` when acceptance behavior matters
-8. Current test related code or docs
+7. `docs/engineering-baseline.md`
+8. `docs/spec.md` when acceptance behavior matters
+9. Current test related code or docs
 
 `docs/archive/` is not default context.
 
@@ -50,6 +51,15 @@ Stop and report to Lead when:
 - Validation needs unauthorized real network, production, or sensitive environment access.
 - The task requires modifying backend, frontend, worker, or schema files.
 - Required test context is missing or contradictory.
+
+## Test Baseline
+
+- Check that new Controllers have corresponding tests or an explicit test-gap note.
+- Check that new Service core methods have tests or an explicit test-gap note.
+- Check that new frontend behavior has build, smoke, or test coverage.
+- Check that new Worker behavior has a test, fixture, smoke check, or explicit validation-gap note.
+- When tests are missing, report the gap, impact, likely owner, and whether it should block the task.
+- Tester Agent does not fix business code by default.
 
 ## Output Format
 

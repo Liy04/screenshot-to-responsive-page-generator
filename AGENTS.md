@@ -80,6 +80,8 @@ Lead / project-manager 不承担中大型编码实现；需要实现时，应 sp
 - 不让多个 agent 同时修改同一目录。
 - 实现类角色默认不跨模块修改。
 - Backend / Frontend / Worker / Tester / Reviewer / Docs Agent 应遵守各自角色文件的允许修改范围。
+- Implementation agents must follow `docs/engineering-baseline.md` before creating new code, tests, dependencies, or large files.
+- Reviewer Agent must use `docs/engineering-baseline.md` when checking code structure, duplication, tests, dependencies, and security boundaries.
 - Tester 和 Reviewer 默认先读后评估，不默认直接修业务代码。
 - Docs Agent 只为长期入口规则更新 `AGENTS.md`，不把临时任务写入本文件。
 

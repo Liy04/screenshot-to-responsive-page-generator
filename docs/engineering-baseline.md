@@ -1,0 +1,101 @@
+# Engineering Baseline
+
+## Purpose
+
+This file defines the minimum engineering quality baseline that AI agents must follow before writing code, while writing code, and during review. It does not replace `docs/mvp-roadmap.md`, `docs/plan.md`, or `docs/spec.md`.
+
+The baseline mainly applies to new code and code touched by the current task. Historical large files or duplicated code should be recorded as tech debt during ordinary tasks, not automatically refactored, unless the current single bet or Lead explicitly requires it.
+
+## 1. Pre-write Search
+
+Before creating any new Controller, Service, DTO, util, component, composable, pipeline, helper, or test, search for similar structures in the project.
+
+- If a similar implementation exists, prefer reuse, extraction of shared logic, or a short explanation of why reuse is not appropriate.
+- Do not copy large similar blocks without explanation.
+- Before adding a new file, the output must state the search keywords or paths, similar files found, and why the task creates a new file or reuses existing code.
+
+## 2. File Size and Split Thresholds
+
+These thresholds trigger consideration and explanation, not automatic failure:
+
+- Vue view over 300 lines.
+- Java Controller or Service over 300 lines.
+- Python pipeline over 500 lines.
+- Single function or method over 80 lines.
+
+When a touched file or new code crosses a threshold, consider splitting. If it is not split now, explain why and where the follow-up tech debt is recorded.
+
+## 3. Backend Baseline
+
+- Before creating a Controller, Service, DTO, exception, or util, search existing backend structures.
+- Prefer reuse of existing Controller, Service, exception handler, and DTO patterns.
+- Controllers should not add local `@ExceptionHandler` by default.
+- Exception handling should prefer unified `@ControllerAdvice` or `GlobalExceptionHandler`.
+- Server errors should use the project unified exception type when available; do not casually use `IllegalStateException` instead of a business exception.
+- New Controllers need corresponding tests or an explicit explanation.
+- New Service core methods need tests or smoke evidence.
+- Do not change API contracts unless `docs/spec.md` or the active task card explicitly allows it.
+
+## 4. Frontend Baseline
+
+- Continue using Vue3 + Vite + JavaScript. Do not migrate to TypeScript during ordinary tasks.
+- Before creating a view, component, composable, or API helper, search existing frontend structures.
+- Large views should be split into child components or composables when practical.
+- For complex API response structures, use lightweight compensation such as JSDoc typedefs, Prop validation, response normalizers, or small helpers.
+- Do not bypass iframe sandbox safety.
+- Do not add `allow-scripts` to iframe previews unless the active task explicitly allows it.
+- New UI behavior needs minimum manual smoke, test, or a clear validation note.
+
+## 5. Worker Baseline
+
+- Before creating a pipeline, helper, or client, search existing Worker modules.
+- Pipelines over the threshold should consider splitting.
+- New Python dependencies must be synchronized to `requirements.txt`.
+- If no dependency is added, say so in the output.
+- New Worker behavior needs a test, fixture, smoke check, or an explanation.
+- New parameters, environment variables, or external dependencies must be synchronized to `README.md`, `docs/spec.md`, or the relevant docs.
+
+## 6. Test Baseline
+
+- New Controllers default to corresponding tests.
+- New Service core methods default to tests.
+- New frontend behavior defaults to a test, build check, or manual smoke.
+- New Worker behavior defaults to a test, fixture, or smoke.
+- If tests cannot be run, explain the reason, impact, and alternative validation.
+- Missing tests must not be silently accepted; report the gap so Lead can decide whether it blocks the task.
+
+## 7. Review Baseline
+
+`reviewer-agent` must check:
+
+- Whether the implementation searched before writing.
+- Obvious duplication or copy-paste.
+- Giant files or functions and missing split rationale.
+- Missing tests, build checks, smoke, or validation notes.
+- Scattered local Controller exception handling.
+- New dependencies without dependency-file synchronization.
+- Sandbox, security, or API contract violations.
+- Whether Should or Could work was upgraded into Must work without approval.
+- Any touch to `docs/archive/` or Claude Code configuration.
+
+## 8. Tooling Baseline
+
+Must:
+
+- Keep existing build and test commands explainable and reproducible.
+- Synchronize new dependencies to dependency files.
+- Every task output must state validation performed or why validation was not run.
+
+Should:
+
+- Gradually add frontend lint or format coverage.
+- Gradually add stable backend test commands.
+- Gradually add Worker `requirements.txt` and test entry points.
+- Future GitHub Actions may provide minimum lint and test checks.
+
+Later:
+
+- Docker or docker-compose.
+- Full CI/CD.
+- Full type migration.
+- Complex quality gates.

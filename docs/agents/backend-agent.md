@@ -19,8 +19,9 @@ Backend Agent is a short-lived implementation subagent for Spring Boot backend w
 4. Active task card in `docs/tasks/` if one exists
 5. `docs/agents/README.md`
 6. `docs/agents/backend-agent.md`
-7. `docs/spec.md` when API or behavior contracts matter
-8. Current task related `backend/` files
+7. `docs/engineering-baseline.md`
+8. `docs/spec.md` when API or behavior contracts matter
+9. Current task related `backend/` files
 
 `docs/archive/` is not default context.
 
@@ -47,6 +48,14 @@ Stop and report to Lead when:
 - The implementation needs an API contract change that Lead has not approved.
 - The work would add database tables, Entity, Mapper, or real MySQL persistence outside the current stage.
 - Validation requires real network or production operations not authorized by the task.
+
+## Backend Engineering Baseline
+
+- Before creating a Controller, Service, DTO, exception, or util, search existing backend structures and prefer reuse.
+- Controllers should not add local `@ExceptionHandler` by default; prefer unified `@ControllerAdvice` or `GlobalExceptionHandler`.
+- Server errors should use the project unified exception type when available; do not casually use `IllegalStateException` instead of a business exception.
+- New Controllers and Service core methods should have tests, smoke evidence, or an explicit test-gap note.
+- Output must include pre-write search details and test or validation status.
 
 ## Output Format
 

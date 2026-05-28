@@ -20,8 +20,9 @@ Worker Agent is a short-lived implementation subagent for Python Worker work und
 4. Active task card in `docs/tasks/` if one exists
 5. `docs/agents/README.md`
 6. `docs/agents/worker-agent.md`
-7. `docs/spec.md` when schema or behavior contracts matter
-8. Current task related `worker/` files
+7. `docs/engineering-baseline.md`
+8. `docs/spec.md` when schema or behavior contracts matter
+9. Current task related `worker/` files
 
 `docs/archive/` is not default context.
 
@@ -50,6 +51,15 @@ Stop and report to Lead when:
 - The implementation needs schema or API contract changes that Lead has not approved.
 - The task would call real external services without explicit authorization.
 - The task would write API keys, environment values, tokens, or sensitive materials.
+
+## Worker Engineering Baseline
+
+- Before creating a pipeline, helper, or client, search existing Worker modules and prefer reuse.
+- Pipelines over 500 lines should consider splitting; explain if the split is deferred.
+- New Python dependencies must be synchronized to `requirements.txt`; if no dependency is added, say so.
+- New Worker behavior needs a test, fixture, smoke check, or explicit validation-gap note.
+- New parameters, environment variables, or external dependencies must be synchronized to `README.md`, `docs/spec.md`, or relevant docs.
+- Output must include pre-write search details, dependency changes, and test or smoke status.
 
 ## Output Format
 

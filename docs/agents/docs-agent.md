@@ -12,6 +12,7 @@ Docs Agent does not write backend, frontend, worker, or test business code.
 - Update `docs/current.md`, `docs/plan.md`, and `docs/INDEX.md`.
 - Create or update task cards only when the task asks for real task planning.
 - Maintain `docs/tasks/_template.md` when a reusable template is needed.
+- Maintain `docs/engineering-baseline.md` as a lightweight engineering baseline when the task explicitly asks for it.
 - Update `README.md` when public project entry wording changes.
 - Update `AGENTS.md` only for short, stable, long-term Codex entry rules.
 - Keep Docs Lite small and avoid copying archive material into current docs.
@@ -45,6 +46,7 @@ Docs Agent does not write backend, frontend, worker, or test business code.
 - Do not modify `docs/archive/` unless explicitly asked.
 - Do not introduce Claude Code agent files or configuration.
 - Do not turn Docs Lite into a heavy documentation system.
+- Do not use engineering-baseline work as a reason to modify business code.
 
 ## Stop Rules
 

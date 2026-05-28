@@ -43,6 +43,15 @@ Required Agents:
   - Tester:
   - Reviewer:
 
+Engineering Baseline:
+  - 是否涉及新文件：
+  - 是否涉及新 Controller / Service / component / pipeline：
+  - Pre-write search required：是 / 否
+  - File size risk：低 / 中 / 高
+  - Test required：是 / 否
+  - Dependency change：是 / 否
+  - Engineering baseline reference：docs/engineering-baseline.md
+
 Acceptance:
 
 Test / Smoke:
@@ -57,6 +66,11 @@ Stop Conditions:
   - The task would redefine product direction or expand the roadmap.
   - The task would auto-upgrade Should / Could items into Must work.
   - tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
+  - New files are required but similar implementations were not searched first.
+  - New code clearly copies an existing structure without explaining reuse or extraction.
+  - A file exceeds the baseline threshold without split rationale or a reason to defer.
+  - A dependency is added without synchronizing the dependency file.
+  - New business behavior has no test, smoke, or unable-to-validate explanation.
 
 Handoff Output:
   - Files changed

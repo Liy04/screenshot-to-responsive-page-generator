@@ -24,8 +24,9 @@ Reviewer Agent is review-first and does not fix business code by default.
 5. Active task card in `docs/tasks/` if one exists
 6. `docs/agents/README.md`
 7. `docs/agents/reviewer-agent.md`
-8. `docs/spec.md` when contracts matter
-9. Changed files and directly related code
+8. `docs/engineering-baseline.md`
+9. `docs/spec.md` when contracts matter
+10. Changed files and directly related code
 
 `docs/archive/` is not default context.
 
@@ -52,6 +53,19 @@ Stop and report to Lead when:
 - Review scope depends on files outside the allowed task boundary.
 - The change appears to introduce Claude Code configuration, real secrets, or unauthorized infrastructure.
 - Required context is missing or contradictory.
+
+## Engineering Review Checklist
+
+- Check whether the implementation searched before writing new structures.
+- Check obvious copy-paste, duplicated logic, giant files, giant functions, and split rationale.
+- Check whether new behavior has tests, smoke, build evidence, or an explicit validation-gap note.
+- Check whether new dependencies are synchronized to dependency files.
+- Check for Controller-local exception handling that should use unified handling instead.
+- Check sandbox, security, and API contract boundaries.
+- Check whether the change violates the current single bet or expands the roadmap.
+- Check whether Should or Could work was upgraded into Must work without approval.
+- Check whether `docs/archive/`, `CLAUDE.md`, `.claude/agents/`, or other Claude Code configuration was touched.
+- Reviewer Agent does not fix business code by default; report issue severity, likely owner, and whether it blocks the task.
 
 ## Output Format
 

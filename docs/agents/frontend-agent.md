@@ -21,8 +21,9 @@ The frontend stack stays Vue3 + Vite + JavaScript unless the user explicitly cha
 4. Active task card in `docs/tasks/` if one exists
 5. `docs/agents/README.md`
 6. `docs/agents/frontend-agent.md`
-7. `docs/spec.md` when API or UI behavior contracts matter
-8. Current task related `frontend/` files
+7. `docs/engineering-baseline.md`
+8. `docs/spec.md` when API or UI behavior contracts matter
+9. Current task related `frontend/` files
 
 `docs/archive/` is not default context.
 
@@ -50,6 +51,15 @@ Stop and report to Lead when:
 - The implementation needs a backend API contract change that Lead has not approved.
 - The requested UI change would loosen iframe sandbox safety or add `allow-scripts`.
 - Validation requires unauthorized real network or production operations.
+
+## Frontend Engineering Baseline
+
+- Continue Vue3 + Vite + JavaScript; do not migrate to TypeScript during ordinary frontend tasks.
+- Before creating a view, component, composable, or API helper, search existing frontend structures and prefer reuse.
+- Views over 300 lines should consider child components or composables; explain if the split is deferred.
+- Complex API data should use lightweight structure support such as JSDoc typedefs, Prop validation, response normalizers, or small helpers.
+- Do not loosen iframe sandbox safety or add `allow-scripts`.
+- Output must include pre-write search details, split judgment, and test, build, or smoke status.
 
 ## Output Format
 

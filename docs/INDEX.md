@@ -14,7 +14,9 @@
 6. `docs/tasks/day-xx.md`
 7. `docs/agents/README.md`
 8. `docs/agents/<role>.md`
-9. 必要时 `docs/spec.md`
+9. 代码实现任务读取 `docs/engineering-baseline.md`
+10. reviewer-agent 必须读取 `docs/engineering-baseline.md`
+11. 必要时 `docs/spec.md`
 
 `docs/archive/` 默认不读；只有明确要求历史追溯、审计、验收证据或归档整理时才读取。
 
@@ -29,6 +31,7 @@
 | `docs/plan.md` | 当前 Cycle / Week single bet，保存本周期规划检查、Must / Should / Could / Won’t、验收、smoke、退出和下一周期规则 |
 | `docs/tasks/day-xx.md` | 执行层 day 卡，只执行当前 plan 的 single bet |
 | `docs/tasks/_template.md` | Day 卡模板和执行边界 |
+| `docs/engineering-baseline.md` | 工程质量底线，约束新代码和被触碰代码，不替代 roadmap / plan / spec |
 | `docs/spec.md` | 当前有效产品规格、接口契约和验收口径 |
 | `docs/agents/` | Codex Lead + Short-lived Subagents 角色边界 |
 | `docs/smoke/` | 当前有效 smoke 说明或记录 |
