@@ -90,6 +90,8 @@ Minimum acceptance checklist:
 
 Lead must not skip this acceptance step just because a subagent says the task passed.
 
+After Lead acceptance is complete, Lead must close the completed subagent. Subagents are short-lived execution units and must not be kept as long-lived project threads.
+
 ### Engineering Baseline Acceptance
 
 For implementation, test, review, or engineering-docs work, Lead final acceptance must recheck `docs/engineering-baseline.md`. Lead must confirm:

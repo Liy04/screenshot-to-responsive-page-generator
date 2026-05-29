@@ -75,16 +75,24 @@
 
 ## Acceptance
 
-- [ ] Week 14 每天结果已汇总。
-- [ ] MVP smoke 结论明确。
-- [ ] 复制 / 下载 / 预览 / 状态说明是否通过有明确判断。
-- [ ] 安全边界检查完成。
-- [ ] 未提交真实 API key。
-- [ ] 未提交运行副产物。
-- [ ] 未新增 MySQL / Figma / 编辑器 / ZIP 复杂实现。
-- [ ] Lead 给出是否可以进入 Week 15 的结论，但不生成 Week 15 / Cycle 15 计划。
-- [ ] reviewer-agent 只审查和报告，不修业务代码。
-- [ ] docs-agent 修改保持在 Write Scope 内。
+- [x] Week 14 每天结果已汇总。
+- [x] MVP smoke 结论明确。
+- [x] 复制 / 下载 / 预览 / 状态说明是否通过有明确判断。
+- [x] 安全边界检查完成。
+- [x] 未提交真实 API key。
+- [x] 未提交运行副产物。
+- [x] 未新增 MySQL / Figma / 编辑器 / ZIP 复杂实现。
+- [x] Lead 给出是否可以进入 Week 15 的结论，但不生成 Week 15 / Cycle 15 计划。
+- [x] reviewer-agent 只审查和报告，不修业务代码。
+- [x] docs-agent 修改保持在 Write Scope 内。
+
+## Day 07 Closeout Result
+
+- Week 14 MVP 产品化交付闭环结论：通过。
+- 依据：`docs/smoke/week14-mvp-smoke.md` 已记录 Day 06 smoke 通过，覆盖上传、REAL_AI 生成、预览、复制、下载、安全检查和服务清理。
+- 当前交付状态：`docs/plan.md` 的 Must、Acceptance Criteria、Smoke Plan 和 Exit Criteria 已标记为满足 / 通过。
+- 下一 handoff：进入 Lead / Git 收口，先确认当前 docs diff，再按仓库流程 stage / commit；不在本卡生成 Week 15 / Cycle 15 计划。
+- 范围确认：未读取或修改 `docs/archive/`，未修改 backend / frontend / worker / schema，未新增 Claude Code 配置。
 
 ## Test / Smoke
 

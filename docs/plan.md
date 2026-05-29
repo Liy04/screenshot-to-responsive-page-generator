@@ -97,6 +97,14 @@ upload sample
 -> verify no secret or generated runtime artifact is staged
 ```
 
+## Week 14 Closeout Status
+
+- Must: satisfied for Week 14 based on implementation results and Day 06 smoke evidence.
+- Acceptance Criteria: satisfied for the productized MVP delivery loop.
+- Smoke Plan: passed and recorded in `docs/smoke/week14-mvp-smoke.md`.
+- Exit Criteria: satisfied for docs closeout; remaining handoff is Lead / Git closeout, not new planning.
+- MVP conclusion: passed for the current cycle. The user can upload a screenshot, generate a result, view original and generated preview, identify REAL_AI / FALLBACK / FAILED state, copy generated output, and download a minimal generated file.
+
 ## Exit Criteria
 
 - Must items are complete or explicitly rejected by Lead.
