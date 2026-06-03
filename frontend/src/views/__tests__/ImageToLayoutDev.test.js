@@ -10,8 +10,13 @@ vi.mock('../../api/imageLayoutApi', () => ({
 
 const uploadResult = {
   jobId: 'imgjob_real_001',
-  fileName: 'demo.png',
+  fileName: '01-simple-card-page.png',
   sourceUrl: '/api/image-page/jobs/imgjob_real_001/source',
+}
+
+const uploadResultWithoutSourceUrl = {
+  jobId: 'imgjob_real_002',
+  fileName: '01-simple-card-page.png',
 }
 
 const realAiResult = {
@@ -201,6 +206,12 @@ describe('ImageToLayoutDev', () => {
     expect(wrapper.text()).toContain('原图 / 生成预览')
     expect(wrapper.text()).toContain('上传原图')
     expect(wrapper.text()).toContain('生成预览')
+    expect(wrapper.text()).toContain('Week 15 质量检查')
+    expect(wrapper.text()).toContain('W15-S1 Simple card')
+    expect(wrapper.text()).toContain('Structure')
+    expect(wrapper.text()).toContain('Safety and delivery')
+    expect(wrapper.text()).toContain('sandbox=""')
+    expect(wrapper.text()).toContain('no allow-scripts')
     expect(wrapper.text()).toContain('交付操作')
     expect(wrapper.text()).toContain('复制 HTML')
     expect(wrapper.text()).toContain('复制 CSS')
@@ -222,6 +233,28 @@ describe('ImageToLayoutDev', () => {
     expect(iframe.attributes('sandbox')).toBe('')
     expect(iframe.attributes('allow')).toBeUndefined()
     expect(iframe.html()).not.toContain('allow-scripts')
+  })
+
+  it('shows a clear original-image empty state when upload response has no sourceUrl', async () => {
+    uploadImagePageSource.mockResolvedValue(uploadResultWithoutSourceUrl)
+    generateImagePage.mockResolvedValue(realAiResult)
+
+    const wrapper = mountPage()
+    const file = new File(['fake-image'], '01-simple-card-page.png', { type: 'image/png' })
+
+    await selectFile(wrapper, file)
+    await uploadSelectedFile(wrapper)
+    await generateForUploadedFile(wrapper)
+
+    expect(generateImagePage).toHaveBeenCalledWith('imgjob_real_002')
+    expect(wrapper.text()).toContain('上传响应未返回 sourceUrl，暂时无法展示原图')
+    expect(wrapper.find('.compare-image-frame img').exists()).toBe(false)
+    expect(wrapper.text()).toContain('生成预览')
+
+    const iframe = wrapper.find('iframe')
+    expect(iframe.exists()).toBe(true)
+    expect(iframe.attributes('sandbox')).toBe('')
+    expect(iframe.attributes('allow')).toBeUndefined()
   })
 
   it('copies HTML, CSS, and full HTML document from previewHtml', async () => {
@@ -319,10 +352,12 @@ describe('ImageToLayoutDev', () => {
     expect(summaryText).toContain('生成状态')
     expect(summaryText).toContain('下一步')
     expect(summaryText).toContain('原图 / 生成预览')
+    expect(summaryText).toContain('Week 15 质量检查')
     expect(summaryText).toContain('交付操作')
     expect(summaryText).toContain('调试详情')
     expect(summaryText.indexOf('生成状态')).toBeLessThan(summaryText.indexOf('原图 / 生成预览'))
-    expect(summaryText.indexOf('原图 / 生成预览')).toBeLessThan(summaryText.indexOf('交付操作'))
+    expect(summaryText.indexOf('原图 / 生成预览')).toBeLessThan(summaryText.indexOf('Week 15 质量检查'))
+    expect(summaryText.indexOf('Week 15 质量检查')).toBeLessThan(summaryText.indexOf('交付操作'))
     expect(summaryText.indexOf('交付操作')).toBeLessThan(summaryText.indexOf('调试详情'))
     expect(summaryText).toContain('model')
     expect(summaryText).toContain('gpt-4.1-mini')

@@ -1,95 +1,119 @@
-# Week 14 Day 03
+# Week 15 Day 03
 
-## 负责角色
+## Source Bet
 
-frontend-agent -> tester-agent -> reviewer-agent -> Lead
+- Current single bet from `docs/plan.md`: Sample-set based generated page quality improvement.
+- This day card only executes the current single bet. It does not redefine product direction, expand the roadmap, generate Week 16 / Cycle 16 planning, or promote Should / Could items into Must work.
 
-## 执行方式
+## Related MVP Gap
 
-- 是否需要 spawn subagent：是
-- Lead 是否可直接执行：否，除非当前运行环境没有 subagent 工具且用户确认降级
-- 必须 spawn 的 agent：frontend-agent、tester-agent、reviewer-agent
-- 是否允许并行：否，默认顺序执行
+- Gap from `docs/mvp-roadmap.md`: Generated output must be understandable enough for a user to decide whether to copy, download, retry, or inspect debug data.
 
-## 任务目标
+## Task Goal
 
-为 `/dev/image-to-layout` 增加最小代码复制能力，让用户能复制生成结果。
+Add or improve a bounded Worker repair / normalization quality pass for common fixed-sample issues discovered in Day 01 and Day 02.
 
-必须提供：
-
-- 复制 HTML。
-- 复制 CSS。
-- 复制完整 HTML 文档。
-
-## 默认读取
+## Read Scope
 
 - `AGENTS.md`
+- `docs/INDEX.md`
 - `docs/current.md`
 - `docs/mvp-roadmap.md`
 - `docs/plan.md`
-- `docs/tasks/day-03.md`
-- `docs/agents/frontend-agent.md`
+- current task card: `docs/tasks/day-03.md`
+- `docs/agents/README.md`
+- `docs/agents/lead.md`
+- `docs/agents/worker-agent.md`
 - `docs/agents/tester-agent.md`
 - `docs/agents/reviewer-agent.md`
-- 必要时 `docs/spec.md`
-- 当前前端页面、API 和 preview 相关组件代码
+- `docs/engineering-baseline.md`
+- Day 01 quality metrics
+- Day 02 Worker handoff
+- current Worker repair, normalization, validator, compiler, tests, and fixtures only
+- do not read `docs/archive/` by default
 
-说明：
+## Write Scope
 
-- 不读取 `docs/archive/`。
-- 不读取 backend / worker 全量代码。
+- Worker repair / normalization / validation files directly tied to the fixed sample set
+- Worker tests or fixtures for the repair / normalization behavior
+- `docs/smoke/week15-quality-smoke.md` only for evidence or blockers if needed
+- `docs/current.md` only for handoff status if needed
 
-## 允许修改
-
-- `frontend/` 中与 `/dev/image-to-layout`、生成结果展示、复制按钮、前端测试相关的文件。
-
-## 禁止修改
+Forbidden:
 
 - `backend/`
-- `worker/`
-- `schema/`
+- `frontend/`
+- `schema/` unless Lead approves a minimal contract sync
 - `docs/archive/`
-- 后端 API 契约
-- 模型 prompt
-- Worker 编译逻辑
+- broad Worker refactors unrelated to the fixed sample set
+- real API keys, credentials, tokens, private screenshots, or sensitive materials
+- Claude Code config, `CLAUDE.md`, `.claude/agents`, Claude Code `/agents`, Custom Subagents, or Agent Teams
 
-## 实施步骤
+## Spawn Decision
 
-1. 读取当前前端生成结果字段来源，确认可复制内容来自 Worker 静态编译结果。
-2. 增加复制 HTML、复制 CSS、复制完整 HTML 文档入口。
-3. 复制成功和失败都要有用户可读反馈。
-4. 不复制模型原始输出。
-5. 如果当前结果没有可复制内容，展示禁用态或清晰空状态。
-6. 补充前端组件测试或最低必要测试。
-7. reviewer-agent 检查复制内容来源、安全边界和未越界修改。
-8. Lead 二次验收。
+- Lead should spawn `worker-agent` for implementation when subagent tools are available.
+- Lead should spawn `tester-agent` after code changes for the narrowest relevant validation.
+- Lead should spawn `reviewer-agent` after code changes for quality, security, and boundary review.
+- If subagent tools are unavailable, Lead must state the downgrade reason and ask for confirmation before continuing in the main thread.
+- Multiple agents must not modify the same directory at the same time.
+- Tester-agent and reviewer-agent report issues by default and do not fix business code directly.
 
-## 验收标准
+## Required Agents
 
-- [ ] 用户可以复制 HTML。
-- [ ] 用户可以复制 CSS。
-- [ ] 用户可以复制完整 HTML 文档。
-- [ ] 复制内容来自静态编译结果或前端安全组合结果。
-- [ ] 复制失败有提示。
-- [ ] 没有真实 API key、环境变量或敏感信息进入复制内容。
-- [ ] 不修改 backend / worker。
-- [ ] 前端测试或 build 通过；无法运行时说明原因。
+- Lead: approve the exact repair / normalization target and reject broad quality drift.
+- Explorer: optional if repair ownership is unclear.
+- Implementation: `worker-agent`.
+- Tester: `tester-agent`.
+- Reviewer: `reviewer-agent`.
 
-## Lead 二次验收
+## Engineering Baseline
 
-- 检查复制功能是否满足 MVP 交付缺口。
-- 检查是否没有扩大到下载、ZIP 或项目模板导出。
-- 检查 tester-agent 与 reviewer-agent 结论。
-- 结论：通过 / 条件通过 / 不通过。
+- 是否涉及新文件：可能，only for a focused helper, fixture, or test with search evidence.
+- 是否涉及新 Controller / Service / component / pipeline：可能涉及 Worker pipeline / helper.
+- Pre-write search required：是，search existing repair, normalization, validation, compiler, and fixture patterns.
+- Implementation placement check required：是。
+- Existing file to be extended：To be determined after pre-write search.
+- Why this belongs in existing file：Must be stated by `worker-agent` before writing.
+- Existing-debt touch decision：Do not refactor historical Worker debt unless Lead approves it as required for the current repair.
+- Reuse / extraction / keep-separate decision：Classify similar logic and choose reuse, extraction, or keep-separate before writing.
+- If extracted, proposed new file：Only a focused Worker helper / test fixture with Lead approval.
+- Responsibility boundary：Repair / normalize fixed-sample layout quality issues only.
+- File size risk：中。
+- Test required：是。
+- Dependency change：否 by default.
+- Engineering baseline reference：`docs/engineering-baseline.md`
 
-## 输出格式
+## Acceptance
 
-```text
-## 修改摘要
-## 修改文件
-## 页面影响
-## 复制内容说明
-## 测试结果
-## Review 结果
-## 风险提示
-```
+- Repair / normalization handles named fixed-sample issues from Day 01 / Day 02.
+- The pass is deterministic enough for smoke comparison and does not hide FAILED state.
+- Existing previewHtml safety and copy / download compatibility are preserved.
+- No broad visual-regression platform, schema overhaul, persistence, Figma API / MCP, multi-page, editor, or ZIP feature is introduced.
+- Tests, fixtures, or smoke notes cover the changed repair / normalization behavior.
+
+## Test / Smoke
+
+- Run relevant Worker tests, fixture checks, or targeted smoke for each repaired / normalized issue.
+- Record any unable-to-run reason and the alternative validation used.
+- Do not record full Week 15 pass until Day 06.
+
+## Stop Conditions
+
+- The repair would mask invalid or unsafe output instead of reporting a readable failure.
+- The task requires a broad schema rewrite or Layout JSON v0.2 upgrade without Lead approval.
+- Required read / write scope exceeds the allowed files.
+- The task requires reading or modifying `docs/archive/`.
+- Multiple agents would modify the same directory at the same time.
+- Tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
+
+## Handoff Output
+
+- Files changed
+- Pre-write search result
+- Implementation placement decision
+- Existing-debt touch decision
+- Reuse / extraction decision
+- Test / smoke result
+- Reviewer findings
+- Blockers or risks
+- Suggested next handoff: Day 04 Frontend preview / result comparison UX

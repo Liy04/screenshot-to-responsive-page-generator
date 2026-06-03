@@ -1,89 +1,137 @@
-# Week 14 Day 05
+# Week 15 Day 05
 
-## 负责角色
+## Source Bet
 
-frontend-agent -> tester-agent -> reviewer-agent -> Lead
+- Current single bet from `docs/plan.md`: Sample-set based generated page quality improvement.
+- This day card only executes the current single bet. It does not redefine product direction, expand the roadmap, generate Week 16 / Cycle 16 planning, or promote Should / Could items into Must work.
 
-## 执行方式
+## Related MVP Gap
 
-- 是否需要 spawn subagent：是
-- Lead 是否可直接执行：否，除非当前运行环境没有 subagent 工具且用户确认降级
-- 必须 spawn 的 agent：frontend-agent、tester-agent、reviewer-agent
-- 是否允许并行：否，默认顺序执行
+- Gap from `docs/mvp-roadmap.md`: Generated artifact fields for HTML / CSS must stay clear enough to support copy and download without expanding into full project export.
 
-## 任务目标
+## Task Goal
 
-优化 REAL_AI / FALLBACK / FAILED 的用户可读状态和交付提示，让用户知道当前生成结果意味着什么、下一步可以做什么。
+Add minimal backend artifact metadata / quality fields only if Day 02-04 prove they are needed for the current fixed sample-set quality checks.
 
-## 默认读取
+## Read Scope
 
 - `AGENTS.md`
+- `docs/INDEX.md`
 - `docs/current.md`
 - `docs/mvp-roadmap.md`
 - `docs/plan.md`
-- `docs/tasks/day-05.md`
-- `docs/agents/frontend-agent.md`
+- current task card: `docs/tasks/day-05.md`
+- `docs/agents/README.md`
+- `docs/agents/lead.md`
+- `docs/agents/backend-agent.md`
 - `docs/agents/tester-agent.md`
 - `docs/agents/reviewer-agent.md`
-- 必要时 `docs/spec.md`
-- 当前前端页面、状态展示和错误展示相关代码
+- `docs/engineering-baseline.md`
+- Day 01 quality metrics
+- Day 02-04 handoffs
+- current backend endpoint / DTO / service files directly involved in generated artifact response only
+- `docs/spec.md` if API contract wording is needed
+- do not read `docs/archive/` by default
 
-说明：
+## Write Scope
 
-- 不读取 `docs/archive/`。
-- 不读取 backend / worker 全量代码。
+- No-op docs note if backend change is not needed
+- Backend DTO / service / controller files directly responsible for generated artifact metadata only if Lead approves
+- Backend tests for changed API behavior
+- `docs/spec.md` only for minimal approved contract sync
+- `docs/smoke/week15-quality-smoke.md` only for evidence or blockers if needed
+- `docs/current.md` only for handoff status if needed
 
-## 允许修改
+Forbidden:
 
-- `frontend/` 中与 `/dev/image-to-layout` 状态展示、提示文案、错误说明和测试相关的文件。
-
-## 禁止修改
-
-- `backend/`
-- `worker/`
-- `schema/`
+- MySQL persistence
+- Entity / Mapper / MyBatis-Plus tables
+- database schema or migration work
+- `frontend/` unless Lead explicitly creates a follow-up task
+- `worker/` unless Lead explicitly creates a follow-up task
 - `docs/archive/`
-- 后端响应字段
-- Worker 状态枚举
-- 模型 prompt
+- auth, permissions, history, multi-page, editor, or ZIP export
+- real API keys, credentials, tokens, private screenshots, or sensitive materials
+- Claude Code config, `CLAUDE.md`, `.claude/agents`, Claude Code `/agents`, Custom Subagents, or Agent Teams
 
-## 实施步骤
+## Spawn Decision
 
-1. 梳理当前页面展示的 `status`、`sourceType`、`fallbackUsed`、`fallbackReason`、`errors`、`warnings`。
-2. 将 REAL_AI、FALLBACK、FAILED、TIMEOUT 等状态转成用户可读说明。
-3. 在成功状态下提示用户可复制或下载。
-4. 在 fallback 状态下说明结果可用但来自保底规则。
-5. 在 failed / timeout 状态下说明失败原因和建议重试动作。
-6. 保留调试信息，但不要让它成为页面第一信息。
-7. 补充前端测试或最低必要验证。
-8. reviewer-agent 检查文案准确性、安全边界和接口契约是否被擅自改变。
-9. Lead 二次验收。
+- Lead first decides whether backend work is actually needed; no-op is valid if current contracts already support the quality checks.
+- If backend change is needed and subagent tools are available, Lead should spawn `backend-agent`.
+- Lead should spawn `tester-agent` after backend code changes for API or service validation.
+- Lead should spawn `reviewer-agent` after code changes for quality, security, and boundary review.
+- If subagent tools are unavailable, Lead must state the downgrade reason and ask for confirmation before continuing in the main thread.
+- Multiple agents must not modify the same directory at the same time.
+- Tester-agent and reviewer-agent report issues by default and do not fix business code directly.
 
-## 验收标准
+## Required Agents
 
-- [ ] REAL_AI 状态说明清楚。
-- [ ] FALLBACK 状态说明清楚。
-- [ ] FAILED / TIMEOUT 状态说明清楚。
-- [ ] 用户能看到下一步动作：复制、下载、重新生成或检查输入。
-- [ ] 调试字段仍可查看，但不压过主流程。
-- [ ] 没有修改 backend / worker。
-- [ ] 前端测试或 build 通过；无法运行时说明原因。
+- Lead: decide no-op vs minimal backend metadata change.
+- Explorer: optional if API ownership is unclear.
+- Implementation: `backend-agent` only if approved.
+- Tester: `tester-agent` only if backend code changes.
+- Reviewer: `reviewer-agent` after backend code changes or for no-op boundary review if requested.
 
-## Lead 二次验收
+## Engineering Baseline
 
-- 检查文案是否服务 MVP 演示。
-- 检查是否没有修改接口和 Worker 行为。
-- 检查 tester-agent 与 reviewer-agent 结论。
-- 结论：通过 / 条件通过 / 不通过。
+- 是否涉及新文件：可能，only for focused backend tests or DTO if search proves no existing fit.
+- 是否涉及新 Controller / Service / component / pipeline：可能涉及 existing Controller / Service / DTO; new Controller is not expected.
+- Pre-write search required：是，search existing backend Controller, Service, DTO, response wrapper, exception handling, and tests.
+- Implementation placement check required：是。
+- Existing file to be extended：To be determined after pre-write search.
+- Why this belongs in existing file：Must be stated by `backend-agent` before writing.
+- Existing-debt touch decision：Do not refactor historical backend debt unless it blocks the minimal metadata change.
+- Reuse / extraction / keep-separate decision：Classify similar DTO / mapping / response logic and choose reuse, extraction, or keep-separate before writing.
+- If extracted, proposed new file：Only a focused DTO / mapper / test file with Lead approval.
+- Responsibility boundary：Minimal artifact metadata / quality fields only; no persistence or export expansion.
+- File size risk：中。
+- Test required：是 if code changes; no-op requires a validation note.
+- Dependency change：否。
+- Engineering baseline reference：`docs/engineering-baseline.md`
 
-## 输出格式
+## Acceptance
 
-```text
-## 修改摘要
-## 修改文件
-## 页面影响
-## 状态说明
-## 测试结果
-## Review 结果
-## 风险提示
-```
+- Lead decision is explicit: no backend change needed, or minimal approved metadata / quality fields added.
+- If added, metadata fields are tied to the fixed sample-set quality checks and documented.
+- Existing upload -> generate -> preview -> copy / download flow remains compatible.
+- No MySQL, Entity, Mapper, migration, persistence, auth, editor, multi-page, or ZIP feature is introduced.
+- Backend tests, API smoke, or unable-to-run explanation is recorded for any code change.
+
+## Test / Smoke
+
+- If no backend change: record why the existing contract is sufficient.
+- If backend changes: run the narrowest backend API / service tests or smoke.
+- Verify no database or persistence requirement was introduced.
+
+## Stop Conditions
+
+- Quality metadata would require persistence, schema migration, MySQL, or MyBatis-Plus work.
+- API contract changes are broader than the current sample-set quality checks.
+- Required docs/spec sync is needed but not approved.
+- Required read / write scope exceeds the allowed files.
+- The task requires reading or modifying `docs/archive/`.
+- Multiple agents would modify the same directory at the same time.
+- Tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
+
+## Handoff Output
+
+- Backend needed: yes / no
+- Files changed
+- Pre-write search result
+- Implementation placement decision
+- API contract note
+- Test / smoke result
+- Reviewer findings
+- Blockers or risks
+- Suggested next handoff: Day 06 full sample-set smoke
+
+## Day 05 Result
+
+- Backend needed: no.
+- Files changed: none for backend code.
+- API contract note: the existing `/api/image-page/jobs/{jobId}/generate` response already exposes the fields needed for Day 06 fixed sample-set smoke and the Day 04 quality panel: `status`, `sourceType`, `fallbackUsed`, `fallbackReason`, `promptVersion`, `layoutJson`, `previewHtml`, `validation`, `warnings`, `errors`, and `artifact`.
+- Existing fields sufficient: yes.
+- Reason: Week 15 quality metrics are recorded as human-readable smoke evidence, not machine-readable backend quality scores. Adding backend quality fields now would expand the API contract without a current single-bet need.
+- Test / smoke result: no backend code changed; Day 06 should verify the existing fields through full fixed sample-set smoke.
+- Reviewer findings: no backend technical blocker; reviewer requested this explicit no-op note.
+- Next handoff: Day 06 full sample-set smoke.

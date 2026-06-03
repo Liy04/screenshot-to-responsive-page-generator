@@ -5,11 +5,13 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from .layout_quality_repair import normalize_intermediate_sections_for_quality
     from .layout_static_generator import compile_preview_document
     from .image_layout_resolver import infer_template_key_from_image_name, resolve_fallback_image_layout
     from .layout_validator import ValidationMessage, validate_layout_document
     from .real_ai_layout_client import PROMPT_VERSION, RealAIError, get_configured_model, request_layout_intermediate
 except ImportError:
+    from layout_quality_repair import normalize_intermediate_sections_for_quality
     from layout_static_generator import compile_preview_document
     from image_layout_resolver import infer_template_key_from_image_name, resolve_fallback_image_layout
     from layout_validator import ValidationMessage, validate_layout_document
@@ -851,26 +853,7 @@ def repair_intermediate_payload(intermediate: Any, image_name: str) -> tuple[dic
         sections = repaired["sections"]
         used = True
 
-    normalized_sections: list[dict[str, Any]] = []
-    sections_changed = False
-    for section in sections:
-        if not isinstance(section, dict):
-            sections_changed = True
-            continue
-
-        normalized_section = copy.deepcopy(section)
-        role = normalized_section.get("role")
-        if not isinstance(role, str) or not role.strip():
-            normalized_section["role"] = "content"
-            sections_changed = True
-
-        elements = normalized_section.get("elements")
-        if not isinstance(elements, list):
-            normalized_section["elements"] = []
-            sections_changed = True
-
-        normalized_sections.append(normalized_section)
-
+    normalized_sections, sections_changed = normalize_intermediate_sections_for_quality(sections)
     if sections_changed:
         repaired["sections"] = normalized_sections
         used = True

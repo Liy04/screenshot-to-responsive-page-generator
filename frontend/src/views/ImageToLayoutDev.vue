@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { generateImagePage, uploadImagePageSource } from '../api/imageLayoutApi'
 import CodeBlock from '../components/CodeBlock.vue'
 import GeneratedPagePreview from '../components/generated/GeneratedPagePreview.vue'
+import QualityInspectionPanel from '../components/generated/QualityInspectionPanel.vue'
 import ImageUploader from '../components/ImageUploader.vue'
 import StatusTag from '../components/StatusTag.vue'
 import JsonPanel from '../components/layout/JsonPanel.vue'
@@ -61,6 +62,12 @@ const canCopyHtml = computed(() => !!copyHtmlCode.value)
 const canCopyCss = computed(() => !!copyCssCode.value)
 const canCopyFullHtml = computed(() => !!copyFullHtmlDocument.value)
 const canDownloadFullHtml = computed(() => !!copyFullHtmlDocument.value)
+const qualityInspectionFileName = computed(() => {
+  return uploadedSource.value?.fileName || selectedFile.value?.name || ''
+})
+const canCopyAnyGeneratedOutput = computed(() => {
+  return canCopyHtml.value || canCopyCss.value || canCopyFullHtml.value
+})
 const topLevelErrors = computed(() => normalizeItems(generateResult.value?.errors))
 const topLevelWarnings = computed(() => normalizeItems(generateResult.value?.warnings))
 const validationErrors = computed(() => normalizeItems(generateResult.value?.validation?.errors))
@@ -621,7 +628,10 @@ async function handleGenerate() {
               <span>source</span>
             </div>
             <div class="compare-image-frame">
-              <img :src="sourcePreviewUrl" alt="用于生成的上传原图" />
+              <img v-if="sourcePreviewUrl" :src="sourcePreviewUrl" alt="用于生成的上传原图" />
+              <div v-else class="compare-empty-state">
+                上传响应未返回 sourceUrl，暂时无法展示原图；仍可检查生成预览与质量指标。
+              </div>
             </div>
           </section>
 
@@ -640,6 +650,15 @@ async function handleGenerate() {
           </section>
         </div>
       </section>
+
+      <QualityInspectionPanel
+        v-if="generateResult"
+        :file-name="qualityInspectionFileName"
+        :result-state="resultState || generateResult.status || ''"
+        :has-preview="showPreviewIframe"
+        :can-copy="canCopyAnyGeneratedOutput"
+        :can-download="canDownloadFullHtml"
+      />
 
       <section
         v-if="generateResult"

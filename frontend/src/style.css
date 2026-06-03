@@ -503,6 +503,17 @@ h2 {
   object-fit: contain;
 }
 
+.compare-empty-state {
+  display: grid;
+  width: 100%;
+  min-height: 460px;
+  place-items: center;
+  padding: 24px;
+  color: #64748b;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .image-compare-grid .generated-preview {
   height: 100%;
   padding: 0;
@@ -752,9 +763,118 @@ h2 {
 
 .mvp-result-card,
 .delivery-actions-card,
-.debug-details-card {
+.debug-details-card,
+.quality-inspection-card {
   display: grid;
   gap: 18px;
+}
+
+.quality-inspection-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.quality-panel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.quality-panel-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.quality-panel-heading h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.quality-panel p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.quality-sample-title {
+  color: #111827;
+  font-weight: 700;
+}
+
+.quality-traits {
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.quality-score-legend {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.quality-metric-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quality-metric-list li {
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.quality-safety-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.quality-safety-list div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.quality-safety-list dt {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.quality-safety-list dd {
+  margin: 8px 0 0;
+  color: #111827;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.quality-safety-list code {
+  font-family:
+    "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 12px;
 }
 
 .delivery-action-grid {
@@ -854,6 +974,12 @@ h2 {
   }
 
   .image-compare-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quality-inspection-grid,
+  .quality-metric-list,
+  .quality-safety-list {
     grid-template-columns: 1fr;
   }
 

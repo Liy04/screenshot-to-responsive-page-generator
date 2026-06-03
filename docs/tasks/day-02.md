@@ -1,100 +1,118 @@
-# Week 14 Day 02
+# Week 15 Day 02
 
-## 负责角色
+## Source Bet
 
-frontend-agent -> tester-agent -> reviewer-agent -> Lead
+- Current single bet from `docs/plan.md`: Sample-set based generated page quality improvement.
+- This day card only executes the current single bet. It does not redefine product direction, expand the roadmap, generate Week 16 / Cycle 16 planning, or promote Should / Could items into Must work.
 
-## 执行方式
+## Related MVP Gap
 
-- 是否需要 spawn subagent：是
-- Lead 是否可直接执行：否，除非当前运行环境没有 subagent 工具且用户确认降级
-- 必须 spawn 的 agent：frontend-agent、tester-agent、reviewer-agent
-- 是否允许并行：否，默认顺序执行
+- Gap from `docs/mvp-roadmap.md`: Generated artifact fields and layout output must stay clear enough to support copy, download, and user acceptance.
 
-## 任务目标
+## Task Goal
 
-重组 `/dev/image-to-layout` 的生成结果区，使页面从调试信息堆叠变成更清晰的 MVP 演示路径。
+Improve Worker prompt and schema output constraints so generated layout is more stable for the fixed Week 15 sample set.
 
-目标结构：
-
-```text
-生成状态
--> 原图 / 生成预览
--> 交付操作入口
--> Layout JSON / previewHtml 调试信息
-```
-
-## 默认读取
+## Read Scope
 
 - `AGENTS.md`
+- `docs/INDEX.md`
 - `docs/current.md`
 - `docs/mvp-roadmap.md`
 - `docs/plan.md`
-- `docs/tasks/day-02.md`
-- `docs/agents/frontend-agent.md`
+- current task card: `docs/tasks/day-02.md`
+- `docs/agents/README.md`
+- `docs/agents/lead.md`
+- `docs/agents/worker-agent.md`
 - `docs/agents/tester-agent.md`
 - `docs/agents/reviewer-agent.md`
-- 必要时 `docs/spec.md`
-- 当前前端页面和组件代码
+- `docs/engineering-baseline.md`
+- Day 01 sample-set and quality notes
+- current Worker prompt, schema, validator, fallback, repair, and related tests / fixtures only
+- do not read `docs/archive/` by default
 
-说明：
+## Write Scope
 
-- 不读取 `docs/archive/`。
-- 不读取 backend / worker 全量代码。
+- Worker files directly responsible for prompt, schema output constraints, validation, or related tests / fixtures
+- `docs/current.md` only for handoff status if needed
+- `docs/smoke/week15-quality-smoke.md` only for notes or blockers if needed
+- `docs/spec.md` only if Lead approves a contract wording update
 
-## 允许修改
+Forbidden:
 
-- `frontend/` 中与 `/dev/image-to-layout` 页面相关的文件。
-- 当前任务必要的前端测试文件。
-
-## 禁止修改
-
-- `backend/`
-- `worker/`
-- `schema/`
+- `backend/` unless Lead explicitly retargets to Day 05
+- `frontend/`
+- `schema/` unless the active task and Lead approve a minimal contract sync
 - `docs/archive/`
-- `docs/plan.md`
-- `docs/current.md`
-- `docs/spec.md`
-- API 契约
+- new runtime infrastructure or large dependencies
+- real API keys, credentials, tokens, private screenshots, or sensitive materials
+- Claude Code config, `CLAUDE.md`, `.claude/agents`, Claude Code `/agents`, Custom Subagents, or Agent Teams
 
-## 实施步骤
+## Spawn Decision
 
-1. 只读探索当前 `/dev/image-to-layout` 页面结构和已有 preview 组件。
-2. 将结果区整理为用户可理解的展示顺序。
-3. 保留原图展示、生成结果、Layout JSON、previewHtml 和 iframe 预览。
-4. 预留 Day 3 / Day 4 的复制和下载操作区，但不实现复制 / 下载。
-5. 保持 iframe `sandbox=""`，不得加入 `allow-scripts`。
-6. 运行前端最低必要测试或 build。
-7. reviewer-agent 检查页面安全、Agent 边界和是否提前做 Day 3 / Day 4。
-8. Lead 二次验收。
+- Lead should spawn `worker-agent` for implementation when subagent tools are available.
+- After implementation, Lead should spawn `tester-agent` for minimum Worker validation when code changed.
+- After code changes, Lead should spawn `reviewer-agent` for quality, security, and boundary review.
+- If subagent tools are unavailable, Lead must state the downgrade reason and ask for confirmation before continuing in the main thread.
+- Multiple agents must not modify the same directory at the same time.
+- Tester-agent and reviewer-agent report issues by default and do not fix business code directly.
 
-## 验收标准
+## Required Agents
 
-- [ ] 页面结果区展示顺序更清晰。
-- [ ] 原图和 iframe 预览都保留。
-- [ ] REAL_AI / FALLBACK / FAILED 基础信息仍可见。
-- [ ] Layout JSON 和 previewHtml 调试信息仍可展开或查看。
-- [ ] 未实现 Day 3 复制功能。
-- [ ] 未实现 Day 4 下载功能。
-- [ ] iframe 仍为 `sandbox=""`。
-- [ ] 无 `allow-scripts`。
-- [ ] 前端测试或 build 通过；无法运行时说明原因。
+- Lead: confirm exact Worker scope and accept any contract implication.
+- Explorer: optional if Worker prompt / schema ownership is unclear.
+- Implementation: `worker-agent`.
+- Tester: `tester-agent` runs the minimum Worker fixture or smoke validation.
+- Reviewer: `reviewer-agent` reviews prompt constraints, schema safety, duplication, and scope.
 
-## Lead 二次验收
+## Engineering Baseline
 
-- 检查是否只修改 frontend 范围。
-- 检查是否服务 Week 14 MVP 产品化，而不是继续模型质量优化。
-- 检查 tester-agent 与 reviewer-agent 结论。
-- 结论：通过 / 条件通过 / 不通过。
+- 是否涉及新文件：可能，only if a focused fixture or test file is justified.
+- 是否涉及新 Controller / Service / component / pipeline：可能涉及 Worker pipeline / helper.
+- Pre-write search required：是，search existing Worker prompt, schema, validator, repair, fallback, tests, and fixtures.
+- Implementation placement check required：是。
+- Existing file to be extended：To be determined after pre-write search.
+- Why this belongs in existing file：Must be stated by `worker-agent` before writing.
+- Existing-debt touch decision：Do not refactor historical Worker debt unless it blocks the current sample-set quality bet.
+- Reuse / extraction / keep-separate decision：Classify similar Worker logic and choose reuse, extraction, or keep-separate before writing.
+- If extracted, proposed new file：Only a focused Worker helper / fixture file with Lead approval.
+- Responsibility boundary：Prompt and schema output constraints for the fixed sample set only.
+- File size risk：中。
+- Test required：是。
+- Dependency change：否 by default; any dependency change requires Lead approval and dependency-file sync.
+- Engineering baseline reference：`docs/engineering-baseline.md`
 
-## 输出格式
+## Acceptance
 
-```text
-## 修改摘要
-## 修改文件
-## 页面影响
-## 测试结果
-## Review 结果
-## 风险提示
-```
+- Worker prompt / schema constraints address the fixed sample-set quality metrics from Day 01.
+- Output remains compatible with the current MVP preview, copy, and download flow.
+- REAL_AI / FALLBACK / FAILED state behavior is not weakened.
+- No broad schema upgrade, Layout JSON v0.2 work, persistence, Figma API / MCP, editor, multi-page, or ZIP feature is introduced.
+- Worker tests, fixtures, or smoke notes cover the changed behavior, or the exact validation blocker is recorded.
+
+## Test / Smoke
+
+- Run the narrowest relevant Worker tests or fixture smoke for the changed prompt / schema path.
+- If real AI cannot be run, record environment, network, key, or timeout blocker and provide fixture-level validation.
+- Update `docs/smoke/week15-quality-smoke.md` only with evidence or blockers, not fabricated pass results.
+
+## Stop Conditions
+
+- Required behavior changes would break the Week 14 delivery loop.
+- API contract changes are needed but not approved or documented.
+- A new dependency or external service is required.
+- The task requires reading or modifying `docs/archive/`.
+- The work no longer maps to the Source Bet.
+- Multiple agents would modify the same directory at the same time.
+- Tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
+
+## Handoff Output
+
+- Files changed
+- Pre-write search result
+- Implementation placement decision
+- Reuse / extraction decision
+- Worker validation result
+- Reviewer findings
+- Blockers or risks
+- Suggested next handoff: Day 03 Worker repair / normalization quality pass

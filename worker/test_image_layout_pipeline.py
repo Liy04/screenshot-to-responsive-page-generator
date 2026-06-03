@@ -60,6 +60,48 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertNotIn("imageName", repaired)
         self.assertNotIn("debugInfo", repaired)
 
+    def test_repair_intermediate_payload_normalizes_section_components(self):
+        intermediate = {
+            "pageName": "  Request Settings  ",
+            "pageType": "  AUTH  ",
+            "sections": [
+                {
+                    "role": " Form ",
+                    "texts": ["Request Settings", "Configure this request", "request settings"],
+                    "components": [
+                        {
+                            "type": "form",
+                            "role": "form",
+                            "items": [
+                                {"type": "input", "role": "field", "label": "Project label"},
+                                {"type": "button", "role": "primary-action", "text": "Submit"},
+                            ],
+                        }
+                    ],
+                }
+            ],
+            "notes": "model metadata should not survive repair",
+        }
+
+        repaired, used = repair_intermediate_payload(intermediate, "request-settings.png")
+
+        self.assertTrue(used)
+        self.assertEqual(repaired["pageName"], "Request Settings")
+        self.assertEqual(repaired["pageType"], "auth")
+        self.assertNotIn("notes", repaired)
+
+        section = repaired["sections"][0]
+        self.assertEqual(section["role"], "form")
+        self.assertNotIn("components", section)
+        self.assertEqual(section["elements"][0], {"type": "text", "role": "heading", "content": "Request Settings"})
+        self.assertEqual(section["elements"][1], {"type": "text", "role": "body", "content": "Configure this request"})
+        form_node = section["elements"][2]
+        self.assertEqual(form_node["type"], "form")
+        self.assertEqual(form_node["elements"][0]["type"], "input")
+        self.assertEqual(form_node["elements"][0]["label"], "Project label")
+        self.assertEqual(form_node["elements"][1]["type"], "button")
+        self.assertEqual(form_node["elements"][1]["content"], "Submit")
+
     def test_fallback_only_mode_returns_valid_layout_json(self):
         image_path = self.create_temp_image_file("landing-shot.png")
         try:
@@ -463,6 +505,55 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertIn("Primary action", serialized_layout)
         self.assertIn("Secondary action", serialized_layout)
 
+    def test_real_ai_section_components_are_normalized_before_mapping(self):
+        image_path = self.create_temp_image_file("simple-card-page.png")
+        ai_payload = {
+            "pageName": "Launch faster",
+            "pageType": "marketing",
+            "sections": [
+                {
+                    "role": "Cards",
+                    "components": [
+                        {
+                            "type": "card",
+                            "role": "card",
+                            "content": "Launch faster",
+                            "items": [
+                                "Create responsive pages from screenshots.",
+                                {"type": "button", "role": "primary-action", "content": "Start now"},
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
+        try:
+            with patch("worker.image_layout_pipeline.request_layout_intermediate", return_value=ai_payload):
+                result, exit_code = process_image_layout_job(
+                    job_id="job-ai-section-components",
+                    image_path=image_path,
+                    mode="real-ai",
+                    fallback=True,
+                )
+        finally:
+            image_path.unlink(missing_ok=True)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertFalse(result["fallbackUsed"])
+        self.assertEqual(result["sourceType"], "REAL_AI")
+        self.assertIn("INTERMEDIATE_REPAIRED", {item["code"] for item in result["validation"]["warnings"]})
+        self.assertTrue(validate_layout_document(result["layoutJson"]).ok)
+
+        section = result["layoutJson"]["layout"]["children"][0]
+        card = section["children"][0]
+        self.assertEqual(section["role"], "cards")
+        self.assertEqual(card["type"], "card")
+        serialized_layout = json.dumps(result["layoutJson"], ensure_ascii=False)
+        self.assertIn("Launch faster", serialized_layout)
+        self.assertIn("Create responsive pages from screenshots.", serialized_layout)
+        self.assertIn("Start now", serialized_layout)
+
     def test_real_ai_mapping_converts_form_inventory_to_semantic_nodes(self):
         image_path = self.create_temp_image_file("form-inventory.png")
         ai_payload = {
@@ -510,6 +601,63 @@ class ImageLayoutPipelineTest(unittest.TestCase):
         self.assertIn("Email", serialized_layout)
         self.assertIn("Password", serialized_layout)
         self.assertIn("Continue", serialized_layout)
+
+    def test_real_ai_form_plain_rows_are_repaired_to_controls(self):
+        image_path = self.create_temp_image_file("simple-form-page.png")
+        ai_payload = {
+            "pageName": "Mock Form",
+            "pageType": "auth",
+            "regions": [
+                {"role": "header", "texts": ["Mock Form", "Settings", "Summary"]},
+                {
+                    "role": "hero",
+                    "texts": [
+                        "Request settings",
+                        "Synthetic form layout with neutral labels and placeholder values.",
+                    ],
+                },
+                {
+                    "role": "form",
+                    "texts": [
+                        "Project label",
+                        "Sample workspace",
+                        "Layout type",
+                        "Responsive",
+                        "Compact",
+                        "Expanded",
+                        "Notes",
+                        "Use simple grouped controls for smoke validation.",
+                        "Submit",
+                    ],
+                },
+            ],
+        }
+        try:
+            with patch("worker.image_layout_pipeline.request_layout_intermediate", return_value=ai_payload):
+                result, exit_code = process_image_layout_job(
+                    job_id="job-ai-form-plain-rows",
+                    image_path=image_path,
+                    mode="real-ai",
+                    fallback=True,
+                )
+        finally:
+            image_path.unlink(missing_ok=True)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertFalse(result["fallbackUsed"])
+        self.assertEqual(result["sourceType"], "REAL_AI")
+        self.assertTrue(validate_layout_document(result["layoutJson"]).ok)
+        self.assertIn("INTERMEDIATE_REPAIRED", {item["code"] for item in result["validation"]["warnings"]})
+
+        form_section = result["layoutJson"]["layout"]["children"][2]
+        form_node = form_section["children"][0]
+        self.assertEqual(form_node["type"], "form")
+        self.assertGreaterEqual(sum(1 for child in form_node["children"] if child["type"] == "input"), 2)
+        self.assertTrue(any(child["type"] == "button" and child["content"] == "Submit" for child in form_node["children"]))
+        self.assertIn("<input", result["previewHtml"])
+        self.assertIn("<button", result["previewHtml"])
+        self.assertIn("Submit", result["previewHtml"])
 
     def test_repair_layout_json_adds_semantic_defaults_recursively(self):
         broken_layout = {

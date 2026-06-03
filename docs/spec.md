@@ -726,7 +726,7 @@ Week 10 不改 Week 09 主链路，只补稳定性、可解释性和可复验相
 
 - Worker 返回的 metadata 应包含 `promptVersion`。
 - `promptVersion` 用于标识当前真实 AI 提示词版本，便于回看和比对。
-- 当前已收口值为 `week10-v1`。
+- 当前已收口值为 `week15-v1`。
 
 ### fallbackReason
 

@@ -113,12 +113,12 @@ class RealAILayoutClientTest(unittest.TestCase):
 
         self.assertEqual(payload["pageName"], "Demo")
         self.assertEqual(payload["pageType"], "marketing")
-        self.assertEqual(PROMPT_VERSION, "week12-v1")
+        self.assertEqual(PROMPT_VERSION, "week15-v1")
 
-    def test_build_prompt_week12_v1_enforces_stable_visual_inventory_shape(self):
+    def test_build_prompt_week15_v1_enforces_stable_visual_inventory_shape(self):
         prompt = build_prompt("job-ai-test", "sample.png")
 
-        self.assertIn("Prompt version: week12-v1", prompt)
+        self.assertIn("Prompt version: week15-v1", prompt)
         self.assertIn("Return JSON only", prompt)
         self.assertIn("Do not return markdown, prose, HTML, CSS, or code fences.", prompt)
         self.assertIn("Never output a complete HTML page", prompt)
@@ -130,6 +130,19 @@ class RealAILayoutClientTest(unittest.TestCase):
         self.assertIn('"regions"', prompt)
         self.assertIn('"texts"', prompt)
         self.assertIn('"components"', prompt)
+        self.assertIn("Schema constraints:", prompt)
+        self.assertIn("Use only the allowed pageType, region role, component type, and component role values", prompt)
+        self.assertIn("Inside components, use only type, role, content, label, items, or elements keys.", prompt)
+        self.assertIn("Keep regions ordered top-to-bottom, then left-to-right.", prompt)
+        self.assertIn("Prefer components over a flat text dump", prompt)
+        self.assertIn("Do not use unsupported component types such as table, chart, modal, drawer, video, or iframe.", prompt)
+        self.assertIn("Week 15 stability targets:", prompt)
+        self.assertIn("Preserve one clear page container and the main visual hierarchy", prompt)
+        self.assertIn("Preserve spacing and grouping relationships", prompt)
+        self.assertIn("Preserve typography roles", prompt)
+        self.assertIn("For simple card pages, keep the hero/card title, body, and action grouped.", prompt)
+        self.assertIn("For simple form pages, keep each label close to its matching input", prompt)
+        self.assertIn("For dashboard pages, keep repeated cards or metrics as repeated grouped components.", prompt)
         self.assertIn("at least 8 visible texts", prompt)
         self.assertIn("metric cards", prompt)
         self.assertIn("pageName must come from visible screenshot text", prompt)
@@ -191,7 +204,7 @@ class RealAILayoutClientTest(unittest.TestCase):
             image_path.unlink(missing_ok=True)
 
         self.assertEqual(captured_kwargs["temperature"], 0.0)
-        self.assertEqual(captured_kwargs["max_tokens"], 1200)
+        self.assertEqual(captured_kwargs["max_tokens"], 1600)
 
     def create_temp_image_file(self, suffix: str) -> Path:
         temp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=suffix, delete=False)

@@ -12,7 +12,7 @@ except ImportError:  # pragma: no cover - environment dependent
 
 
 DEFAULT_OPENAI_MODEL = "gpt-4.1-mini"
-PROMPT_VERSION = "week12-v1"
+PROMPT_VERSION = "week15-v1"
 
 
 class RealAIError(RuntimeError):
@@ -54,14 +54,32 @@ def build_prompt(job_id: str, image_name: str) -> str:
             "Do not include metadata keys such as jobId, imageName, filename, debug, confidence, or notes.",
             "Never output a complete HTML page; the Worker maps this inventory into Layout JSON.",
             "Read the screenshot visually and preserve readable text. Do not use image file names, job ids, or generic placeholder content.",
-            "Your job is OCR plus coarse structure, not pixel-perfect layout and not UI code generation.",
+            "Your job is OCR plus coarse structure with stable grouping, not pixel-perfect layout and not UI code generation.",
             "Use this compact JSON shape:",
             '{"pageName":"visible main title or brand","pageType":"marketing|dashboard|auth|profile|mobile-list|generic","texts":["all important visible text"],"regions":[{"role":"sidebar|header|nav|hero|content|cards|form|dashboard|metrics|table|chart|status|footer","texts":["visible text in this region"],"components":[{"type":"text|button|input|card|image|listItem","role":"heading|body|nav|primary-action|secondary-action|field|label|card|metric","content":"visible text"}]}]}',
+            "Schema constraints:",
+            "- Use only the allowed pageType, region role, component type, and component role values shown in the compact JSON shape.",
+            "- Inside components, use only type, role, content, label, items, or elements keys.",
+            "- Keep regions ordered top-to-bottom, then left-to-right.",
+            "- Keep related labels, values, inputs, buttons, and card text in the same region or component group.",
+            "- Prefer components over a flat text dump when the screenshot shows cards, forms, repeated metrics, or actions.",
+            "- Use card components for visible card or panel groups; put the card title in content and short supporting text in items when useful.",
+            "- Use input components for form fields and preserve the visible label in content or label.",
+            "- Use button components only for visible actions, with primary-action for the main CTA or submit action.",
+            "- For dashboard metric cards, preserve label/value pairs in order, such as Items/128 or Rate/7.4.",
+            "- Do not use unsupported component types such as table, chart, modal, drawer, video, or iframe.",
+            "- If a table or chart is visible, summarize it with text, card, or listItem components inside a table or chart region.",
+            "Week 15 stability targets:",
+            "- Preserve one clear page container and the main visual hierarchy instead of making all text equal.",
+            "- Preserve spacing and grouping relationships through region/component grouping; do not scatter unrelated texts.",
+            "- Preserve typography roles by marking headings, labels, metric values, body text, and buttons distinctly.",
+            "- For simple card pages, keep the hero/card title, body, and action grouped.",
+            "- For simple form pages, keep each label close to its matching input and keep the submit action separate.",
+            "- For dashboard pages, keep repeated cards or metrics as repeated grouped components.",
             "- Prefer copying visible text accurately over inventing layout details.",
             "- Include 3 to 8 regions when visible.",
             "- Include readable nav labels, headings, body text, button labels, form labels, metric labels, metric values and card titles.",
             "- Include at least 8 visible texts for ordinary simple pages when they exist.",
-            "- If the screenshot contains metric cards, preserve label/value pairs such as Items/128 or Rate/7.4.",
             "- If the screenshot contains cards, preserve each card title.",
             "- If the screenshot contains a form, preserve labels, fields and buttons separately.",
             "- pageName must come from visible screenshot text, never from the file name.",
@@ -228,7 +246,7 @@ def request_layout_intermediate(image_path: str | Path, job_id: str) -> dict[str
     response = client.chat.completions.create(
         model=model,
         temperature=0.0,
-        max_tokens=1200,
+        max_tokens=1600,
         messages=[
             {
                 "role": "user",

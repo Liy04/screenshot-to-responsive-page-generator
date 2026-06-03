@@ -1,17 +1,17 @@
-# Week 14 Day 06
+# Week 15 Day 06
 
 ## Source Bet
 
-- Current single bet from `docs/plan.md`: 执行 Week 14 MVP 产品化交付闭环 smoke，确认上传、生成、预览、复制、下载和安全检查可复现。
-- 本 day 卡只执行 `docs/plan.md` 的当前 single bet，不重新定义产品方向、不扩展 roadmap、不把 Should / Could 自动升级为 Must。
+- Current single bet from `docs/plan.md`: Sample-set based generated page quality improvement.
+- This day card only executes the current single bet. It does not redefine product direction, expand the roadmap, generate Week 16 / Cycle 16 planning, or promote Should / Could items into Must work.
 
 ## Related MVP Gap
 
-- Gap from `docs/mvp-roadmap.md`: 将“能生成”推进到“能交付”的 MVP 闭环证据。
+- Gap from `docs/mvp-roadmap.md`: Smoke evidence must prove the minimum upload -> generate -> preview -> copy / download loop, now with fixed sample-set quality checks.
 
 ## Task Goal
 
-执行 Week 14 MVP smoke，确认上传、生成、预览、复制、下载和安全检查形成可复现闭环，并记录到 `docs/smoke/week14-mvp-smoke.md`。
+Run and record the full Week 15 fixed sample-set smoke across the current MVP flow.
 
 ## Read Scope
 
@@ -22,117 +22,104 @@
 - `docs/plan.md`
 - current task card: `docs/tasks/day-06.md`
 - `docs/agents/README.md`
+- `docs/agents/lead.md`
 - `docs/agents/tester-agent.md`
 - `docs/agents/reviewer-agent.md`
-- `docs/agents/docs-agent.md`
-- `docs/smoke/week14-mvp-smoke.md`
-- 必要时 `docs/spec.md`
-- 当前任务相关前端页面和测试代码
+- `docs/engineering-baseline.md`
+- Day 01 quality metrics
+- Day 02-05 handoffs
+- current smoke scripts, frontend page, backend API, Worker generation path, and fixtures required to run the smoke
 - do not read `docs/archive/` by default
-
-说明：
-
-- 不读取 `docs/archive/`。
-- 不读取无关模块全量代码。
 
 ## Write Scope
 
-- `docs/smoke/week14-mvp-smoke.md`
-- 必要时仅更新 `docs/tasks/day-06.md` 的测试结果部分
+- `docs/smoke/week15-quality-smoke.md`
+- `docs/current.md` only for handoff status if needed
+- no business code changes
 
-禁止修改：
+Forbidden:
 
-- `backend/`
-- `frontend/`
-- `worker/`
-- `schema/`
-- `docs/archive/`
-- `docs/current.md`
-- `docs/plan.md`
-- 业务代码
-- 测试代码
+- modifying `backend/`
+- modifying `frontend/`
+- modifying `worker/`
+- modifying `schema/`
+- modifying `docs/archive/`
+- committing generated output, downloaded files, private screenshots, secrets, or runtime artifacts
+- Claude Code config, `CLAUDE.md`, `.claude/agents`, Claude Code `/agents`, Custom Subagents, or Agent Teams
 
 ## Spawn Decision
 
-- Lead 判断本任务需要 spawn subagent。
-- Lead 不直接执行测试、审查和记录，除非当前运行环境没有 subagent 工具且用户确认降级。
-- 必须按顺序执行，不允许并行。
-- 多个 agent 不允许同时修改同一目录。
-- Day 卡只执行当前 plan，不重新定义产品方向。
-- Day 卡不扩展 roadmap。
-- Day 卡不把 Should / Could 自动升级为 Must。
+- Lead should spawn `tester-agent` for smoke execution when subagent tools are available.
+- Lead may spawn `reviewer-agent` after smoke to review evidence quality and remaining risk.
+- If subagent tools are unavailable, Lead must state the downgrade reason and ask for confirmation before continuing in the main thread.
+- Multiple agents must not modify the same directory at the same time.
+- Tester-agent and reviewer-agent report issues by default and do not fix business code directly.
 
 ## Required Agents
 
-- Lead: 判断范围、分派、二次验收。
-- Explorer: 默认不需要；仅在 smoke 范围不清或上下文不足时由 Lead 决定是否 spawn。
-- Implementation: 不需要；本卡禁止修改业务代码和测试代码。
-- Tester: `tester-agent` 执行 MVP smoke，只测试和记录，不修业务代码。
-- Reviewer: `reviewer-agent` 审查 smoke 结果、安全风险和边界，只报告问题，不修业务代码。
-- Docs: `docs-agent` 将结果记录到 `docs/smoke/week14-mvp-smoke.md`。
+- Lead: confirm smoke scope, accept or reject final evidence, and decide whether blockers stop the cycle.
+- Explorer: not required unless smoke setup is unclear.
+- Implementation: not required; tester does not fix business code.
+- Tester: `tester-agent`.
+- Reviewer: optional `reviewer-agent` for smoke evidence review.
+
+## Engineering Baseline
+
+- 是否涉及新文件：否 if `docs/smoke/week15-quality-smoke.md` already exists; otherwise the file should have been created on Day 01.
+- 是否涉及新 Controller / Service / component / pipeline：否。
+- Pre-write search required：是，check existing smoke scripts and records before running or recording.
+- Implementation placement check required：否，no business implementation.
+- Existing file to be extended：`docs/smoke/week15-quality-smoke.md`.
+- Why this belongs in existing file：Week 15 sample-set smoke evidence belongs in the current smoke record.
+- Existing-debt touch decision：Do not refactor tests or scripts during smoke unless Lead creates a separate task.
+- Reuse / extraction / keep-separate decision：Reuse existing smoke commands and fixtures where possible.
+- If extracted, proposed new file：None.
+- Responsibility boundary：Smoke execution and evidence recording only.
+- File size risk：低。
+- Test required：是，this task is the smoke.
+- Dependency change：否。
+- Engineering baseline reference：`docs/engineering-baseline.md`
 
 ## Acceptance
 
-- [ ] 上传成功。
-- [ ] 生成成功或失败状态可解释。
-- [ ] 原图展示正常。
-- [ ] iframe 预览正常或失败时有清晰说明。
-- [ ] HTML 复制可用。
-- [ ] CSS 或完整 HTML 复制可用。
-- [ ] 下载文件可用。
-- [ ] iframe 为 `sandbox=""`。
-- [ ] 无 `allow-scripts`。
-- [ ] 未发现真实 API key 泄漏。
-- [ ] 本轮服务已清理，无残留监听。
-- [ ] smoke 结果已记录到 `docs/smoke/week14-mvp-smoke.md`。
-- [ ] Lead 二次验收通过、条件通过或不通过结论明确。
+- Every fixed Week 15 sample has a recorded result.
+- Each sample records generation state: REAL_AI / FALLBACK / FAILED.
+- Each sample records preview render status, strict iframe sandbox check, quality metric result, copy result, and download result.
+- Any failure includes a readable blocker, likely responsible area, and suggested next agent.
+- No tester-agent business-code fix is made directly.
+- No secrets, private screenshots, generated runtime artifacts, or downloaded files are committed.
 
 ## Test / Smoke
 
-1. tester-agent 读取 smoke 模板和当前页面验收标准。
-2. 启动后端和前端，使用真实或公开安全样例图执行 MVP smoke。
-3. 验证上传和生成。
-4. 验证原图 / iframe 对比。
-5. 验证 HTML / CSS / 完整 HTML 复制。
-6. 验证最小下载文件。
-7. 验证 REAL_AI / FALLBACK / FAILED 状态展示。
-8. 验证 iframe `sandbox=""` 且无 `allow-scripts`。
-9. 验证不泄漏真实 API key。
-10. reviewer-agent 审查 smoke 结果和安全风险。
-11. docs-agent 将结果记录到 smoke 文档。
-12. Lead 二次验收。
+Execute the Smoke Plan from `docs/plan.md`:
+
+```text
+prepare fixed Week 15 sample set
+-> generate each sample through the current MVP path
+-> verify REAL_AI / FALLBACK / FAILED state is readable for each sample
+-> verify generated preview renders safely in strict sandbox
+-> compare output against the sample quality metrics
+-> verify copy action still works or reports a readable failure
+-> verify download action still creates the expected minimal file
+-> verify any quality metadata is present only when needed and documented
+-> verify no secret, private screenshot, generated runtime artifact, or out-of-scope file is staged
+```
 
 ## Stop Conditions
 
-- Requested work no longer maps to the Source Bet.
-- Required read / write scope would touch unauthorized files.
+- Smoke requires real API keys or secrets that are not already safely configured in the local environment.
+- Smoke would commit private screenshots, generated output, downloaded files, or runtime artifacts.
+- Required read / write scope exceeds the allowed files.
+- The task requires reading or modifying `docs/archive/`.
+- Tester-agent would need to fix business code directly instead of reporting issues.
 - Multiple agents would modify the same directory at the same time.
-- The task requires reading `docs/archive/` without explicit approval.
-- The task requires secrets, real API keys, or sensitive materials.
-- The task would add Claude Code config, `CLAUDE.md`, or `.claude/agents`.
-- The task would redefine product direction or expand the roadmap.
-- The task would auto-upgrade Should / Could items into Must work.
-- tester-agent or reviewer-agent would need to fix business code directly instead of reporting issues.
 
 ## Handoff Output
 
-- 测试范围
-- 执行命令
-- 测试结果
-- Smoke 记录
-- Review 结果
-- Lead 二次验收：检查 smoke 是否覆盖 Week 14 MVP 交付闭环；检查 tester-agent 是否只测试和记录，没有直接修业务代码；检查 reviewer-agent 是否完成安全和边界审查；结论为通过 / 条件通过 / 不通过。
-- 风险提示
-- 是否通过验收
-
-## 输出格式
-
-```text
-## 测试范围
-## 执行命令
-## 测试结果
-## Smoke 记录
-## Review 结果
-## 风险提示
-## 是否通过验收
-```
+- Smoke command / manual steps run
+- Sample-by-sample result
+- Overall pass / conditional pass / fail
+- Validation not run and why, if applicable
+- Blockers or risks
+- Suggested responsible agent for each failure
+- Suggested next handoff: Day 07 closeout
