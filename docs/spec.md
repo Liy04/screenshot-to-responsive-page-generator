@@ -683,7 +683,9 @@ POST /api/image-page/jobs/{jobId}/generate
 - `OPENAI_API_KEY` 只允许通过环境变量提供，不写入仓库、不写入文档真实值。
 - `IMAGEPAGE_WORKER_PYTHON_COMMAND` 必须指向可用的 Python 3.11+ 解释器；当前已验证路径是 `D:\\environment\\python11\\python.exe`。
 - Python 3.11+ 推荐；当前已验证版本是 `Python 3.11.9`。
-- `imagepage.worker.timeout-seconds` 建议使用 `120`；默认 30 秒不适合真实多模态调用。
+- `imagepage.worker.timeout-seconds` 对普通 / 历史 Week 09 单样例 smoke 可使用 `120`；默认 30 秒不适合真实多模态调用。
+- Week 15 fixed sample REAL_AI full smoke 推荐使用 `420`。已验证 180 秒可能返回 504，120 / 180 秒不应作为 Week 15 三个固定样例全量复测口径。
+- `420s` 只是当前真实多模态固定样例 smoke 的复现配置，不改变 API contract、runtime defaults 或产品方向；真正的延迟 / 异步稳定性应作为后续 single bet 评估。
 
 ### 最终 smoke 可复现条件
 
@@ -693,8 +695,10 @@ POST /api/image-page/jobs/{jobId}/generate
   - `OPENAI_API_KEY` 已通过环境变量设置，但不得写入仓库或文档真实值
   - `IMAGEPAGE_WORKER_PYTHON_COMMAND=D:\\environment\\python11\\python.exe`
   - Python 版本为 `3.11.9`
-  - backend 启动参数带 `--imagepage.worker.timeout-seconds=120`
-- 默认 30 秒超时不适合 Week 09 真实多模态调用。
+- backend 启动参数：
+  - 普通 / 历史 Week 09 单样例 smoke 可用 `--imagepage.worker.timeout-seconds=120`
+  - Week 15 fixed sample REAL_AI full smoke 推荐 `--imagepage.worker.timeout-seconds=420`
+- 默认 30 秒超时不适合真实多模态调用；120 / 180 秒不适合 Week 15 三个固定样例全量复测。
 - 如果缺少 `OPENAI_*` 环境变量、Python 版本不符、Worker 路径错误或 timeout 不足，结果可能 fallback 或直接失败。
 - 最终通过口径是：
   - `status=SUCCESS`
@@ -716,6 +720,13 @@ $env:IMAGEPAGE_WORKER_PYTHON_COMMAND="D:\environment\python11\python.exe"
 
 cd backend
 java -jar target/backend-0.0.1-SNAPSHOT.jar --imagepage.worker.timeout-seconds=120
+```
+
+Week 15 fixed sample REAL_AI full smoke 示例：
+
+```powershell
+cd backend
+java -jar target/backend-0.0.1-SNAPSHOT.jar --imagepage.worker.timeout-seconds=420
 ```
 
 ## Week 10：稳定化与可复现验收补充契约

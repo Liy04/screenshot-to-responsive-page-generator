@@ -32,9 +32,12 @@ Write-Host "  `$env:OPENAI_MODEL = `"$RecommendedOpenAiModel`""
 Write-Host '  $env:OPENAI_API_KEY = "<set-your-key-here>"'
 Write-Host "  `$env:IMAGEPAGE_WORKER_PYTHON_COMMAND = `"$RecommendedPythonCommand`""
 Write-Host ""
-Write-Host "Then start backend with:"
+Write-Host "Then start backend for ordinary single-sample smoke with:"
 Write-Host "  cd backend"
 Write-Host "  java -jar target/backend-0.0.1-SNAPSHOT.jar --imagepage.worker.timeout-seconds=120"
+Write-Host "For Week 15 fixed sample REAL_AI full smoke, use the verified reproduction timeout:"
+Write-Host "  java -jar target/backend-0.0.1-SNAPSHOT.jar --imagepage.worker.timeout-seconds=420"
+Write-Host "Do not treat 420s as a product-level latency fix; it is only the current fixed-sample smoke reproduction setting."
 Write-Host "Do not write the real key into this file."
 Write-Host ""
 

@@ -116,4 +116,11 @@ docs/agents/README.md
 - backend 启动时需要 `--imagepage.worker.timeout-seconds=120`。
 - 详细运行配置见 `docs/spec.md`。
 
+如需复现 Week 15 fixed sample REAL_AI full smoke：
+
+- 使用公开固定样例 `samples/01-simple-card-page.png`、`samples/02-simple-form-page.png`、`samples/03-dashboard-cards-page.png`。
+- backend 推荐启动参数为 `--imagepage.worker.timeout-seconds=420`；已验证 180 秒可能返回 504，不建议用 120 / 180 秒作为 Week 15 全量复测口径。
+- `420s` 只是当前真实多模态固定样例 smoke 的复现配置，不是产品级稳定性修复；真正的延迟 / 异步稳定性应作为后续 single bet 评估。
+- 不写入真实 API key，不提交生成产物或运行副产物。
+
 如启动 dev server 或后端服务，验证完成后需要停止进程，不留下后台服务。

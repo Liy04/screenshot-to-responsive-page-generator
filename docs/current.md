@@ -50,6 +50,7 @@ Current handoff: Lead may proceed with Git closeout for Week 15, or wait for the
 - W15-S1 and W15-S3 showed no API / preview / quality regression in the retest.
 - Reviewer-agent final evidence review passed with no Blocker, Major, or Minor findings.
 - Real AI latency remains variable; the first 180 second timeout attempt returned 504, and the successful full retest used a 420 second Worker timeout.
+- For Week 15 fixed sample REAL_AI full smoke, use 420 seconds as the reproduction timeout baseline; older 120 second single-sample smoke guidance and the failed 180 second attempt should not be reused as the Week 15 full retest setting.
 - Headless Chrome copy can fail because of clipboard permission, but the UI reports a readable failure and download succeeded.
 - `frontend/dist` may exist locally as ignored build output and should not be submitted.
 - Strict iframe sandbox must be preserved without `allow-scripts`.

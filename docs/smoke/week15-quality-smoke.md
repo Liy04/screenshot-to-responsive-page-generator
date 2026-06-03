@@ -55,6 +55,13 @@ Use these repository samples only:
 - [x] Required environment variables were checked by presence only and were not written to Git.
 - [x] `docs/archive/` was not read or modified during this retest.
 
+## REAL_AI Timeout Note
+
+- Week 15 fixed sample REAL_AI full smoke recommended backend startup timeout: `--imagepage.worker.timeout-seconds=420`.
+- Do not use the older 120 second Week 09 single-sample smoke setting, or the failed 180 second attempt, as the Week 15 full fixed-sample retest baseline.
+- The 420 second timeout is only the current reproduction setting for real multimodal fixed-sample smoke. It is not a product-level latency or async stability fix, and it does not change API contract, runtime defaults, or product direction.
+- Real latency / async stability should be evaluated as a later single bet if Lead selects it through the cycle gate.
+
 ## Sample Results
 
 ### W15-S1 Simple card
